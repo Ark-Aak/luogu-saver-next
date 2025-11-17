@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { type Component } from 'vue'
+import { type Component, inject, computed } from 'vue'
 import { NIcon, NStatistic } from 'naive-ui'
+import { uiThemeKey, type UiThemeVars } from "@/styles/themeKeys.ts";
 import Card from './Card.vue'
 
-defineProps({
+const themeVars: UiThemeVars = inject(uiThemeKey)!;
+
+const props = defineProps({
 	icon: {
 		type: Object as () => Component,
 		required: true
@@ -18,14 +21,18 @@ defineProps({
 	},
 	iconColor: {
 		type: String,
-		default: '#667eea'
+		default: null
 	}
 })
+
+const effectiveIconColor = computed(() => {
+	return props.iconColor || themeVars.value.iconColor
+});
 </script>
 
 <template>
 	<Card style="text-align: center;">
-		<n-icon :component="icon" size="40" :color="iconColor" />
+		<n-icon :component="icon" size="40" :color="effectiveIconColor" />
 
 		<n-statistic
 			:label="label"

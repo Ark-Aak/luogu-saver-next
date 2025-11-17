@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { type CSSProperties } from "vue";
-import { NCard, NH3, NIcon, useThemeVars, type ThemeCommonVars } from 'naive-ui';
+import { type CSSProperties, inject } from "vue";
+import { NCard, NH3, NIcon } from 'naive-ui';
 import { computed, type Component } from 'vue'
+import { uiThemeKey, type UiThemeVars } from '@/styles/themeKeys';
 
-const themeVars : ThemeCommonVars = useThemeVars().value;
+const themeVars: UiThemeVars = inject(uiThemeKey)!;
 
 const props = defineProps({
 	title: {
@@ -24,17 +25,17 @@ const props = defineProps({
 })
 
 const effectiveIconColor = computed(() => {
-	return props.iconColor || themeVars.primaryColor
+	return props.iconColor || themeVars.value.iconColor
 })
 
 const effectiveBackgroundColor = computed(() => {
-	return props.backgroundColor || themeVars.cardColor
+	return props.backgroundColor || themeVars.value.cardColor
 })
 
 const containerStyle = computed(() : CSSProperties => ({
 	padding: '24px',
 	borderRadius: '8px',
-	backgroundColor: effectiveBackgroundColor,
+	backgroundColor: effectiveBackgroundColor.value,
 	boxShadow: '2px 2px 4px #e4e4e4'
 }))
 

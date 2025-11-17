@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { computed, type Component, type CSSProperties } from 'vue'
-import { NIcon, NCard, NH1, NText } from 'naive-ui'
+import { computed, type Component, type CSSProperties } from 'vue';
+import { NIcon, NCard, NH1, NText } from 'naive-ui';
+import { uiThemeKey, type UiThemeVars } from '@/styles/themeKeys';
+import { inject } from 'vue';
+
+const themeVars: UiThemeVars = inject(uiThemeKey)!;
 
 const props = defineProps({
 	title: {
@@ -17,28 +21,32 @@ const props = defineProps({
 	},
 	backgroundColor: {
 		type: String,
-		default: '#d6e3ff',
+		default: null,
 	},
-	textColor: {
+	iconColor: {
 		type: String,
-		default: '#667eea',
+		default: null,
 	}
 })
 
-const containerStyle = computed(() : CSSProperties => ({
+const containerStyle = computed((): CSSProperties => ({
 	textAlign: 'center',
-	backgroundColor: props.backgroundColor,
+	backgroundColor: props.backgroundColor || themeVars.value.cardTitleColor,
 	padding: '16px',
 	borderRadius: '8px'
 }))
 
-const titleStyle = computed(() : CSSProperties => ({
-	color: props.textColor,
+const titleStyle = computed((): CSSProperties => ({
+	color: props.textColor || themeVars.value.primaryColor,
 	display: 'flex',
 	alignItems: 'center',
 	justifyContent: 'center',
 	gap: '8px'
 }))
+
+const effectiveIconColor = computed(() => {
+	return props.iconColor || themeVars.value.iconColor;
+});
 </script>
 
 <template>
@@ -46,7 +54,7 @@ const titleStyle = computed(() : CSSProperties => ({
 		<div :style="containerStyle">
 			<n-h1 class="title">
 				<span :style="titleStyle">
-					<n-icon v-if="icon" :component="icon" :color="textColor" size="36" :depth="1" />
+					<n-icon v-if="icon" :component="icon" :color="effectiveIconColor" size="36" :depth="1" />
 					{{ title }}
 				</span>
 			</n-h1>
