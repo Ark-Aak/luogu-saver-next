@@ -3,6 +3,7 @@ import { computed, type Component, type CSSProperties } from 'vue';
 import { NIcon, NCard, NH1, NText } from 'naive-ui';
 import { uiThemeKey, type UiThemeVars } from '@/styles/themeKeys';
 import { inject } from 'vue';
+import { hexToRgba } from '@/utils/render';
 
 const themeVars: UiThemeVars = inject(uiThemeKey)!;
 
@@ -31,7 +32,7 @@ const props = defineProps({
 
 const containerStyle = computed((): CSSProperties => ({
 	textAlign: 'center',
-	backgroundColor: props.backgroundColor || themeVars.value.cardTitleColor,
+	backgroundColor: props.backgroundColor || hexToRgba(themeVars.value.primaryColor, 0.1),
 	padding: '16px',
 	borderRadius: '8px'
 }))
@@ -45,7 +46,7 @@ const titleStyle = computed((): CSSProperties => ({
 }))
 
 const effectiveIconColor = computed(() => {
-	return props.iconColor || themeVars.value.iconColor;
+	return props.iconColor || themeVars.value.primaryColor;
 });
 </script>
 

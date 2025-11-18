@@ -25,7 +25,7 @@ const props = defineProps({
 })
 
 const effectiveIconColor = computed(() => {
-	return props.iconColor || themeVars.value.iconColor
+	return props.iconColor || themeVars.value.primaryColor
 })
 
 const effectiveBackgroundColor = computed(() => {

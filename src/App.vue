@@ -291,9 +291,7 @@ const uiThemeVars = ref<UiThemeVars>(parsedTheme ? parsedTheme : {
 	primaryColorPressed: '#0c7a43',
 	primaryColorSuppl: '#36ad6a',
 	cardColor: '#ffffff',
-	cardTitleColor: 'rgba(24, 160, 88, 0.1)',
-	cardShadow: '2px 2px 4px #e4e4e4',
-	iconColor: '#36ad6a'
+	cardShadow: '2px 2px 4px #e4e4e4'
 });
 
 provide(uiThemeKey, uiThemeVars);
