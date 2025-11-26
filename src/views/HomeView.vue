@@ -6,6 +6,17 @@ import { NGrid, NGi, NInput, NIcon, NButton } from 'naive-ui';
 import {
 	Bookmark, Megaphone, Newspaper, Clipboard, Search, PaperPlane, Save, Link
 } from '@vicons/ionicons5';
+
+import { getArticleCount } from "@/api/article.ts";
+import { getPasteCount } from "@/api/paste.ts";
+import { onMounted, ref } from "vue";
+
+const articleCount = ref(0);
+const pasteCount = ref(0);
+onMounted(async () => {
+	articleCount.value = (await getArticleCount()).data.count;
+	pasteCount.value = (await getPasteCount()).data.count;
+});
 </script>
 
 <template>
@@ -54,10 +65,10 @@ import {
 				<n-gi span="7">
 					<n-grid cols="1" y-gap="16">
 						<n-gi>
-							<Statistic value="99999" label="文章总数" :icon="Newspaper" />
+							<Statistic :value="articleCount" label="文章总数" :icon="Newspaper" />
 						</n-gi>
 						<n-gi>
-							<Statistic value="99999" label="剪贴板总数" :icon="Clipboard" />
+							<Statistic :value="pasteCount" label="剪贴板总数" :icon="Clipboard" />
 						</n-gi>
 					</n-grid>
 				</n-gi>

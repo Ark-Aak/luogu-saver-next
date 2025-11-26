@@ -9,6 +9,9 @@ import router from './routers';
 import { logger } from './utils/logger';
 
 import { responseHelper } from './middlewares/response';
+import path from "path";
+import history from "koa2-connect-history-api-fallback";
+import serve from "koa-static";
 
 const app = new Koa();
 
@@ -16,6 +19,12 @@ app.use(cors());
 app.use(bodyParser());
 app.use(responseHelper);
 app.use(router.routes()).use(router.allowedMethods());
+
+if (config.env === 'production') {
+    const staticPath = path.join(__dirname, '../../dist');
+    app.use(history({ whiteList: ['/api'] }));
+    app.use(serve(staticPath));
+}
 
 AppDataSource.initialize()
     .then(() => {

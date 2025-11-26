@@ -1,14 +1,15 @@
 import Router from 'koa-router';
+import { Context, DefaultState } from 'koa';
 
-const router = new Router({ prefix: '/article' });
+const router = new Router<DefaultState, Context>({ prefix: '/article' });
 
 import { ArticleService } from '@/services/article.service';
-import { Context } from 'koa';
 import { truncateUtf8 } from "@/utils/string";
 
 router.get('/query/:id', async (ctx: Context) => {
     const articleId = ctx.params.id;
     const article = await ArticleService.getArticleById(articleId);
+    await article?.loadRelationships();
     if (article) {
         if (article.deleted) {
             ctx.fail(403, article.deletedReason);
@@ -28,12 +29,20 @@ router.get('/recent', async (ctx: Context) => {
     const updatedAfter = updatedAfterStr ? new Date(updatedAfterStr) : undefined;
     const truncatedCount = Math.min(Number(ctx.query.truncated_count) || 200, 600);
 
-    const articles = await ArticleService.getRecentArticles(count, updatedAfter);
+    const articles = await Promise.all(
+        (await ArticleService.getRecentArticles(count, updatedAfter))
+            .map(async article => { await article.loadRelationships(); return article; })
+    );
     const sanitizedArticles = articles.map((article) => ({
         ...article,
-        content: truncateUtf8(article.content, truncatedCount)
+        content: article.content ? truncateUtf8(article.content, truncatedCount) : undefined
     }));
     ctx.success(sanitizedArticles);
+});
+
+router.get('/count', async (ctx: Context) => {
+    const count = await ArticleService.getArticleCount();
+    ctx.success({ count });
 });
 
 export default router;

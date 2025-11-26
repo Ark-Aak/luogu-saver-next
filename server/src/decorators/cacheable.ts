@@ -1,6 +1,13 @@
 import { redisClient } from '@/config/redis';
+import { plainToInstance } from "class-transformer";
 
-export function Cacheable(ttlSeconds: number = 60, keyGenerator: (...args: any[]) => string): MethodDecorator {
+export type ClassConstructor<T> = { new(...args: any[]): T };
+
+export function Cacheable(
+    ttlSeconds: number = 60,
+    keyGenerator: (...args: any[]) => string,
+    EntityClass?: ClassConstructor<any>
+): MethodDecorator {
     return function (
         target: Object,
         propertyKey: string | symbol,
@@ -12,12 +19,15 @@ export function Cacheable(ttlSeconds: number = 60, keyGenerator: (...args: any[]
             try {
                 const cachedResult = await redisClient.get(cacheKey);
                 if (cachedResult) {
-                    return JSON.parse(cachedResult);
+                    const parsedResult = JSON.parse(cachedResult);
+                    if (EntityClass) {
+                        return plainToInstance(EntityClass, parsedResult);
+                    }
+                    return parsedResult;
                 }
             } catch (err) {
                 console.error(err);
             }
-            console.log('Cache miss for key:', cacheKey);
             const result = await originalMethod.apply(this, args);
             if (result) {
                 redisClient.set(cacheKey, JSON.stringify(result), 'EX', ttlSeconds).catch(console.error);

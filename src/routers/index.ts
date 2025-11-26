@@ -1,18 +1,32 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
 
-const HomeView = () => import('@/views/HomeView.vue');
+const routes: RouteRecordRaw[] = [
+	{
+	    path: '/',
+	    name: 'home',
+	    component: () => import('@/views/HomeView.vue'),
+        meta: {
+            activeMenu: 'home'
+        }
+	}
+];
 
-const routes = [
-    {
-        path: '/',
-        name: 'Home',
-        component: HomeView
-    }
-]
+const modules = import.meta.glob('./modules/*.ts', { eager: true });
+
+Object.keys(modules).forEach((key) => {
+	const mod = modules[key] as { default: RouteRecordRaw[] };
+	const modList = mod.default || [];
+	routes.push(...modList);
+});
+
+routes.push({
+	path: '/:pathMatch(.*)*',
+	component: () => import('@/views/NotFound.vue')
+});
 
 const router = createRouter({
-    history: createWebHistory(),
-    routes: routes
-})
+	history: createWebHistory(),
+	routes
+});
 
-export default router
+export default router;

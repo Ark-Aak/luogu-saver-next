@@ -5,13 +5,18 @@
   "author": "Federico2903",
   "license": "AGPL-3.0-or-later",
   "scripts": {
-    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev": "cross-env NODE_ENV=development concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "dev:frontend": "vite",
     "dev:backend": "cd server && npm run dev",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build:frontend": "vite build",
+    "build:backend": "cd server && npm run build",
+    "build": "npm run build:frontend && npm run build:backend",
+    "preview": "vite preview",
+    "start": "cross-env NODE_ENV=production node server/dist/index.js"
   },
   "dependencies": {
+    "axios": "^1.13.2",
+    "cross-env": "^10.1.0",
     "koa": "^3.1.1",
     "vue": "^3.5.24",
     "vue-router": "^4.6.3"

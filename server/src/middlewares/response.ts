@@ -17,7 +17,7 @@ export const responseHelper = async (ctx: Context, next: Next) => {
         };
     };
     ctx.fail = (code: number, msg: string, data: any = null) => {
-        ctx.status = code;
+        ctx.status = 200;
         ctx.body = {
             code: code,
             message: msg,

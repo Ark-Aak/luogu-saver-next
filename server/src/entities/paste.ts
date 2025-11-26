@@ -3,6 +3,8 @@ import {
     Column, CreateDateColumn, UpdateDateColumn, Index
 } from 'typeorm';
 
+import { Type } from 'class-transformer';
+
 import { User } from './user';
 
 @Entity({ name: 'paste' })
@@ -23,9 +25,11 @@ export class Paste extends BaseEntity {
     deleted: boolean;
 
     @CreateDateColumn({ name: 'created_at' })
+    @Type(() => Date)
     createdAt: number;
 
     @UpdateDateColumn({ name: 'updated_at' })
+    @Type(() => Date)
     updatedAt: number;
 
     @Column({ name: 'deleted_reason', default: '作者要求删除' })
@@ -34,6 +38,6 @@ export class Paste extends BaseEntity {
     author?: User;
 
     async loadRelationships() {
-        this.author = this.authorUid ? await User.findOne({ where: { id: this.authorUid } }) : null;
+        this.author = this.authorUid ? (await User.findOne({ where: { id: this.authorUid } }))! : undefined;
     }
 }
