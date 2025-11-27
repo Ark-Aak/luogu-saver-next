@@ -1,4 +1,3 @@
-import { ApiResponse } from './common';
 import { User } from './user';
 
 export interface Article {
