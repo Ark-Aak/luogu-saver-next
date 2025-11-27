@@ -17,4 +17,5 @@ export interface Article {
     deletedReason?: string;
     contentHash?: string;
     author?: User;
+    renderedContent?: string;
 }

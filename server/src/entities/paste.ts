@@ -4,8 +4,8 @@ import {
 } from 'typeorm';
 
 import { Type } from 'class-transformer';
-
 import { User } from './user';
+import renderMarkdown from '@/utils/markdown';
 
 @Entity({ name: 'paste' })
 export class Paste extends BaseEntity {
@@ -36,8 +36,10 @@ export class Paste extends BaseEntity {
     deletedReason: string;
 
     author?: User;
+    renderedContent?: string;
 
     async loadRelationships() {
         this.author = this.authorUid ? (await User.findOne({ where: { id: this.authorUid } }))! : undefined;
+        this.renderedContent = this.content ? await renderMarkdown(this.content) : undefined;
     }
 }

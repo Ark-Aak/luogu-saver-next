@@ -4,9 +4,9 @@ import {
 } from 'typeorm';
 
 import { Type } from 'class-transformer';
-
 import { User } from './user';
 import { ArticleCategory } from '@/constants/article-category';
+import renderMarkdown from '@/utils/markdown';
 
 @Entity({ name: 'article' })
 @Index('idx_articles_author', ['authorUid'])
@@ -66,8 +66,10 @@ export class Article extends BaseEntity {
     // TODO: change this column's type to varchar
 
     author?: User;
+    renderedContent?: string;
 
     async loadRelationships() {
         this.author = this.authorUid ? (await User.findOne({ where: { id: this.authorUid } }))! : undefined;
+        this.renderedContent = this.content ? await renderMarkdown(this.content) : undefined;
     }
 }
