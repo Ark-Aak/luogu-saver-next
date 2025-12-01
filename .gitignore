@@ -24,5 +24,4 @@ dist-ssr
 *.sw?
 **/.env
 
-// 3rd party directories
 chroma
