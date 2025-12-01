@@ -48,6 +48,7 @@ const containerStyle = computed(() : CSSProperties => ({
 				<span style="display: flex; align-items: center; gap: 8px; font-weight: bold;">
 					<n-icon v-if="icon" :component="icon" :color="effectiveIconColor" size="24" :depth="1" />
 					{{ title }}
+					<slot name="title-extra" />
 				</span>
 			</n-h3>
 			<slot />

@@ -3,7 +3,6 @@
 		<n-message-provider>
 			<n-space vertical>
 				<n-layout has-sider>
-					<n-back-top :right="100"/>
 					<n-layout-sider
 						bordered
 						show-trigger="bar"
@@ -38,8 +37,8 @@
 								content-style="padding: 24px;"
 							>
 								<div class="router-view">
+									<n-back-top :right="50"/>
 									<router-view/>
-									<ThemeEditor/>
 								</div>
 								
 								<IconConfigProvider size="14">
@@ -139,6 +138,7 @@
 							</n-layout-content>
 						</n-layout>
 					</n-dialog-provider>
+					<TrackingConsent/>
 				</n-layout>
 			</n-space>
 		</n-message-provider>
@@ -174,6 +174,7 @@ import ThemeEditor from '@/components/ThemeEditor.vue';
 
 import { uiThemeKey, type UiThemeVars } from '@/styles/theme/themeKeys.ts';
 import { defaultTheme } from "@/styles/theme/default-theme.ts";
+import TrackingConsent from "@/components/TrackingConsent.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -224,7 +225,12 @@ const menuOptions : MenuOption[] = [
 		icon: renderIcon(ListOutline)
 	},
 	{
-		label: '犇犇',
+		label: '文章广场',
+		key: 'plaza',
+		icon: renderIcon(GlobeOutline)
+	},
+	{
+		label: '用户动态',
 		key: 'benben',
 		icon: renderIcon(ShareSocialOutline),
 		children: [
@@ -263,11 +269,6 @@ const menuOptions : MenuOption[] = [
 		]
 	},
 	{
-		label: '文章广场',
-		key: 'plaza',
-		icon: renderIcon(GlobeOutline)
-	},
-	{
 		label: '陶片放逐',
 		key: 'judgement',
 		icon: renderIcon(HammerOutline)
@@ -289,7 +290,7 @@ const menuOptions : MenuOption[] = [
 	}
 ];
 
-const THEME_STORAGE_KEY = 'luogu-saver-ui-theme';
+import { THEME_STORAGE_KEY } from '@/utils/constants.ts';
 const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
 const parsedTheme = savedTheme ? JSON.parse(savedTheme) : null;
 

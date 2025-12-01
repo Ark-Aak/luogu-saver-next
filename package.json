@@ -19,11 +19,13 @@
     "cross-env": "^10.1.0",
     "katex": "^0.16.25",
     "koa": "^3.1.1",
+    "uuid": "^13.0.0",
     "vue": "^3.5.24",
     "vue-router": "^4.6.3"
   },
   "devDependencies": {
     "@types/node": "^24.10.0",
+    "@types/uuid": "^10.0.0",
     "@vicons/antd": "^0.13.0",
     "@vicons/carbon": "^0.13.0",
     "@vicons/fa": "^0.13.0",

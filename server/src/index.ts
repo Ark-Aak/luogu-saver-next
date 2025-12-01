@@ -8,6 +8,8 @@ import { AppDataSource } from './data-source';
 import router from './routers';
 import { logger } from './utils/logger';
 
+import { authorization } from "@/middlewares/authorization";
+import { trackingMiddleware } from './middlewares/tracking';
 import { responseHelper } from './middlewares/response';
 import path from "path";
 import history from "koa2-connect-history-api-fallback";
@@ -17,6 +19,8 @@ const app = new Koa();
 
 app.use(cors());
 app.use(bodyParser());
+app.use(authorization);
+app.use(trackingMiddleware);
 app.use(responseHelper);
 app.use(router.routes()).use(router.allowedMethods());
 

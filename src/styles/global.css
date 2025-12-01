@@ -4,7 +4,7 @@
 .user-Green { color: #2ecc71 !important; }
 .user-Blue { color: #3498db !important; }
 .user-Gray { color: #7f8c8d !important; }
-.user-Cheater { color: #8e44ad !important; text-decoration: line-through; }
+.user-Cheater { color: #ad8b00 !important; }
 
 :not(pre) > code {
 	background: #f1f5f9 !important;

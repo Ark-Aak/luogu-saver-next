@@ -12,10 +12,6 @@ const props = defineProps({
 		type: String,
 		required: true,
 	},
-	subtitle: {
-		type: String,
-		default: null,
-	},
 	icon: {
 		type: Object as () => Component,
 		default: null,
@@ -59,8 +55,8 @@ const effectiveIconColor = computed(() => {
 					{{ title }}
 				</span>
 			</n-h1>
-			<n-text v-if="subtitle" class="subtitle" :depth="3">
-				{{ subtitle }}
+			<n-text class="subtitle" :depth="3">
+				<slot />
 			</n-text>
 		</div>
 	</n-card>

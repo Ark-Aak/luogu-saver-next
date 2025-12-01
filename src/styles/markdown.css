@@ -93,6 +93,11 @@
 .md-block-title, .md-block > .toggle-btn { cursor: pointer; }
 .md-container img { max-width: 100%; }
 
+.md-body {
+	line-height: 1.6;
+	overflow-wrap: break-word;
+}
+
 .code-container {
 	position: relative;
 	margin-bottom: 20px;
@@ -130,6 +135,42 @@ pre {
 	border-radius: 10px;
 	border: 1px solid #e2e8f0;
 	background: white;
+}
+
+pre {
+	padding: 16px;
+	border-radius: 6px;
+	background-color: #f6f8fa !important;
+	overflow: auto;
+}
+
+.toggle-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	margin-left: 8px;
+	transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+	width: 16px;
+	height: 16px;
+}
+
+.toggle-btn.expanded {
+	transform: rotate(90deg);
+}
+
+.empty-tip {
+	text-align: center;
+	color: #999;
+	padding: 40px;
+}
+
+a {
+	color: #337ab7;
+	transition: color 0.2s;
+	text-decoration: none;
+}
+a:hover {
+	color: #286090 !important;
 }
 
 .table-container::-webkit-scrollbar { height: 8px; }

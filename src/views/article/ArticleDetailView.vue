@@ -7,14 +7,16 @@ import {
 	ArrowBackOutline, NewspaperOutline, CalendarOutline
 } from '@vicons/ionicons5';
 
-import { getArticleById } from '@/api/article';
-import type { Article } from '@/types/article';
+import { getArticleById, getRelevant } from '@/api/article';
+import type { Article, PlazaArticle } from '@/types/article';
+import { hexToRgba } from '@/utils/render.ts';
 
 import Card from '@/components/Card.vue';
 import UserLink from '@/components/UserLink.vue';
 import MarkdownViewer from '@/components/MarkdownViewer.vue';
 import LoadingSkeleton from '@/components/LoadingSkeleton.vue';
 import { ARTICLE_CATEGORIES, UNKNOWN_CATEGORY } from '@/utils/constants';
+import { formatDate } from '@/utils/render';
 
 const route = useRoute();
 const router = useRouter();
@@ -25,15 +27,35 @@ const articleId = route.params.id as string;
 const article = ref<Article | null>(null);
 const loading = ref(true);
 
-const currentCategory = computed(() => {
-	if (article.value?.category && ARTICLE_CATEGORIES[article.value.category]) {
-		return ARTICLE_CATEGORIES[article.value.category];
-	}
-	return UNKNOWN_CATEGORY;
-});
+const recommended = ref<PlazaArticle[]>([]);
+const recLoading = ref(false);
 
-const formatDate = (timestamp: number) => {
-	return new Date(timestamp).toLocaleString('zh-CN', {hour12: false});
+const getCategoryLabel = (id?: number) => {
+	if (id && ARTICLE_CATEGORIES[id]) return ARTICLE_CATEGORIES[id].label;
+	return ARTICLE_CATEGORIES[9].label;
+};
+const getCategoryColor = (id?: number) => {
+	if (id && ARTICLE_CATEGORIES[id]) return ARTICLE_CATEGORIES[id].color;
+	return ARTICLE_CATEGORIES[9].color;
+};
+const getCategoryIcon = (id?: number) => {
+	if (id && ARTICLE_CATEGORIES[id]) return ARTICLE_CATEGORIES[id].icon;
+	return ARTICLE_CATEGORIES[9].icon;
+};
+
+const loadRelevant = async () => {
+	if (!articleId) return;
+	recLoading.value = true;
+	try {
+		const res = await getRelevant(articleId);
+		const items: PlazaArticle[] = res.data.relevant;
+		recommended.value = items || [];
+	} catch (err: any) {
+		console.error(err);
+		message.error('获取相关推荐失败');
+	} finally {
+		recLoading.value = false;
+	}
 };
 
 const loadData = async () => {
@@ -41,6 +63,7 @@ const loadData = async () => {
 	try {
 		const res = await getArticleById(articleId);
 		article.value = res.data;
+		await loadRelevant();
 	} catch (err: any) {
 		message.error(err.message || '加载失败');
 	} finally {
@@ -48,22 +71,18 @@ const loadData = async () => {
 	}
 };
 
-const handleCopy = () => {
-	if (article.value?.content) {
-		navigator.clipboard.writeText(article.value.content);
-		message.success('Markdown 源码已复制');
-	}
+const openArticle = (id: string) => {
+	const route = router.resolve({ path: `/article/${id}` });
+	const newWin = window.open(route.href, '_blank');
+	if (newWin) newWin.opener = null;
 };
 
-const handleDelete = () => {
-	dialog.warning({
-		title: '确认删除',
-		content: '确定要申请删除这篇文章吗？',
-		positiveText: '确定',
-		negativeText: '取消',
-		onPositiveClick: () => console.log('Deleted')
-	});
-};
+const currentCategory = computed(() => {
+	if (article.value?.category && ARTICLE_CATEGORIES[article.value.category]) {
+		return ARTICLE_CATEGORIES[article.value.category];
+	}
+	return UNKNOWN_CATEGORY;
+});
 
 onMounted(() => {
 	loadData();
@@ -195,9 +214,83 @@ onMounted(() => {
 				</Card>
 			</LoadingSkeleton>
 		</div>
-	
-	</div>
-</template>
+
+		<div style="margin-top: 20px;">
+			<LoadingSkeleton :loading="recLoading">
+				<template #skeleton>
+					<Card title="相关推荐">
+						<div class="article-list">
+							<div v-for="i in 3" :key="i" class="article-item">
+								<n-skeleton text :repeat="2"/>
+							</div>
+						</div>
+					</Card>
+				</template>
+
+				<Card title="相关推荐" v-if="recommended.length">
+					<div class="article-list">
+						<div v-for="it in recommended" :key="it.id" class="article-item">
+							<Card :title="it.title" :icon="NewspaperOutline" class="clickable-card" @click="openArticle(it.id)">
+								<template #title-extra>
+									<n-tag
+										v-if="it.reason === 'title'"
+										:color="{ textColor: '#ff6200', color: 'rgba(255, 98, 0, 0.15)', borderColor: '#ff6200' }"
+										size="small"
+									>
+										标题相关
+									</n-tag>
+									<n-tag
+										v-else-if="it.reason === 'vector'"
+										:color="{ textColor: '#00aaff', color: 'rgba(0, 170, 255, 0.15)', borderColor: '#00aaff' }"
+										size="small"
+									>
+										相似文章
+									</n-tag>
+								</template>
+
+								<div class="article-summary">
+									{{ it.summary || '暂无预览...' }}
+								</div>
+
+								<n-divider style="margin: 12px 0"/>
+
+								<div class="article-meta">
+									<div class="left">
+										<UserLink :user="it.author" show-avatar/>
+										<n-tag
+											:color="{
+												textColor: getCategoryColor(it.category),
+												backgroundColor: hexToRgba(getCategoryColor(it.category), 0.12),
+												borderColor: getCategoryColor(it.category)
+											}"
+											size="small"
+											style="margin-left: 8px;"
+										>
+											<template #icon>
+												<n-icon :component="getCategoryIcon(it.category)"/>
+											</template>
+											{{ getCategoryLabel(it.category) }}
+										</n-tag>
+									</div>
+									<div class="right">
+										<n-button text size="small" type="primary" @click.stop="openArticle(it.id)">
+											阅读全文
+										</n-button>
+									</div>
+								</div>
+							</Card>
+						</div>
+					</div>
+				</Card>
+
+				<Card v-else-if="!recLoading" title="相关推荐">
+					<div style="padding:12px;color:#666">暂无相关推荐</div>
+				</Card>
+			</LoadingSkeleton>
+		</div>
+ 	
+ 	</div>
+ </template>
 
 <style scoped>
 .article-detail-page {
@@ -229,5 +322,33 @@ onMounted(() => {
 	align-items: center;
 	gap: 6px;
 	font-weight: 600;
+}
+
+.article-list {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+.article-item {
+	margin-bottom: 0;
+}
+.clickable-card {
+	cursor: pointer;
+}
+.article-summary {
+	color: #555;
+	font-size: 14px;
+	line-height: 1.6;
+	margin-bottom: 8px;
+}
+.article-meta {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 14px;
+}
+.article-meta .left {
+	display: flex;
+	align-items: center;
 }
 </style>

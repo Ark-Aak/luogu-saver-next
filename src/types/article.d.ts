@@ -12,10 +12,22 @@ export interface Article {
     priority: number;
     deleted: boolean;
     tags?: string;
-    createdAt: number;
-    updatedAt: number;
+    createdAt: string;
+    updatedAt: string;
     deletedReason?: string;
     contentHash?: string;
+    viewCount: number;
     author?: User;
     renderedContent?: string;
+}
+
+export interface PlazaArticle {
+    id: string;
+    title: string;
+    summary: string;
+    category?: number;
+    author?: User;
+    updatedAt: string;
+    tags?: string;
+    reason?: string;
 }

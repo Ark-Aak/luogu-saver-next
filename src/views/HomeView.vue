@@ -14,8 +14,8 @@ import { onMounted, ref } from "vue";
 const articleCount = ref(0);
 const pasteCount = ref(0);
 onMounted(async () => {
-	articleCount.value = (await getArticleCount()).data.count;
-	pasteCount.value = (await getPasteCount()).data.count;
+	getArticleCount().then(res => articleCount.value = res.data.count);
+	getPasteCount().then(res => pasteCount.value = res.data.count);
 });
 </script>
 
@@ -24,9 +24,10 @@ onMounted(async () => {
 		<n-gi>
 			<CardTitle
 				title="洛谷保存站"
-				subtitle="Save everything, keep it alive."
 				:icon="Bookmark"
-			/>
+			>
+				Save everything, keep it alive.
+			</CardTitle>
 		</n-gi>
 		<n-gi>
 			<n-grid cols="24" :x-gap="16">

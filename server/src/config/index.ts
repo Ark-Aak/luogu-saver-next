@@ -19,6 +19,21 @@ interface Config {
         password: string;
         keyPrefix: string;
     };
+    chroma: {
+        ssl: boolean;
+        host: string;
+        port: number;
+        collectionName: string;
+    };
+    recommendation: {
+        anonymous: {
+            exprireTime: number;
+            maxCount: number;
+        },
+        maxHistory: number;
+        decayFactor: number;
+        relevantThreshold: number;
+    }
 }
 
 export const config: Config = {
@@ -37,4 +52,29 @@ export const config: Config = {
         password: process.env.REDIS_PASSWORD || '',
         keyPrefix: process.env.REDIS_KEY_PREFIX || '',
     },
+    chroma: {
+        ssl: process.env.CHROMA_SSL === 'true',
+        host: process.env.CHROMA_HOST || '127.0.0.1',
+        port: process.env.CHROMA_PORT ? parseInt(process.env.CHROMA_PORT, 10) : 8000,
+        collectionName: process.env.CHROMA_COLLECTION_NAME || 'lgs_articles',
+    },
+    recommendation: {
+        anonymous: {
+            exprireTime: process.env.RECOMMENDATION_ANONYMOUS_EXPIRE_TIME
+                ? parseInt(process.env.RECOMMENDATION_ANONYMOUS_EXPIRE_TIME, 10)
+                : 7 * 24 * 60 * 60,
+            maxCount: process.env.RECOMMENDATION_ANONYMOUS_MAX_COUNT
+                ? parseInt(process.env.RECOMMENDATION_ANONYMOUS_MAX_COUNT, 100)
+                : 100,
+        },
+        maxHistory: process.env.RECOMMENDATION_MAX_HISTORY
+            ? parseInt(process.env.RECOMMENDATION_MAX_HISTORY, 10)
+            : 500,
+        decayFactor: process.env.RECOMMENDATION_DECAY_FACTOR
+            ? parseFloat(process.env.RECOMMENDATION_DECAY_FACTOR)
+            : 0.9,
+        relevantThreshold: process.env.RECOMMENDATION_RELEVANT_THRESHOLD
+            ? parseFloat(process.env.RECOMMENDATION_RELEVANT_THRESHOLD)
+            : 0.75,
+    }
 }

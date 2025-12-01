@@ -76,64 +76,18 @@ onMounted(processContent);
 </script>
 
 <template>
-	<div class="markdown-wrapper">
+	<div class="md-container">
 		<div v-if="loading" class="empty-tip">加载中...</div>
 		<div v-else-if="!content" class="empty-tip">暂无内容</div>
 		
 		<div
 			v-else
 			ref="contentRef"
-			class="markdown-body"
+			class="md-body"
 			v-html="content"
 		></div>
 	</div>
 </template>
 
 <style scoped>
-.markdown-body {
-	line-height: 1.6;
-	overflow-wrap: break-word;
-}
-
-:deep(pre) {
-	padding: 16px;
-	border-radius: 6px;
-	background-color: #f6f8fa !important;
-	overflow: auto;
-}
-
-:deep(.md-block-title) {
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-}
-
-:deep(.toggle-btn) {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	margin-left: 8px;
-	transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-	width: 16px;
-	height: 16px;
-}
-
-:deep(.toggle-btn.expanded) {
-	transform: rotate(90deg);
-}
-
-.empty-tip {
-	text-align: center;
-	color: #999;
-	padding: 40px;
-}
-
-:deep(a) {
-	color: #337ab7;
-	transition: color 0.2s;
-	text-decoration: none;
-}
-:deep(a:hover) {
-	color: #286090 !important;
-}
 </style>

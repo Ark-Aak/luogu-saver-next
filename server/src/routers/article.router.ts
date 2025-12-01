@@ -5,11 +5,14 @@ const router = new Router<DefaultState, Context>({ prefix: '/article' });
 
 import { ArticleService } from '@/services/article.service';
 import { truncateUtf8 } from "@/utils/string";
+import { TrackingEvents } from "@/constants/tracking-events";
+import { RecommendationService } from "@/services/recommendation.service";
 
 router.get('/query/:id', async (ctx: Context) => {
     const articleId = ctx.params.id;
     const article = await ArticleService.getArticleById(articleId);
     await article?.loadRelationships();
+    if (ctx.track) ctx.track(TrackingEvents.VIEW_ARTICLE, articleId);
     if (article) {
         if (article.deleted) {
             ctx.fail(403, article.deletedReason);
@@ -21,6 +24,10 @@ router.get('/query/:id', async (ctx: Context) => {
     else {
         ctx.fail(404, 'Article not found');
     }
+});
+
+router.get('/relevant/:id', async (ctx: Context) => {
+    ctx.success({ relevant: await RecommendationService.getRelevantArticle(ctx.params.id) });
 });
 
 router.get('/recent', async (ctx: Context) => {

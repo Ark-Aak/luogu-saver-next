@@ -4,6 +4,7 @@ import {
 } from 'typeorm';
 
 import { UserColor } from '@/constants/user-color';
+import { Cacheable } from '@/decorators/cacheable';
 
 @Entity({ name: 'user' })
 export class User extends BaseEntity {
@@ -21,4 +22,9 @@ export class User extends BaseEntity {
 
     @UpdateDateColumn({ name: 'updated_at' })
     updatedAt: number;
+
+    @Cacheable(3600 * 24 * 3, (id) => `user:${id}`, User)
+    static async findById(id: number) {
+        return await User.findOne({ where: { id } });
+    }
 }

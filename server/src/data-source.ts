@@ -3,6 +3,7 @@ import { DataSource } from "typeorm";
 import path from "path";
 import { config } from "./config";
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+import { ChromaClient } from 'chromadb';
 
 export const AppDataSource = new DataSource({
     type: "mariadb",
@@ -20,4 +21,12 @@ export const AppDataSource = new DataSource({
 
     subscribers: [],
     migrations: [],
+});
+
+export const ChromaDataSource = new ChromaClient({
+    ssl: config.chroma.ssl,
+    host: config.chroma.host,
+    port: config.chroma.port,
+    tenant: "default_tenant",
+    database: "default_database",
 });
