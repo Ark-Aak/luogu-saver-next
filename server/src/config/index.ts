@@ -33,7 +33,13 @@ interface Config {
         maxHistory: number;
         decayFactor: number;
         relevantThreshold: number;
-    }
+    };
+    queue: {
+        concurrencyLimit: number;
+        maxRequestToken: number;
+        regenerationSpeed: number;
+        regenerationInterval: number;
+    };
 }
 
 export const config: Config = {
@@ -76,5 +82,19 @@ export const config: Config = {
         relevantThreshold: process.env.RECOMMENDATION_RELEVANT_THRESHOLD
             ? parseFloat(process.env.RECOMMENDATION_RELEVANT_THRESHOLD)
             : 0.75,
+    },
+    queue: {
+        concurrencyLimit: process.env.QUEUE_CONCURRENCY_LIMIT
+            ? parseInt(process.env.QUEUE_CONCURRENCY_LIMIT, 10)
+            : 5,
+        maxRequestToken: process.env.QUEUE_MAX_REQUEST_TOKEN
+            ? parseInt(process.env.QUEUE_MAX_REQUEST_TOKEN, 10)
+            : 20,
+        regenerationSpeed: process.env.QUEUE_REGENERATION_SPEED
+            ? parseFloat(process.env.QUEUE_REGENERATION_SPEED)
+            : 1,
+        regenerationInterval: process.env.QUEUE_REGENERATION_INTERVAl
+            ? parseInt(process.env.QUEUE_REGENERATION_INTERVAL, 10)
+            : 1000,
     }
 }

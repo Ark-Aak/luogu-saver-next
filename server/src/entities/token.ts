@@ -1,9 +1,9 @@
 import {
     Entity, BaseEntity, PrimaryColumn,
-    Column, CreateDateColumn, Index
+    Column, CreateDateColumn
 } from 'typeorm';
 
-import { User } from './user';
+import { Type } from 'class-transformer';
 
 @Entity({ name: 'token' })
 export class Token extends BaseEntity {
@@ -17,7 +17,8 @@ export class Token extends BaseEntity {
     role: number;
 
     @CreateDateColumn({ name: 'created_at' })
-    createdAt: number;
+    @Type(() => Date)
+    createdAt: Date;
 
     static async validate(token: string): Promise<number | null> {
         const tokenRecord = await Token.findOne({ where: { id: token } });

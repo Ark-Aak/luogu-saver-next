@@ -124,7 +124,7 @@ export class RecommendationService {
         const articleIds = await redisClient.zrevrange(key, 0, config.recommendation.anonymous.maxCount - 1);
         const profile = await this.drawProfile(articleIds, config.recommendation.anonymous.maxCount);
         const vectorResults = await this.getNearestArticlesByProfile(profile, count * 5);
-        const randomResults = (await ArticleService.getRandomArticles(50)).map(a => a.id);
+        const randomResults = (await ArticleService.getRandomArticles(20)).map(a => a.id);
         const hotResults = (await ArticleService.getArticlesOrderedByViewCount(50)).map(a => a.id);
         logger.debug({ deviceId, vL: vectorResults.length, rL: randomResults.length, hL: hotResults.length }, `Anonymous recommendations`);
         logger.debug({ deviceId, profile: profile?.slice(0, 5).map(v => v.toFixed(4)) }, `Profile vector`);
