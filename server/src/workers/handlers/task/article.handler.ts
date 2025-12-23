@@ -35,7 +35,7 @@ export class ArticleHandler implements TaskHandler<SaveTask> {
         const data = resp.data.article;
         const hash = sha256(data.content);
         let article = await ArticleService.getArticleByIdWithoutCache(data.lid);
-        if (article && article.contentHash === hash) {
+        if (article && article.title === data.title && article.contentHash === hash) {
             logger.info({ articleId: article.id }, 'Article content unchanged, skipping update');
             return;
         }
