@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { type CSSProperties, inject, computed, type Component, useSlots } from "vue";
+import { type CSSProperties, inject, computed, type Component, useSlots, type Ref } from "vue";
 import { NIcon } from 'naive-ui';
 import { uiThemeKey, type UiThemeVars } from '@/styles/theme/themeKeys.ts';
 
-const themeVars: UiThemeVars = inject(uiThemeKey)!;
+const themeVars = inject(uiThemeKey) as Ref<UiThemeVars>;
 const slots = useSlots();
 
 const props = defineProps({
@@ -51,6 +51,10 @@ const showHeader = computed(() => {
 	return !!props.title || !!slots['header-extra'];
 });
 
+const titleColor = computed(() => {
+	return themeVars?.value?.textColor || '#1d1d1f';
+});
+
 </script>
 
 <template>
@@ -60,7 +64,7 @@ const showHeader = computed(() => {
 				<div v-if="icon" class="card-icon-wrapper">
 					<n-icon :component="icon" :color="effectiveIconColor" size="20" :depth="1" />
 				</div>
-				<span v-if="title" class="card-title" :style="{ color: themeVars.cardTitleColor }">{{ title }}</span>
+				<span v-if="title" class="card-title" :style="{ color: titleColor }">{{ title }}</span>
 				<slot name="title-extra" />
 			</div>
 			<div class="card-extra">
@@ -126,11 +130,9 @@ const showHeader = computed(() => {
 	font-size: 17px;
 	line-height: 1;
 	letter-spacing: -0.02em;
-	color: rgba(255, 255, 255, 0.95) !important;
 }
 
 .card-content {
 	flex: 1;
-	color: rgba(255, 255, 255, 0.85);
 }
 </style>

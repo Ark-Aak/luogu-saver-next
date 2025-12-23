@@ -3,6 +3,7 @@ import { type UiThemeVars } from "@/styles/theme/themeKeys.ts";
 export const defaultTheme: UiThemeVars = {
     // macOS Sonoma-inspired color palette
     bodyColor: '#f5f5f7',
+    textColor: '#1d1d1f',
     primaryColor: '#007AFF',
     primaryColorHover: '#0A84FF',
     primaryColorPressed: '#0062CC',

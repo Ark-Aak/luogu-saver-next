@@ -2,6 +2,7 @@ import { type InjectionKey, type Ref } from 'vue';
 
 export interface UiThemeVars {
     bodyColor: string;
+    textColor: string;
     primaryColor: string;
     primaryColorHover: string;
     primaryColorPressed: string;

@@ -236,7 +236,7 @@ import { THEME_STORAGE_KEY } from '@/utils/constants.ts';
 const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
 const parsedTheme = savedTheme ? JSON.parse(savedTheme) : null;
 
-const uiThemeVars = ref<UiThemeVars>(parsedTheme ? parsedTheme : defaultTheme);
+const uiThemeVars = ref<UiThemeVars>(parsedTheme ? { ...defaultTheme, ...parsedTheme } : defaultTheme);
 
 provide(uiThemeKey, uiThemeVars);
 

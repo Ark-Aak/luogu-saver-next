@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed, type Component, type CSSProperties } from 'vue';
+import { computed, type Component, type CSSProperties, type Ref } from 'vue';
 import { NIcon, NCard, NH1, NText } from 'naive-ui';
 import { uiThemeKey, type UiThemeVars } from '@/styles/theme/themeKeys.ts';
 import { inject } from 'vue';
 
-const themeVars: UiThemeVars = inject(uiThemeKey)!;
+const themeVars = inject(uiThemeKey) as Ref<UiThemeVars>;
 
 const props = defineProps({
 	title: {
@@ -28,17 +28,27 @@ const props = defineProps({
 const effectiveIconColor = computed(() => {
 	return props.iconColor || themeVars.value.primaryColor;
 });
+
+const containerStyle = computed((): CSSProperties => ({
+	background: props.backgroundColor || themeVars.value.cardColor,
+	borderColor: themeVars.value.borderColor,
+	color: themeVars.value.textColor,
+}));
+
+const subtitleStyle = computed((): CSSProperties => ({
+	color: themeVars.value.textSecondary,
+}));
 </script>
 
 <template>
-	<div class="macos-card-title">
+	<div class="macos-card-title" :style="containerStyle">
 		<div class="title-content">
 			<div v-if="icon" class="title-icon-wrapper">
 				<n-icon :component="icon" :color="effectiveIconColor" size="28" />
 			</div>
 			<div class="title-text">
 				<h1 class="main-title">{{ title }}</h1>
-				<p v-if="$slots.default" class="subtitle">
+				<p v-if="$slots.default" class="subtitle" :style="subtitleStyle">
 					<slot />
 				</p>
 			</div>
@@ -48,10 +58,9 @@ const effectiveIconColor = computed(() => {
 
 <style scoped>
 .macos-card-title {
-	background: rgba(255, 255, 255, 0.72);
 	backdrop-filter: blur(20px) saturate(180%);
 	-webkit-backdrop-filter: blur(20px) saturate(180%);
-	border: 1px solid rgba(255, 255, 255, 0.5);
+	border: 1px solid;
 	border-radius: 16px;
 	padding: 24px 32px;
 	box-shadow:
@@ -85,7 +94,6 @@ const effectiveIconColor = computed(() => {
 	margin: 0;
 	font-size: 28px;
 	font-weight: 700;
-	color: #1d1d1f;
 	letter-spacing: -0.02em;
 	line-height: 1.2;
 }
@@ -93,7 +101,6 @@ const effectiveIconColor = computed(() => {
 .subtitle {
 	margin: 6px 0 0;
 	font-size: 14px;
-	color: #86868b;
 	font-weight: 400;
 	letter-spacing: 0.01em;
 }
