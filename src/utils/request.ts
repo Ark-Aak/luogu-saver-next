@@ -3,7 +3,7 @@ import { getDeviceId } from "@/utils/device-id.ts";
 import { CONSENT_TRACKING_STORAGE_KEY } from "@/utils/constants.ts";
 
 export const apiFetch = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    baseURL: import.meta.env.VITE_API_URL || '/api',
     timeout: 30000
 });
 

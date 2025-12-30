@@ -16,7 +16,7 @@ export const AppDataSource = new DataSource({
     synchronize: true,
     logging: true,
 
-    entities: [path.join(__dirname, "/entities/*.ts")],
+    entities: [path.join(__dirname, "/entities/*.{ts,js}")],
     namingStrategy: new SnakeNamingStrategy(),
 
     subscribers: [],

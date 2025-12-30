@@ -26,7 +26,7 @@ export class PasteHandler implements TaskHandler<SaveTask> {
         await UserService.saveUser(user!);
 
         const data = resp.currentData.paste;
-        let paste = await PasteService.getPasteByIdWithoutCache(data.pid);
+        let paste = await PasteService.getPasteByIdWithoutCache(data.id);
         const incomingData: Partial<Paste> = {
             content: data.data,
             authorId: data.user.uid

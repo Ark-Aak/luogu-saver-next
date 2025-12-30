@@ -33,7 +33,7 @@ onMounted(async () => {
 		<div class="main-content">
 			<n-grid :x-gap="20" :y-gap="20" cols="1 m:2 l:3" responsive="screen">
 				<n-gi span="1 m:2 l:2">
-					<Card :icon="Megaphone" title="公告" style="height: 100%">
+					<Card :icon="Megaphone" title="公告" style="height: 100%" :hoverable="true">
 						<div class="announcement-content">
 							<p class="announcement-text">欢迎使用洛谷保存站！我们致力于保存和归档洛谷社区的优质内容。</p>
 							<div class="announcement-tags">
@@ -45,7 +45,7 @@ onMounted(async () => {
 				</n-gi>
 
 				<n-gi>
-					<Card style="height: 100%" :hoverable="false">
+					<Card style="height: 100%" :hoverable="true">
 						<div class="stats-container">
 							<div class="stat-item">
 								<div class="stat-icon-wrapper" :style="{ background: `linear-gradient(135deg, ${themeVars.primaryColor}20 0%, ${themeVars.primaryColor}10 100%)` }">

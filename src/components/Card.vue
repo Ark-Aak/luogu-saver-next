@@ -24,11 +24,7 @@ const props = defineProps({
 	},
 	hoverable: {
 		type: Boolean,
-		default: true
-	},
-	vibrancy: {
-		type: Boolean,
-		default: true
+		default: false
 	}
 })
 

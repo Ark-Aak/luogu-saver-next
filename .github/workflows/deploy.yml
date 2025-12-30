@@ -1,0 +1,106 @@
+name: Auto Deploy
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  # ==================================================
+  # 任务 1: 前端部署 (Server A)
+  # ==================================================
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.1
+
+      - name: Setup Node
+        uses: actions/setup-node@v6.1.0
+        with:
+          node-version: 22
+
+      # --------------------------------------------------
+      # 步骤 4: 构建前端
+      # --------------------------------------------------
+      - name: Install & Build Frontend
+        run: |
+          npm install
+          npm run build:frontend
+        env:
+          # 始终注入后端 API 地址
+          VITE_API_URL: ${{ secrets.BACKEND_API_URL }}
+
+      # --------------------------------------------------
+      # 步骤 6: 发送文件到 Nginx 服务器 (Server A)
+      # --------------------------------------------------
+      - name: Deploy to Server A
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_A_HOST }}
+          username: root
+          password: ${{ secrets.SERVER_A_PASSWORD }}
+          # 无论是否上传 OSS，我们都把所有文件传给服务器做兜底
+          # 如果走了 OSS，index.html 里引用的地址是 OSS 的，服务器上的 assets 不会被访问，但也无害
+          source: "dist/*"
+          target: "/opt/luogu-saver-frontend"
+          strip_components: 1
+
+  # ==================================================
+  # 任务 2: 后端部署 (Server B)
+  # ==================================================
+  deploy-backend:
+    runs-on: ubuntu-latest
+    needs: deploy-frontend # 可选：让它并行跑可以删掉这行，为了稳妥可以留着
+    steps:
+      - uses: actions/checkout@v6.0.1
+      - uses: actions/setup-node@v6.1.0
+        with:
+          node-version: 22
+
+      - name: Install & Build Backend
+        run: |
+          cd server
+          npm install
+          npm run build 
+          # 你的 build 命令是 tsc && tsc-alias，会生成 dist
+
+      - name: Deploy to Server B
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_B_HOST }}
+          username: root
+          password: ${{ secrets.SERVER_B_PASSWORD }}
+          # 传输构建产物 + package.json (为了安装依赖)
+          source: "server/dist/,server/package.json"
+          target: "/opt/luogu-saver-backend"
+          strip_components: 1
+
+      - name: Restart Backend Service
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_B_HOST }}
+          username: root
+          password: ${{ secrets.SERVER_B_PASSWORD }}
+          script: |
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            echo "Node version: $(node -v)"
+            echo "PM2 path: $(which pm2)"
+            cd /opt/luogu-saver-backend
+            
+            # 安装生产依赖
+            npm install --production
+
+            # PM2 维护
+            # 如果 ecosystem.config.js 存在则用它，不存在则直接启动
+            pm2 describe luogu-backend > /dev/null
+            if [ $? -eq 0 ]; then
+              pm2 reload luogu-backend
+              echo "✅ PM2 Reloaded"
+            else
+              pm2 start dist/index.js --name "luogu-backend"
+              pm2 save
+              echo "✅ PM2 Started"
+            fi
