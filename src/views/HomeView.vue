@@ -41,7 +41,7 @@ const handleSave = () => {
 		<div class="main-content">
 			<n-grid :x-gap="24" :y-gap="24" cols="1 m:2 l:3" responsive="screen">
 				<n-gi span="1 m:2 l:2">
-					<Card title="公告" style="height: 100%">
+					<Card title="公告" style="height: 100%" :hoverable="true">
 						<template #header-extra>
 							<n-icon size="20" :component="Megaphone" :color="themeVars.primaryColor" />
 						</template>
@@ -52,7 +52,7 @@ const handleSave = () => {
 				</n-gi>
 
 				<n-gi>
-					 <Card style="height: 100%">
+					 <Card style="height: 100%" :hoverable="true">
 						 <div class="stats-container">
 							 <div class="stat-item">
 								 <div class="stat-icon-wrapper" :style="{ backgroundColor: themeVars.primaryColor + '20' }">

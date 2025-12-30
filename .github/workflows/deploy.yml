@@ -1,6 +1,9 @@
 name: Auto Deploy
 
 on:
+  push:
+    branches:
+      - master
   workflow_dispatch:
 
 jobs:
@@ -98,5 +101,6 @@ jobs:
               echo "✅ PM2 Reloaded"
             else
               pm2 start dist/index.js --name "luogu-backend"
+              pm2 save
               echo "✅ PM2 Started"
             fi
