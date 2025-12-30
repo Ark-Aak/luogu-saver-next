@@ -41,7 +41,7 @@ jobs:
           # 无论是否上传 OSS，我们都把所有文件传给服务器做兜底
           # 如果走了 OSS，index.html 里引用的地址是 OSS 的，服务器上的 assets 不会被访问，但也无害
           source: "dist/*"
-          target: "/root/luogu-saver-frontend"
+          target: "/opt/luogu-saver-frontend"
           strip_components: 1
 
   # ==================================================
@@ -71,7 +71,7 @@ jobs:
           password: ${{ secrets.SERVER_B_PASSWORD }}
           # 传输构建产物 + package.json (为了安装依赖)
           source: "server/dist/,server/package.json"
-          target: "/root/luogu-saver-backend"
+          target: "/opt/luogu-saver-backend"
           strip_components: 1
 
       - name: Restart Backend Service
@@ -81,7 +81,7 @@ jobs:
           username: root
           password: ${{ secrets.SERVER_B_PASSWORD }}
           script: |
-            cd /root/luogu-saver-backend
+            cd /opt/luogu-saver-backend
             
             # 安装生产依赖
             npm install --production
