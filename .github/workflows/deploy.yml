@@ -81,7 +81,10 @@ jobs:
           username: root
           password: ${{ secrets.SERVER_B_PASSWORD }}
           script: |
-            source ~/.bashrc
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            echo "Node version: $(node -v)"
+            echo "PM2 path: $(which pm2)"
             cd /opt/luogu-saver-backend
             
             # 安装生产依赖
