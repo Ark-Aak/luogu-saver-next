@@ -10,13 +10,13 @@ defineProps<{
 
 <template>
 	<div class="user-link-container">
-		<n-avatar
-			v-if="showAvatar"
-			round
-			size="small"
-			:src="`https://cdn.luogu.com.cn/upload/usericon/${user?.id || 3}.png`"
-			style="margin-right: 8px;"
-		/>
+		<div v-if="showAvatar" class="avatar-wrapper">
+			<n-avatar
+				round
+				:size="28"
+				:src="`https://cdn.luogu.com.cn/upload/usericon/${user?.id || 3}.png`"
+			/>
+		</div>
 		<a
 	 	 :href="`/user/${user?.id}`"
 			class="user-name"
@@ -32,13 +32,34 @@ defineProps<{
 .user-link-container {
 	display: inline-flex;
 	align-items: center;
+	gap: 10px;
 }
+
+.avatar-wrapper {
+	position: relative;
+}
+
+.avatar-wrapper::after {
+	content: '';
+	position: absolute;
+	inset: -2px;
+	border-radius: 50%;
+	border: 2px solid rgba(0, 0, 0, 0.06);
+	pointer-events: none;
+}
+
+.avatar-wrapper :deep(.n-avatar) {
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 .user-name {
 	text-decoration: none;
 	font-weight: 600;
-	transition: opacity 0.2s;
+	font-size: 14px;
+	transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
+
 .user-name:hover {
-	opacity: 0.8;
+	opacity: 0.75;
 }
 </style>

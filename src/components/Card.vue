@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { type CSSProperties, inject, computed, type Component, useSlots } from "vue";
+import { type CSSProperties, inject, computed, type Component, useSlots, type Ref } from "vue";
 import { NIcon } from 'naive-ui';
 import { uiThemeKey, type UiThemeVars } from '@/styles/theme/themeKeys.ts';
 
-const themeVars: UiThemeVars = inject(uiThemeKey)!;
+const themeVars = inject(uiThemeKey) as Ref<UiThemeVars>;
 const slots = useSlots();
 
 const props = defineProps({
@@ -33,7 +33,10 @@ const effectiveIconColor = computed(() => {
 })
 
 const effectiveBackgroundColor = computed(() => {
-	return props.backgroundColor || themeVars.value.cardColor
+	if (props.vibrancy) {
+		return props.backgroundColor || 'rgba(255, 255, 255, 0.72)';
+	}
+	return props.backgroundColor || themeVars.value.cardColor;
 })
 
 const cardStyle = computed(() : CSSProperties => ({
@@ -44,14 +47,20 @@ const showHeader = computed(() => {
 	return !!props.title || !!slots['header-extra'];
 });
 
+const titleColor = computed(() => {
+	return themeVars?.value?.textColor || '#1d1d1f';
+});
+
 </script>
 
 <template>
-	<div class="saver-card" :class="{ 'is-hoverable': hoverable }" :style="cardStyle">
+	<div class="macos-card" :class="{ 'is-hoverable': hoverable, 'has-vibrancy': vibrancy }" :style="cardStyle">
 		<div class="card-header" v-if="showHeader">
 			<div class="card-title-wrapper">
-				<n-icon v-if="icon" :component="icon" :color="effectiveIconColor" size="24" :depth="1" />
-				<span v-if="title" class="card-title" :style="{ color: themeVars.cardTitleColor }">{{ title }}</span>
+				<div v-if="icon" class="card-icon-wrapper">
+					<n-icon :component="icon" :color="effectiveIconColor" size="20" :depth="1" />
+				</div>
+				<span v-if="title" class="card-title" :style="{ color: titleColor }">{{ title }}</span>
 				<slot name="title-extra" />
 			</div>
 			<div class="card-extra">
@@ -65,37 +74,58 @@ const showHeader = computed(() => {
 </template>
 
 <style scoped>
-.saver-card {
-	padding: 24px;
-	border-radius: 12px;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-	transition: transform 0.3s ease, box-shadow 0.3s ease;
+/* TRUE GLASSMORPHISM CARD */
+.macos-card {
+	padding: 24px 28px;
+	border-radius: 20px;
+	background: rgba(255, 255, 255, 0.2);
+	border: 1px solid rgba(255, 255, 255, 0.3);
+	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+	transition: all 0.3s ease;
 	display: flex;
 	flex-direction: column;
 }
 
-.saver-card.is-hoverable:hover {
+.macos-card.has-vibrancy {
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
+}
+
+.macos-card.is-hoverable:hover {
 	transform: translateY(-4px);
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+	background: rgba(255, 255, 255, 0.25);
+	box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
 }
 
 .card-header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	margin-bottom: 16px;
+	margin-bottom: 20px;
 }
 
 .card-title-wrapper {
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 12px;
+}
+
+.card-icon-wrapper {
+	width: 36px;
+	height: 36px;
+	border-radius: 10px;
+	background: rgba(255, 255, 255, 0.2);
+	border: 1px solid rgba(255, 255, 255, 0.3);
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .card-title {
-	font-weight: bold;
-	font-size: 18px;
+	font-weight: 600;
+	font-size: 17px;
 	line-height: 1;
+	letter-spacing: -0.02em;
 }
 
 .card-content {

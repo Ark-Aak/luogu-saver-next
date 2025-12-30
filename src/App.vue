@@ -1,146 +1,97 @@
 <template>
 	<n-config-provider :theme-overrides="themeOverrides">
 		<n-message-provider>
-			<n-space vertical>
-				<n-layout has-sider>
+			<div class="macos-app">
+				<n-layout has-sider class="main-layout">
+					<!-- Glassmorphism Sidebar -->
 					<n-layout-sider
-						bordered
-						show-trigger="bar"
+						class="glass-sidebar"
+						:bordered="false"
 						:collapsed="collapsed"
-						:width="240"
-						:collapsed-width="64"
+						:width="260"
+						:collapsed-width="72"
 						collapse-mode="width"
 						@collapse="handleManualCollapse"
 						@expand="handleManualExpand"
 						@mouseenter="handleMouseEnter"
 						@mouseleave="handleMouseLeave"
 					>
-						<div style="height: 64px; display: flex; align-items: center; justify-content: center;">
-							<img v-if="!collapsed" src="/logo-text.png" alt="洛谷保存站" style="height: 32px"/>
-							<img v-else src="/logo-icon.png" alt="洛谷保存站" style="height: 32px;"/>
+						<!-- Logo area -->
+						<div class="sidebar-header">
+							<div class="logo-wrapper">
+								<img v-if="!collapsed" src="/logo-text.png" alt="洛谷保存站" class="logo-full"/>
+								<img v-else src="/logo-icon.png" alt="洛谷保存站" class="logo-icon"/>
+							</div>
 						</div>
-						
-						<n-menu
-							v-model:value="activeKey"
-							:collapsed="collapsed"
-							:collapsed-width="64"
-							:options="menuOptions"
-							@update:value="handleMenuSelect"
-							:responsive="true"
-							:accordion="true"
-						/>
+
+						<!-- Navigation -->
+						<div class="nav-container">
+							<n-menu
+								v-model:value="activeKey"
+								:collapsed="collapsed"
+								:collapsed-width="72"
+								:options="menuOptions"
+								@update:value="handleMenuSelect"
+								:responsive="true"
+								:accordion="true"
+								:indent="16"
+							/>
+						</div>
 					</n-layout-sider>
-					
+
 					<n-dialog-provider>
-						<n-layout :native-scrollbar="false">
-							<n-layout-content
-								content-style="padding: 24px;"
-							>
+						<n-layout :native-scrollbar="false" class="content-layout">
+							<n-layout-content content-style="padding: 32px 40px;">
 								<div class="router-view">
-									<n-back-top :right="50"/>
+									<n-back-top :right="40" :bottom="40"/>
 									<router-view/>
 								</div>
-								
-								<IconConfigProvider size="14">
-									<n-layout-footer bordered style="margin-top: 24px; padding: 10px 40px;">
-										<n-grid cols="2">
-											<n-gi>
-												<p class="footer-element">
-													<Icon>
-														<Copyright/>
-													</Icon>
-													<span> 2025 洛谷保存站 </span>
-												</p>
-												<p class="footer-element">
-													<a href="https://github.com/laikit-dev/luogu-saver-next"
-													   class="footer-link">
-														<Icon>
-															<Github/>
-														</Icon>
-														<span> GitHub </span>
-													</a>
-													<a href="https://help.luogu.me" class="footer-link">
-														<Icon>
-															<Book/>
-														</Icon>
-														<span> 帮助文档 </span>
-													</a>
-													<a href="https://help.luogu.me/docs/update" class="footer-link">
-														<Icon>
-															<History/>
-														</Icon>
-														<span> 更新日志 </span>
-													</a>
-												</p>
-												<p class="footer-element">
-													<Icon>
-														<Clock/>
-													</Icon>
-													<span> 本网站已运行 {{ timeSinceFound }} 秒 </span>
-												</p>
-												<p class="footer-element">
-													<a href="https://github.com/laikit-dev/luogu-saver/graphs/contributors"
-													   class="footer-link">
-														<Icon>
-															<Users/>
-														</Icon>
-														<span> 项目贡献者 </span>
-													</a>
-												</p>
-											</n-gi>
-											<n-gi>
-												<p class="footer-element right-aligned">
-													<Icon><Code/></Icon>
-													<span> 开发者：Federico2903 & Murasame & quanac-lcx </span>
-												</p>
-												<p class="footer-element right-aligned">
-													<a href="https://qm.qq.com/q/QVM9YFEb26" target="_blank"
-													   class="footer-link">
-														<Icon>
-															<Qq/>
-														</Icon>
-														<span>洛谷保存站用户群：1017248143（点击加入）</span>
-													</a>
-												</p>
-												<p class="footer-element right-aligned">
-													<a href="/privacy" class="footer-link">
-														<Icon>
-															<UserShield/>
-														</Icon>
-														<span>隐私协议</span>
-													</a>
-													<a href="/disclaimer" class="footer-link">
-														<Icon>
-															<ExclamationCircle/>
-														</Icon>
-														<span>免责声明</span>
-													</a>
-													<a href="/deletion" class="footer-link">
-														<Icon>
-															<TrashAlt/>
-														</Icon>
-														<span>数据移除政策</span>
-													</a>
-												</p>
-												<p class="footer-element right-aligned">
-													<a href="https://www.rainyun.com/MjUxMDAy_?s=saver" target="_blank"
-													   class="footer-link">
-														<Icon>
-															<Server/>
-														</Icon>
-														<span>本站由雨云提供支持</span>
-													</a>
-												</p>
-											</n-gi>
-										</n-grid>
-									</n-layout-footer>
-								</IconConfigProvider>
+
+								<!-- Footer -->
+								<footer class="glass-footer">
+									<div class="footer-content">
+										<div class="footer-left">
+											<p class="footer-row">
+												<span class="footer-copyright">© 2025 洛谷保存站</span>
+											</p>
+											<p class="footer-row">
+												<a href="https://github.com/laikit-dev/luogu-saver-next" class="footer-link">GitHub</a>
+												<span class="footer-divider">·</span>
+												<a href="https://help.luogu.me" class="footer-link">帮助文档</a>
+												<span class="footer-divider">·</span>
+												<a href="https://help.luogu.me/docs/update" class="footer-link">更新日志</a>
+												<span class="footer-divider">·</span>
+												<a href="https://github.com/laikit-dev/luogu-saver/graphs/contributors" class="footer-link">贡献者</a>
+											</p>
+											<p class="footer-row footer-meta">
+												已运行 {{ formatRuntime(timeSinceFound) }}
+											</p>
+										</div>
+										<div class="footer-right">
+											<p class="footer-row">
+												<span class="footer-text">开发者：Federico2903 & Murasame & quanac-lcx</span>
+											</p>
+											<p class="footer-row">
+												<a href="/privacy" class="footer-link">隐私协议</a>
+												<span class="footer-divider">·</span>
+												<a href="/disclaimer" class="footer-link">免责声明</a>
+												<span class="footer-divider">·</span>
+												<a href="/deletion" class="footer-link">数据移除</a>
+											</p>
+											<p class="footer-row">
+												<a href="https://qm.qq.com/q/QVM9YFEb26" target="_blank" class="footer-link">QQ群：1017248143</a>
+												<span class="footer-divider">·</span>
+												<a href="https://www.rainyun.com/MjUxMDAy_?s=saver" target="_blank" class="footer-link">雨云提供支持</a>
+											</p>
+										</div>
+									</div>
+								</footer>
 							</n-layout-content>
 						</n-layout>
 					</n-dialog-provider>
 					<TrackingConsent/>
 				</n-layout>
-			</n-space>
+			</div>
 		</n-message-provider>
 	</n-config-provider>
 </template>
@@ -149,8 +100,8 @@
 import { provide, ref, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import {
-	NLayout, NLayoutSider, NLayoutContent, NLayoutFooter,
-	NSpace, NMenu, NConfigProvider, type GlobalThemeOverrides, NGrid, NGi,
+	NLayout, NLayoutSider, NLayoutContent,
+	NMenu, NConfigProvider, type GlobalThemeOverrides,
 	type MenuOption, NMessageProvider, NBackTop, NDialogProvider
 } from 'naive-ui';
 
@@ -161,16 +112,7 @@ import {
 	StatsChartOutline, HammerOutline, GlobeOutline, SettingsOutline
 } from '@vicons/ionicons5';
 
-import { Icon, IconConfigProvider } from '@vicons/utils';
-
-import {
-	Copyright, Code, UserShield, ExclamationCircle,
-	TrashAlt, Qq, Server, Github, Clock, Book, History, Users
-} from '@vicons/fa';
-
 import { renderIcon } from '@/utils/render';
-
-import ThemeEditor from '@/components/ThemeEditor.vue';
 
 import { uiThemeKey, type UiThemeVars } from '@/styles/theme/themeKeys.ts';
 import { defaultTheme } from "@/styles/theme/default-theme.ts";
@@ -294,7 +236,7 @@ import { THEME_STORAGE_KEY } from '@/utils/constants.ts';
 const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
 const parsedTheme = savedTheme ? JSON.parse(savedTheme) : null;
 
-const uiThemeVars = ref<UiThemeVars>(parsedTheme ? parsedTheme : defaultTheme);
+const uiThemeVars = ref<UiThemeVars>(parsedTheme ? { ...defaultTheme, ...parsedTheme } : defaultTheme);
 
 provide(uiThemeKey, uiThemeVars);
 
@@ -310,14 +252,46 @@ watch(
 const themeOverrides = computed<GlobalThemeOverrides>(() => {
 	return {
 		common: {
-			fontFamily: "'Lato', sans-serif",
-			fontFamilyMono: "'Fira Code', monospace",
+			fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif",
+			fontFamilyMono: "'SF Mono', Monaco, Menlo, Consolas, monospace",
 			bodyColor: uiThemeVars.value.bodyColor,
 			primaryColor: uiThemeVars.value.primaryColor,
 			primaryColorHover: uiThemeVars.value.primaryColorHover,
 			primaryColorPressed: uiThemeVars.value.primaryColorPressed,
 			primaryColorSuppl: uiThemeVars.value.primaryColorSuppl,
-			cardColor: uiThemeVars.value.cardColor
+			cardColor: uiThemeVars.value.cardColor,
+			borderRadius: '10px',
+			borderRadiusSmall: '6px'
+		},
+		Button: {
+			borderRadiusMedium: '8px',
+			borderRadiusSmall: '6px',
+			fontWeightStrong: '500',
+			paddingMedium: '0 16px',
+			heightMedium: '34px'
+		},
+		Input: {
+			borderRadius: '10px',
+			heightMedium: '38px'
+		},
+		Tag: {
+			borderRadius: '6px',
+			fontWeight: '500'
+		},
+		Card: {
+			borderRadius: '16px'
+		},
+		Menu: {
+			borderRadius: '8px',
+			itemColorActive: 'rgba(0, 122, 255, 0.12)',
+			itemColorActiveHover: 'rgba(0, 122, 255, 0.15)',
+			itemTextColorActive: '#007AFF',
+			itemTextColorActiveHover: '#007AFF',
+			itemIconColorActive: '#007AFF',
+			itemIconColorActiveHover: '#007AFF'
+		},
+		Divider: {
+			color: 'rgba(0, 0, 0, 0.06)'
 		}
 	};
 });
@@ -336,43 +310,236 @@ const timeSinceFound = ref(Math.floor((Date.now() - foundDate) / 1000));
 setInterval(() => {
 	timeSinceFound.value = Math.floor((Date.now() - foundDate) / 1000);
 }, 1000);
+
+const formatRuntime = (seconds: number) => {
+	const days = Math.floor(seconds / 86400);
+	const hours = Math.floor((seconds % 86400) / 3600);
+	const mins = Math.floor((seconds % 3600) / 60);
+	if (days > 0) return `${days}天 ${hours}小时`;
+	if (hours > 0) return `${hours}小时 ${mins}分钟`;
+	return `${mins}分钟 ${seconds % 60}秒`;
+};
 </script>
 
 <style scoped>
-.n-layout {
+/* ============================================
+   APPLE-STYLE GLASSMORPHISM
+   Clean, neutral, professional
+   ============================================ */
+
+.macos-app {
+	min-height: 100vh;
+	background: #f5f5f7;
+	font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+}
+
+.main-layout {
 	height: 100vh;
+	background: transparent !important;
 }
-.footer-element {
+
+.content-layout {
+	background: transparent !important;
+}
+
+/* ============================================
+   GLASSMORPHISM SIDEBAR
+   ============================================ */
+.glass-sidebar {
+	background: rgba(255, 255, 255, 0.2) !important;
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
+	border-right: 1px solid rgba(255, 255, 255, 0.3) !important;
+	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-header {
+	padding: 20px 16px;
+}
+
+.logo-wrapper {
 	display: flex;
 	align-items: center;
+	justify-content: center;
 }
-.footer-element.right-aligned {
-	justify-content: flex-end;
+
+.logo-full {
+	height: 32px;
+	width: auto;
 }
-.footer-element > :nth-child(2) {
-	margin-left: 8px;
+
+.logo-icon {
+	height: 28px;
+	width: 28px;
 }
-.footer-element > a > :nth-child(2) {
-	margin-left: 8px;
+
+.nav-container {
+	flex: 1;
+	overflow-y: auto;
+	padding: 8px 12px;
 }
-.footer-link {
-	display: flex;
-	align-items: center;
-	color: #000;
-	transition: color 0.2s;
-	text-decoration: none;
+
+/* ============================================
+   MENU ITEMS - FIXED ALIGNMENT
+   ============================================ */
+:deep(.n-menu) {
+	background: transparent !important;
 }
-.footer-link:hover {
-	color: #337ab7 !important;
-	text-decoration-color: #000;
-	text-underline-position: under;
+
+:deep(.n-menu-item) {
+	margin: 2px 0;
+	border-radius: 10px !important;
+	height: 40px !important;
 }
-.footer-link:not(:first-child) {
-	margin-left: 16px;
+
+:deep(.n-menu-item-content) {
+	padding: 0 12px !important;
+	border-radius: 10px !important;
+	font-size: 14px !important;
+	font-weight: 400 !important;
+	color: #1d1d1f !important;
+	transition: all 0.2s ease;
+	height: 40px !important;
+	line-height: 40px !important;
+	display: flex !important;
+	align-items: center !important;
 }
+
+:deep(.n-menu-item-content:hover) {
+	background: rgba(0, 0, 0, 0.04) !important;
+}
+
+:deep(.n-menu-item-content--selected) {
+	background: rgba(0, 0, 0, 0.06) !important;
+	font-weight: 500 !important;
+	color: #1d1d1f !important;
+}
+
+:deep(.n-menu-item-content--selected::before) {
+	display: none !important;
+}
+
+:deep(.n-submenu-children) {
+	padding-left: 8px !important;
+	background: transparent !important;
+}
+
+:deep(.n-menu-item-content__icon) {
+	color: #1d1d1f !important;
+	margin-right: 8px !important;
+	display: flex !important;
+	align-items: center !important;
+}
+
+:deep(.n-menu-item-content__arrow) {
+	color: rgba(0, 0, 0, 0.3) !important;
+}
+
+:deep(.n-layout-toggle-bar),
+:deep(.n-layout-sider__border) {
+	display: none !important;
+}
+
+:deep(.n-layout-sider-scroll-container) {
+	background: transparent !important;
+}
+
+/* ============================================
+   CONTENT AREA
+   ============================================ */
 .router-view {
 	max-width: 1400px;
 	margin: 0 auto;
-	min-height: calc(100vh - 48px);
+	min-height: calc(100vh - 200px);
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.glass-footer {
+	margin-top: 60px;
+	padding: 24px 40px;
+	margin-left: -40px;
+	margin-right: -40px;
+	margin-bottom: -32px;
+	background: rgba(255, 255, 255, 0.2);
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
+	border-top: 1px solid rgba(255, 255, 255, 0.3);
+	border-radius: 20px 20px 0 0;
+	box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.05);
+}
+
+.footer-content {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+}
+
+.footer-left,
+.footer-right {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.footer-right {
+	text-align: right;
+	align-items: flex-end;
+}
+
+.footer-row {
+	margin: 0;
+	font-size: 12px;
+	color: #86868b;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.footer-copyright {
+	font-weight: 500;
+	color: #1d1d1f;
+}
+
+.footer-text {
+	color: #86868b;
+}
+
+.footer-link {
+	color: #515154 !important;
+	text-decoration: none;
+	transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+	color: #1d1d1f !important;
+}
+
+.footer-divider {
+	color: #d2d2d7;
+}
+
+.footer-meta {
+	font-size: 11px;
+	color: #86868b;
+}
+
+/* ============================================
+   BACK TO TOP
+   ============================================ */
+:deep(.n-back-top) {
+	background: rgba(255, 255, 255, 0.2) !important;
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
+	border: 1px solid rgba(255, 255, 255, 0.3) !important;
+	border-radius: 12px !important;
+	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
+	transition: all 0.2s ease !important;
+}
+
+:deep(.n-back-top:hover) {
+	transform: translateY(-2px);
+	box-shadow: 0 6px 30px rgba(0, 0, 0, 0.12) !important;
 }
 </style>

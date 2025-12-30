@@ -1,16 +1,151 @@
-.user-Red { color: #e74c3c !important; }
-.user-Orange { color: #e67e22 !important; }
-.user-Purple { color: #9b59b6 !important; }
-.user-Green { color: #2ecc71 !important; }
-.user-Blue { color: #3498db !important; }
-.user-Gray { color: #7f8c8d !important; }
-.user-Cheater { color: #ad8b00 !important; }
+/* APPLE-STYLE GLOBAL STYLES */
+* {
+	box-sizing: border-box;
+}
 
+html {
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	text-rendering: optimizeLegibility;
+}
+
+body {
+	font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+	background: #f5f5f7;
+	min-height: 100vh;
+	color: #1d1d1f;
+	line-height: 1.5;
+}
+
+/* User color classes */
+.user-Red { color: #ff3b30 !important; }
+.user-Orange { color: #ff9500 !important; }
+.user-Purple { color: #af52de !important; }
+.user-Green { color: #34c759 !important; }
+.user-Blue { color: #007aff !important; }
+.user-Gray { color: #8e8e93 !important; }
+.user-Cheater { color: #ffcc00 !important; }
+
+/* Inline code */
 :not(pre) > code {
-	background: #f1f5f9 !important;
+	background: rgba(0, 0, 0, 0.05) !important;
 	padding: 2px 6px !important;
 	border-radius: 4px !important;
-	border: 1px solid #e2e8f0 !important;
-	font-size: 0.85em !important;
-	color: #e11d48 !important;
- }
+	border: none !important;
+	font-size: 0.9em !important;
+	color: #e83e8c !important;
+	font-family: "SF Mono", Monaco, monospace !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background: rgba(0, 0, 0, 0.2);
+	border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: rgba(0, 0, 0, 0.3);
+}
+
+::selection {
+	background: rgba(0, 122, 255, 0.2);
+}
+
+a, button {
+	transition: all 0.2s ease;
+}
+
+a {
+	color: #007aff;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+/* ============================================
+   BUTTONS - Apple style
+   ============================================ */
+.n-button--primary-type {
+	background: #007aff !important;
+	border: none !important;
+	border-radius: 8px !important;
+	color: #fff !important;
+	font-weight: 400 !important;
+	transition: all 0.2s ease !important;
+}
+
+.n-button--primary-type:hover {
+	background: #0066d6 !important;
+}
+
+.n-button--default-type {
+	background: rgba(255, 255, 255, 0.2) !important;
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
+	border: 1px solid rgba(255, 255, 255, 0.3) !important;
+	border-radius: 8px !important;
+	color: #1d1d1f !important;
+	font-weight: 400 !important;
+	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
+	transition: all 0.2s ease !important;
+}
+
+.n-button--default-type:hover {
+	background: rgba(255, 255, 255, 0.3) !important;
+}
+
+.n-button--tertiary-type {
+	background: transparent !important;
+	border: none !important;
+	color: #007aff !important;
+	font-weight: 400 !important;
+}
+
+.n-button--tertiary-type:hover {
+	background: rgba(0, 122, 255, 0.1) !important;
+}
+
+/* ============================================
+   INPUTS - Glass style
+   ============================================ */
+.n-input {
+	background: rgba(255, 255, 255, 0.2) !important;
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
+	border: 1px solid rgba(255, 255, 255, 0.3) !important;
+	border-radius: 8px !important;
+	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+.n-input:focus-within {
+	border-color: #007aff !important;
+}
+
+/* Select */
+.n-select .n-base-selection {
+	background: rgba(255, 255, 255, 0.2) !important;
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
+	border: 1px solid rgba(255, 255, 255, 0.3) !important;
+	border-radius: 8px !important;
+	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Tags */
+.n-tag {
+	background: rgba(0, 0, 0, 0.05) !important;
+	border: none !important;
+	border-radius: 6px !important;
+	color: #1d1d1f !important;
+}

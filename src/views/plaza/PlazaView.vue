@@ -193,12 +193,17 @@ const goToDetail = (id: string) => {
 
 <style scoped>
 .feed-header {
-	margin-bottom: 16px;
+	margin-bottom: 24px;
+}
+
+.article-list {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
 }
 
 .article-item {
-	margin-bottom: 16px;
-	transition: transform 0.2s;
+	transition: transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 .clickable-card {
@@ -206,10 +211,13 @@ const goToDetail = (id: string) => {
 }
 
 .article-summary {
-	color: #555;
+	color: #48484a;
 	font-size: 14px;
-	line-height: 1.6;
-	margin-bottom: 8px;
+	line-height: 1.7;
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
 }
 
 .article-meta {
@@ -225,15 +233,48 @@ const goToDetail = (id: string) => {
 }
 
 .load-trigger {
-	padding: 20px 0;
+	padding: 32px 0;
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	min-height: 50px;
+	min-height: 60px;
 }
 
 .loading-state, .error-state {
 	display: flex;
 	align-items: center;
+	color: #86868b;
+	font-size: 14px;
+}
+
+.loading-state span {
+	margin-left: 12px;
+}
+
+/* macOS-style divider */
+:deep(.n-divider) {
+	background-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Tag styling */
+:deep(.n-tag) {
+	border-radius: 6px !important;
+	font-weight: 500 !important;
+	font-size: 11px !important;
+}
+
+/* Empty state */
+:deep(.n-empty) {
+	padding: 24px 0;
+}
+
+:deep(.n-empty__description) {
+	color: #86868b;
+	font-size: 14px;
+}
+
+/* Primary button text styling */
+:deep(.n-button--primary-type.n-button--text-type) {
+	font-weight: 500;
 }
 </style>

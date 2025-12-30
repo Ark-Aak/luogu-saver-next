@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { computed, type Component, type CSSProperties } from 'vue';
+import { computed, type Component, type CSSProperties, type Ref } from 'vue';
 import { NIcon, NCard, NH1, NText } from 'naive-ui';
 import { uiThemeKey, type UiThemeVars } from '@/styles/theme/themeKeys.ts';
 import { inject } from 'vue';
-import { hexToRgba } from '@/utils/render';
 
-const themeVars: UiThemeVars = inject(uiThemeKey)!;
+const themeVars = inject(uiThemeKey) as Ref<UiThemeVars>;
 
 const props = defineProps({
 	title: {
@@ -26,49 +25,83 @@ const props = defineProps({
 	}
 })
 
-const containerStyle = computed((): CSSProperties => ({
-	textAlign: 'center',
-	backgroundColor: props.backgroundColor || hexToRgba(themeVars.value.primaryColor, 0.1),
-	padding: '16px',
-	borderRadius: '8px'
-}))
-
-const titleStyle = computed((): CSSProperties => ({
-	color: props.textColor || themeVars.value.primaryColor,
-	display: 'flex',
-	alignItems: 'center',
-	justifyContent: 'center',
-	gap: '8px'
-}))
-
 const effectiveIconColor = computed(() => {
 	return props.iconColor || themeVars.value.primaryColor;
 });
+
+const containerStyle = computed((): CSSProperties => ({
+	background: props.backgroundColor || themeVars.value.cardColor,
+	borderColor: themeVars.value.borderColor,
+	color: themeVars.value.textColor,
+}));
+
+const subtitleStyle = computed((): CSSProperties => ({
+	color: themeVars.value.textSecondary,
+}));
 </script>
 
 <template>
-	<n-card :bordered="false" content-style="padding: 0;">
-		<div :style="containerStyle">
-			<n-h1 class="title">
-				<span :style="titleStyle">
-					<n-icon v-if="icon" :component="icon" :color="effectiveIconColor" size="36" :depth="1" />
-					{{ title }}
-				</span>
-			</n-h1>
-			<n-text class="subtitle" :depth="3">
-				<slot />
-			</n-text>
+	<div class="macos-card-title" :style="containerStyle">
+		<div class="title-content">
+			<div v-if="icon" class="title-icon-wrapper">
+				<n-icon :component="icon" :color="effectiveIconColor" size="28" />
+			</div>
+			<div class="title-text">
+				<h1 class="main-title">{{ title }}</h1>
+				<p v-if="$slots.default" class="subtitle" :style="subtitleStyle">
+					<slot />
+				</p>
+			</div>
 		</div>
-	</n-card>
+	</div>
 </template>
 
 <style scoped>
-.title {
-	margin-top: 8px;
-	margin-bottom: 4px;
-	font-weight: bold;
+.macos-card-title {
+	backdrop-filter: blur(20px) saturate(180%);
+	-webkit-backdrop-filter: blur(20px) saturate(180%);
+	border: 1px solid;
+	border-radius: 16px;
+	padding: 24px 32px;
+	box-shadow:
+		0 0 0 1px rgba(0, 0, 0, 0.03),
+		0 2px 4px rgba(0, 0, 0, 0.02),
+		0 8px 24px rgba(0, 0, 0, 0.06);
 }
+
+.title-content {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+
+.title-icon-wrapper {
+	width: 52px;
+	height: 52px;
+	border-radius: 14px;
+	background: linear-gradient(135deg, rgba(0, 122, 255, 0.15) 0%, rgba(90, 200, 250, 0.1) 100%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.title-text {
+	flex: 1;
+}
+
+.main-title {
+	margin: 0;
+	font-size: 28px;
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	line-height: 1.2;
+}
+
 .subtitle {
-	font-size: 1rem;
+	margin: 6px 0 0;
+	font-size: 14px;
+	font-weight: 400;
+	letter-spacing: 0.01em;
 }
 </style>
