@@ -1,4 +1,6 @@
 name: Auto Deploy with OSS
+permissions:
+  contents: read
 
 on:
   push:
