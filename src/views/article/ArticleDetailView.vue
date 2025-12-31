@@ -115,7 +115,7 @@ const handleDelete = () => {
 
 const currentCategory = computed(() => {
 	if (article.value?.category && ARTICLE_CATEGORIES[article.value.category]) {
-		return ARTICLE_CATEGORIES[article.value.category];
+		return ARTICLE_CATEGORIES[article.value.category] || UNKNOWN_CATEGORY;
 	}
 	return UNKNOWN_CATEGORY;
 });
@@ -317,7 +317,7 @@ onMounted(() => {
 											<n-tag
 												:color="{
 														textColor: getCategoryColor(it.category),
-														backgroundColor: hexToRgba(getCategoryColor(it.category), 0.12),
+														color: hexToRgba(getCategoryColor(it.category), 0.2),
 														borderColor: getCategoryColor(it.category)
 													}"
 												size="small"
@@ -356,7 +356,7 @@ onMounted(() => {
 						:title="`版本 ${ver.version}`"
 						:content="ver.title"
 						:time="ver.createdAt"
-						:type="ver.version === versionHistory[0].version ? 'success' : 'default'"
+						:type="ver.version === versionHistory[0]?.version ? 'success' : 'default'"
 					/>
 				</n-timeline>
 			</SidebarWidget>

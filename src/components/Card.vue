@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { type CSSProperties, inject, computed, type Component, useSlots } from "vue";
+import { type CSSProperties, inject, computed, type Component, useSlots, type Ref } from "vue";
 import { NIcon } from 'naive-ui';
 import { uiThemeKey, type UiThemeVars } from '@/styles/theme/themeKeys.ts';
 
-const themeVars: UiThemeVars = inject(uiThemeKey)!;
+const themeVars: Ref<UiThemeVars> = inject(uiThemeKey)!;
 const slots = useSlots();
 
 const props = defineProps({

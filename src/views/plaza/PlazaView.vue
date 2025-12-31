@@ -29,7 +29,7 @@ const loadMore = async () => {
 	error.value = false;
 
 	try {
-		const newArticles = await getRecommendations() || [];
+		const newArticles = (await getRecommendations()).data || [];
 
 		if (newArticles.length > 0) {
 			everReturned.value = true;
@@ -61,7 +61,7 @@ onMounted(() => {
 	loadMore();
 
 	observer = new IntersectionObserver((entries) => {
-		if (entries[0].isIntersecting && !loading.value) {
+		if (entries[0]?.isIntersecting && !loading.value) {
 			loadMore();
 		}
 	}, {
@@ -80,17 +80,17 @@ onUnmounted(() => {
 
 const getCategoryLabel = (id?: number) => {
 	if (id && ARTICLE_CATEGORIES[id]) return ARTICLE_CATEGORIES[id].label;
-	return ARTICLE_CATEGORIES[9].label;
+	return ARTICLE_CATEGORIES[9]!.label;
 };
 
 const getCategoryColor = (id?: number) => {
 	if (id && ARTICLE_CATEGORIES[id]) return ARTICLE_CATEGORIES[id].color;
-	return ARTICLE_CATEGORIES[9].color;
+	return ARTICLE_CATEGORIES[9]!.color;
 }
 
 const getCategoryIcon = (id?: number) => {
 	if (id && ARTICLE_CATEGORIES[id]) return ARTICLE_CATEGORIES[id].icon;
-	return ARTICLE_CATEGORIES[9].icon;
+	return ARTICLE_CATEGORIES[9]!.icon;
 }
 
 const goToDetail = (id: string) => {
@@ -151,7 +151,7 @@ const goToDetail = (id: string) => {
 						<n-tag
 							:color="{
 									textColor: getCategoryColor(article.category),
-									backgroundColor: hexToRgba(getCategoryColor(article.category), 0.2),
+									color: hexToRgba(getCategoryColor(article.category), 0.2),
 									borderColor: getCategoryColor(article.category)
 								}"
 							size="small"

@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, inject } from 'vue';
-import { useRouter } from 'vue-router';
 import {
-	NGrid, NGi, NInput, NIcon, NButton, NStatistic, NDivider
+	NGrid, NGi, NIcon, NStatistic, NDivider
 } from 'naive-ui';
 import {
-	Link, Newspaper, Clipboard, Megaphone, Save
+	Newspaper, Clipboard, Megaphone
 } from '@vicons/ionicons5';
 import { getArticleCount } from "@/api/article.ts";
 import { getPasteCount } from "@/api/paste.ts";
@@ -14,10 +13,9 @@ import HomeHero from '@/components/HomeHero.vue';
 import Card from '@/components/Card.vue';
 import { uiThemeKey } from '@/styles/theme/themeKeys.ts';
 
-const router = useRouter();
 const articleCount = ref(0);
 const pasteCount = ref(0);
-const saveUrl = ref('');
+// const saveUrl = ref('');
 
 const themeVars = inject(uiThemeKey)!;
 
@@ -26,12 +24,14 @@ onMounted(async () => {
 	getPasteCount().then(res => pasteCount.value = res.data.count);
 });
 
+/*
 const handleSave = () => {
 	if (saveUrl.value) {
 		// TODO: Implement save
 		console.log('Save:', saveUrl.value);
 	}
 };
+ */
 </script>
 
 <template>

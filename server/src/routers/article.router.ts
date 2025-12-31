@@ -20,7 +20,7 @@ router.get('/query/:id', async (ctx: Context) => {
         await article.renderContent();
         if (ctx.track) ctx.track(TrackingEvent.VIEW_ARTICLE, articleId);
         if (article.deleted) {
-            ctx.fail(403, article.deleteReason);
+            ctx.fail(403, article.deleteReason || 'Article has been deleted');
         } else {
             ctx.success(article);
         }

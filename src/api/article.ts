@@ -22,7 +22,7 @@ export async function getArticleCount() {
     return (await apiFetch('/article/count')) as ApiResponse<{ count: number }>;
 }
 
-export async function getRelevant(id) {
+export async function getRelevant(id: string) {
     return (await apiFetch(`/article/relevant/${id}`)) as ApiResponse<PlazaArticle[]>;
 }
 

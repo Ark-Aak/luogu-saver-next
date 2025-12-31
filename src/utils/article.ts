@@ -3,17 +3,17 @@ import type { TocItem } from '@/types/article';
 
 export const getCategoryLabel = (id?: number) => {
     if (id && ARTICLE_CATEGORIES[id]) return ARTICLE_CATEGORIES[id].label;
-    return ARTICLE_CATEGORIES[9].label;
+    return ARTICLE_CATEGORIES[9]!.label;
 };
 
 export const getCategoryColor = (id?: number) => {
     if (id && ARTICLE_CATEGORIES[id]) return ARTICLE_CATEGORIES[id].color;
-    return ARTICLE_CATEGORIES[9].color;
+    return ARTICLE_CATEGORIES[9]!.color;
 };
 
 export const getCategoryIcon = (id?: number) => {
     if (id && ARTICLE_CATEGORIES[id]) return ARTICLE_CATEGORIES[id].icon;
-    return ARTICLE_CATEGORIES[9].icon;
+    return ARTICLE_CATEGORIES[9]!.icon;
 };
 
 export const generateTocAndProcessHtml = (html: string) => {
@@ -36,14 +36,14 @@ export const generateTocAndProcessHtml = (html: string) => {
 
         const item: TocItem = { title, href: `#${id}`, children: [] };
 
-        while (stack.length > 0 && stack[stack.length - 1].level >= level) {
+        while (stack.length > 0 && stack[stack.length - 1]!.level >= level) {
             stack.pop();
         }
 
         if (stack.length === 0) {
             toc.push(item);
         } else {
-            const parent = stack[stack.length - 1].item;
+            const parent = stack[stack.length - 1]!.item;
             if (!parent.children) parent.children = [];
             parent.children.push(item);
         }

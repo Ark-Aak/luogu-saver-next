@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { computed, type Component, type CSSProperties } from 'vue';
+import { computed, type Component, type CSSProperties, type Ref } from 'vue';
 import { NIcon, NCard, NH1, NText } from 'naive-ui';
 import { uiThemeKey, type UiThemeVars } from '@/styles/theme/themeKeys.ts';
 import { inject } from 'vue';
 import { hexToRgba } from '@/utils/render';
 
-const themeVars: UiThemeVars = inject(uiThemeKey)!;
+const themeVars: Ref<UiThemeVars> = inject(uiThemeKey)!;
 
 const props = defineProps({
 	title: {
@@ -23,7 +23,11 @@ const props = defineProps({
 	iconColor: {
 		type: String,
 		default: null,
-	}
+	},
+	textColor: {
+		type: String,
+		default: null,
+	},
 })
 
 const containerStyle = computed((): CSSProperties => ({

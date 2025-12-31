@@ -2,7 +2,7 @@
 import { inject, ref } from 'vue';
 import { NButton, NColorPicker, NDrawer, NDrawerContent, NForm, NFormItem, NIcon, NInput, useMessage } from 'naive-ui';
 import { Settings } from '@vicons/ionicons5';
-import { uiThemeKey, type UiThemeVars } from '@/styles/theme/themeKeys.ts';
+import { uiThemeKey } from '@/styles/theme/themeKeys.ts';
 import { defaultTheme } from '@/styles/theme/default-theme.ts';
 
 const uiTheme = inject(uiThemeKey);

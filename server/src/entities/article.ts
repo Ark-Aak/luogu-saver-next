@@ -58,8 +58,8 @@ export class Article extends BaseEntity {
     @Type(() => Date)
     updatedAt: Date;
 
-    @Column({ name: 'delete_reason', default: '作者要求删除' })
-    deleteReason: string;
+    @Column({ name: 'delete_reason', nullable: true })
+    deleteReason?: string;
 
     @Column({ type: 'varchar', name: 'content_hash', nullable: true })
     contentHash?: string;

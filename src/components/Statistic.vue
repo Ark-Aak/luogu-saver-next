@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { type Component, inject, computed } from 'vue'
+import { type Component, inject, computed, type Ref } from 'vue'
 import { NIcon, NStatistic } from 'naive-ui'
 import { uiThemeKey, type UiThemeVars } from "@/styles/theme/themeKeys.ts";
 import Card from './Card.vue'
 
-const themeVars: UiThemeVars = inject(uiThemeKey)!;
+const themeVars: Ref<UiThemeVars> = inject(uiThemeKey)!;
 
 const props = defineProps({
 	icon: {

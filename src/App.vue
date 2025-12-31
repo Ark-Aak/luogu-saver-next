@@ -170,8 +170,6 @@ import {
 
 import { renderIcon } from '@/utils/render';
 
-import ThemeEditor from '@/components/ThemeEditor.vue';
-
 import { uiThemeKey, type UiThemeVars } from '@/styles/theme/themeKeys.ts';
 import { defaultTheme } from "@/styles/theme/default-theme.ts";
 import TrackingConsent from "@/components/TrackingConsent.vue";

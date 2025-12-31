@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { inject, ref } from 'vue';
-import { useRouter } from 'vue-router';
 import { NIcon, NInput, NButton } from 'naive-ui';
 import { Search, ArrowForward } from '@vicons/ionicons5';
 import { uiThemeKey } from '@/styles/theme/themeKeys.ts';
 import LuoguLogo from '@/components/icons/LuoguLogo.vue';
 
-const router = useRouter();
 const themeVars = inject(uiThemeKey)!;
 const searchText = ref('');
 

@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { type Component, inject, computed } from 'vue';
+import { type Component, inject, computed, type Ref } from 'vue';
 import { NIcon } from 'naive-ui';
 import { uiThemeKey, type UiThemeVars } from '@/styles/theme/themeKeys.ts';
 
-const themeVars: UiThemeVars = inject(uiThemeKey)!;
+const themeVars: Ref<UiThemeVars> = inject(uiThemeKey)!;
 
 defineProps<{
 	title?: string;
 	icon?: Component;
 }>();
 
-const titleColor = computed(() => themeVars.value.textColor1);
+const titleColor = computed(() => themeVars.value.cardTitleColor);
 const iconColor = computed(() => themeVars.value.primaryColor);
 </script>
 
