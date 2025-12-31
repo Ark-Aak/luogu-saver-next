@@ -1,6 +1,7 @@
 import markdownit from "markdown-it";
 import markdownItAttrs from "markdown-it-attrs";
 import markdownItContainer from "markdown-it-container";
+import crypto from "crypto";
 
 let mdPromise: Promise<markdownit> | null = null;
 
@@ -132,7 +133,9 @@ export default async function renderMarkdown(src: string) {
 
     const preprocessed = src.split(/\r?\n/).map(preprocessLine).join("\n");
 
-    const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const uid =
+        Date.now().toString(36) +
+        crypto.randomBytes(4).toString("hex").slice(0, 4);
 
     const codePlaceholder = (i: number) => `CODE?PLACEHOLDER${uid}?${i}?`;
     const mathDisplayPlaceholder = (i: number) => `MATH?DISPLAY${uid}?${i}?`;
