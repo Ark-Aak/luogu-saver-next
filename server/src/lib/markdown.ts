@@ -1,132 +1,166 @@
-import markdownit from "markdown-it";
-import markdownItAttrs from "markdown-it-attrs";
-import markdownItContainer from "markdown-it-container";
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
+import rehypeStringify from 'rehype-stringify';
+import remarkGfm from 'remark-gfm';
+import remarkDirective from 'remark-directive';
+import rehypeRaw from 'rehype-raw';
+import remarkSmartypants from 'remark-smartypants';
+import { visit } from 'unist-util-visit';
 import crypto from "crypto";
+import { logger } from "@/lib/logger";
 
-let mdPromise: Promise<markdownit> | null = null;
+let processorPromise: Promise<any> | null = null;
 
-async function getMdInstance() {
-    if (mdPromise) return mdPromise;
+async function getProcessor() {
+    if (processorPromise) return processorPromise;
 
-    mdPromise = (async () => {
-        // @ts-ignore
-        const { createHighlighter } = await import('shiki');
-        // @ts-ignore
-        const { fromHighlighter } = await import('@shikijs/markdown-it/core');
+    processorPromise = (async () => {
+        const { default: rehypeShiki } = await import('@shikijs/rehype');
 
-        const highlighter = await createHighlighter({
-            themes: ['github-light'],
-            langs: [
-                'cpp', 'java', 'python',
-                'javascript', 'typescript',
-                'sql', 'bash', 'json', 'html',
-                'css', 'go', 'rust', 'ruby', 'php',
-                'csharp', 'kotlin', 'swift', 'haskell',
-                'markdown'
-            ]
-        });
+        function remarkCustomContainers() {
+            return (tree: any) => {
+                visit(tree, (node) => {
+                    if (node.type === 'containerDirective') {
+                        const data = node.data || (node.data = {});
+                        const attributes = node.attributes || {};
+                        const name = node.name;
 
-        const md = markdownit({
-            html: true,
-            linkify: true,
-            typographer: true
-        });
-
-        md.use(fromHighlighter(highlighter, {
-            theme: 'github-light'
-        }));
-
-        const renderPlainFence = (tokens: any[], idx: number) => {
-            const token = tokens[idx];
-            const lang = (token.info || "").trim().split(/\s+/)[0].toLowerCase();
-            const langAddon = lang ? ` language-${md.utils.escapeHtml(lang)}` : "";
-            return `<pre class="md-plain${langAddon}"><code class="md-plain${langAddon}">${md.utils.escapeHtml(token.content)}</code></pre>`;
-        };
-
-        const originalFence = md.renderer.rules.fence;
-        md.renderer.rules.fence = function (tokens: any[], idx: number, options: any, env: any, slf: any) {
-            const lang = (tokens[idx].info || "").trim().split(/\s+/)[0].toLowerCase();
-            try {
-                return originalFence
-                    ? originalFence(tokens, idx, options, env, slf)
-                    : renderPlainFence(tokens, idx);
-            } catch {
-                return renderPlainFence(tokens, idx);
-            }
-        };
-
-        md.use(markdownItAttrs);
-
-        md.use(markdownItContainer, "align", {
-            render: (tokens: any[], idx: number) => {
-                if (tokens[idx].nesting === 1) {
-                    const m = tokens[idx].attrs ? (tokens[idx].attrs[0]?.length ? tokens[idx].attrs[0][0] : "") : "";
-                    const cls = m ? `md-align-${m}` : "md-align-center";
-                    return `<div class="${cls}">`;
-                } else return "</div>";
-            },
-        });
-
-        md.use(markdownItContainer, "epigraph", {
-            render: (tokens: any[], idx: number) => {
-                if (tokens[idx].nesting === 1) {
-                    return `<div class="md-epigraph"><div class="epigraph-body">`;
-                } else {
-                    const m = tokens[idx].info.match(/\[(.*)\]/);
-                    const author = m ? m[1] : "";
-                    const authorHtml = author
-                        ? `<span class="epigraph-author">${md.utils.escapeHtml(author)}</span>`
-                        : "";
-                    return `</div>${authorHtml}</div>`;
-                }
-            },
-        });
-
-        ["info", "warning", "success", "error"].forEach((name) => {
-            md.use(markdownItContainer, name, {
-                render: (tokens: any[], idx: number) => {
-                    const info = tokens[idx].info || "";
-                    if (tokens[idx].nesting === 1) {
-                        const titleMatch = info.match(/\[(.*)\]$/);
-                        const title = titleMatch ? md.render(titleMatch[1]) : name.toUpperCase();
-                        const open = (tokens[idx].attrs ? (tokens[idx].attrs[0]?.length ? tokens[idx].attrs[0][0] : "") : "") === "open";
-                        return `<div class="md-block ${name}"><div class="md-block-title"><span>${title}</span><i class="toggle-btn fa fa-caret-${open ? "down" : "right"}"></i></div><div class="md-block-body"${open ? "" : ' style="display:none"'}>`;
-                    } else {
-                        return `</div></div>`;
+                        if (name === 'align') {
+                            const align = attributes.class || Object.keys(attributes)[0] || 'center';
+                            data.hName = 'div';
+                            data.hProperties = { className: [`md-align-${align}`] };
+                        } else if (name === 'epigraph') {
+                            const author = attributes.author || '';
+                            data.hName = 'div';
+                            data.hProperties = { className: ['md-epigraph'], 'data-author': author };
+                        } else if (['info', 'warning', 'success', 'error'].includes(name)) {
+                            logger.debug({ attributes }, `Processing custom container: ${name}`);
+                            const title = attributes.title || name.toUpperCase();
+                            const open = attributes.open !== undefined;
+                            data.hName = 'div';
+                            data.hProperties = {
+                                className: ['md-block', name],
+                                'data-title': title,
+                                'data-open': open.toString()
+                            };
+                        }
                     }
-                },
-            });
-        });
+                });
+            };
+        }
 
-        md.use(markdownItContainer, "cute-table", {
-            render: (_tokens: any[], _idx: number) => {
-                return "";
-            }
-        });
+        function rehypeCustomContainers() {
+            return (tree: any) => {
+                visit(tree, 'element', (node: any) => {
+                    if (node.properties && node.properties.className) {
+                        const classes = node.properties.className;
 
-        return md;
+                        if (classes.includes('md-epigraph')) {
+                            const author = node.properties['data-author'] || '';
+                            delete node.properties['data-author'];
+
+                            const body = {
+                                type: 'element',
+                                tagName: 'div',
+                                properties: { className: ['epigraph-body'] },
+                                children: node.children
+                            };
+
+                            const children = [body];
+                            if (author) {
+                                children.push({
+                                    type: 'element',
+                                    tagName: 'span',
+                                    properties: { className: ['epigraph-author'] },
+                                    children: [{ type: 'text', value: author }]
+                                });
+                            }
+                            node.children = children;
+                        }
+
+                        const typeClass = classes.find((c: string) => ['info', 'warning', 'success', 'error'].includes(c));
+                        if (typeClass && classes.includes('md-block')) {
+                            const title = node.properties['dataTitle'] || typeClass.toUpperCase();
+                            const open = node.properties['dataOpen'] === 'true';
+                            delete node.properties['dataTitle'];
+                            delete node.properties['dataOpen'];
+
+                            const titleNode = {
+                                type: 'element',
+                                tagName: 'div',
+                                properties: { className: ['md-block-title'] },
+                                children: [
+                                    { type: 'element', tagName: 'span', children: [{ type: 'text', value: title }] },
+                                    { type: 'element', tagName: 'i', properties: { className: ['toggle-btn', 'fa', `fa-caret-${open ? 'down' : 'right'}`] }, children: [] }
+                                ]
+                            };
+
+                            const bodyNode = {
+                                type: 'element',
+                                tagName: 'div',
+                                properties: { className: ['md-block-body'], style: open ? '' : 'display:none' },
+                                children: node.children
+                            };
+
+                            node.children = [titleNode, bodyNode];
+                        }
+                    }
+                });
+            };
+        }
+
+        return unified()
+            .use(remarkParse)
+            .use(remarkGfm)
+            .use(remarkSmartypants)
+            .use(remarkDirective)
+            .use(remarkCustomContainers)
+            .use(remarkRehype, { allowDangerousHtml: true })
+            .use(rehypeRaw)
+            .use(rehypeCustomContainers)
+            .use(rehypeShiki, {
+                themes: { light: 'github-light', dark: 'github-light' },
+                defaultColor: false
+            })
+            .use(rehypeStringify);
     })();
 
-    return mdPromise;
+    return processorPromise;
 }
 
 export default async function renderMarkdown(src: string) {
     if (!src) return "";
 
-    const md = await getMdInstance();
+    const processor = await getProcessor();
 
-    const pattern = /^(:{2,})([\w|-]+)(\s*\[.*?\])?(\s*\{.*?\})?$/;
+    const pattern = /^(:{2,})\s*([\w|-]+)(\s*\[.*?])?(\s*\{.*?})?\s*$/;
 
     function preprocessLine(line: string) {
         const match = line.match(pattern);
         if (match) {
-            const colons = match[1];
             const word = match[2];
             let bracket = match[3] || "";
             let brace = match[4] || "";
-            if (bracket) bracket = " " + bracket.trim();
-            if (brace) brace = " " + brace.trim();
-            return `${colons} ${word}${bracket}${brace}`.trim();
+
+            let attributes = "";
+
+            if (bracket) {
+                const content = bracket.trim().slice(1, -1);
+                if (['info', 'warning', 'success', 'error'].includes(word)) {
+                    attributes += `title="${content}" `;
+                } else if (word === 'epigraph') {
+                    attributes += `author="${content}" `;
+                }
+            }
+
+            if (brace) {
+                attributes += brace.trim().slice(1, -1);
+            }
+
+            logger.debug({ line, attributes }, `Preprocessing custom syntax: ${word}`);
+
+            return `:::${word}{${attributes.trim()}}`;
         }
         return line;
     }
@@ -146,7 +180,7 @@ export default async function renderMarkdown(src: string) {
     const mathBlocks: string[] = [];
 
     const codeRegex = /((?:^|\n)(`{3,}|~{3,})[^\n]*\n[\s\S]*?\n\2(?=\n|$))|(`+)([\s\S]*?)\3/g;
-    const mathRegex = /\$\$([\s\S]*?)\$\$|\$([^\$]+?)\$/g;
+    const mathRegex = /\$\$([\s\S]*?)\$\$|\$([^$]+?)\$/g;
 
     let processed = preprocessed.replace(codeRegex, function (match: string) {
         const idx = codeBlocks.push(match) - 1;
@@ -171,10 +205,11 @@ export default async function renderMarkdown(src: string) {
 
     let resultHtml;
     try {
-        resultHtml = md.render(processed);
+        const file = await processor.process(processed);
+        resultHtml = String(file);
     } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Render Error';
-        return `<p>渲染失败：${md.utils ? md.utils.escapeHtml(msg) : 'Render Error'}</p>`;
+        return `<p>渲染失败：${msg}</p>`;
     }
 
     function escapeHtmlInMath(str: string) {
