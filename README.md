@@ -1,4 +1,4 @@
-<div style="text-align: center">
+<div align="center">
     <h1>Luogu Saver Next (LGS-NG)</h1>
     <p>A web application for saving user-generated content (UGC) from www.luogu.com.cn.</p>
     <p>
