@@ -1,0 +1,30 @@
+.user-Red {
+    color: #e74c3c !important;
+}
+.user-Orange {
+    color: #e67e22 !important;
+}
+.user-Purple {
+    color: #9b59b6 !important;
+}
+.user-Green {
+    color: #2ecc71 !important;
+}
+.user-Blue {
+    color: #3498db !important;
+}
+.user-Gray {
+    color: #7f8c8d !important;
+}
+.user-Cheater {
+    color: #ad8b00 !important;
+}
+
+:not(pre) > code {
+    background: #f1f5f9 !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+    border: 1px solid #e2e8f0 !important;
+    font-size: 0.85em !important;
+    color: #e11d48 !important;
+}
