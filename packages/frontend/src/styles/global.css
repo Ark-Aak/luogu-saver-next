@@ -28,3 +28,37 @@
     font-size: 0.85em !important;
     color: #e11d48 !important;
 }
+
+:root {
+	--shiki-light: initial;
+	--shiki-dark: initial;
+	--shiki-light-bg: initial;
+	--shiki-dark-bg: initial;
+
+	--shiki-light-font-weight: initial;
+	--shiki-dark-font-weight: initial;
+	--shiki-light-font-style: initial;
+	--shiki-dark-font-style: initial;
+	--shiki-light-text-decoration: initial;
+	--shiki-dark-text-decoration: initial;
+}
+
+.shiki,
+.shiki span {
+	color: var(--shiki-light);
+	/*background-color: var(--shiki-light-bg);*/
+	font-style: var(--shiki-light-font-style);
+	font-weight: var(--shiki-light-font-weight);
+	text-decoration: var(--shiki-light-text-decoration);
+}
+
+/*
+html.dark .shiki,
+html.dark .shiki span {
+	color: var(--shiki-dark);
+	background-color: var(--shiki-dark-bg);
+	font-style: var(--shiki-dark-font-style);
+	font-weight: var(--shiki-dark-font-weight);
+	text-decoration: var(--shiki-dark-text-decoration);
+}
+*/

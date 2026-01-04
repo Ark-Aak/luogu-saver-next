@@ -1,12 +1,14 @@
-import { ref } from 'vue';
+import { ref, onUnmounted } from 'vue';
 import { useDialog, useMessage } from 'naive-ui';
 import { useRouter } from 'vue-router';
+import socket from '@/utils/websocket';
 
 export function useContentSaver() {
     const dialog = useDialog();
     const message = useMessage();
     const router = useRouter();
     const isSaving = ref(false);
+    const hasUpdate = ref(false);
 
     const handle404 = (saveAction: () => Promise<any>, onCancel?: () => void) => {
         dialog.warning({
@@ -39,10 +41,43 @@ export function useContentSaver() {
         isSaving.value = false;
     };
 
+    const setupUpdateListener = (room: string, event: string, onRefresh: () => void) => {
+        socket.joinRoom(room);
+
+        const handleUpdate = () => {
+            stopSaving();
+            hasUpdate.value = true;
+            dialog.info({
+                title: '内容已更新',
+                content: '检测到当前内容有新的版本，是否立即刷新页面以查看最新内容？',
+                positiveText: '刷新',
+                negativeText: '稍后',
+                onPositiveClick: () => {
+                    hasUpdate.value = false;
+                    onRefresh();
+                }
+            });
+        };
+
+        socket.getInstance().on(event, handleUpdate);
+
+        onUnmounted(() => {
+            socket.getInstance().off(event, handleUpdate);
+            socket.leaveRoom(room);
+        });
+    };
+
+    const handleRefresh = (onRefresh: () => void) => {
+        hasUpdate.value = false;
+        onRefresh();
+    };
+
     return {
         isSaving,
+        hasUpdate,
         handle404,
-        stopSaving
+        stopSaving,
+        setupUpdateListener,
+        handleRefresh
     };
 }
-

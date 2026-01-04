@@ -25,5 +25,6 @@ export const ARTICLE_CATEGORIES: Record<number, { label: string; icon: any; colo
 export const UNKNOWN_CATEGORY = { label: '未知分类', icon: HelpCircleOutline, color: '#95a5a6' };
 
 export const THEME_STORAGE_KEY = 'ui_theme';
+export const CACHE_STORAGE_KEY = 'save_cache_';
 export const DEVICE_ID_STORAGE_KEY = 'anon_device_id';
 export const CONSENT_TRACKING_STORAGE_KEY = 'consent_tracking';

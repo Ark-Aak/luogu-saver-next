@@ -1,3 +1,4 @@
+<!--suppress ALL -->
 <template>
     <n-config-provider :theme-overrides="themeOverrides">
         <n-message-provider>
@@ -214,9 +215,9 @@ import { uiThemeKey, type UiThemeVars } from '@/styles/theme/themeKeys.ts';
 import { defaultTheme } from '@/styles/theme/default-theme.ts';
 import TrackingConsent from '@/components/TrackingConsent.vue';
 
-import socket from '@/utils/websocket.ts';
+// import socket from '@/utils/websocket';
 
-socket.joinRoom('notification');
+// socket.joinRoom('notification');
 
 const router = useRouter();
 const route = useRoute();
@@ -330,17 +331,16 @@ const menuOptions: MenuOption[] = [
 ];
 
 import { THEME_STORAGE_KEY } from '@/utils/constants.ts';
-const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-const parsedTheme = savedTheme ? JSON.parse(savedTheme) : null;
-
-const uiThemeVars = ref<UiThemeVars>(parsedTheme ? parsedTheme : defaultTheme);
+import { useLocalStorage } from "@/composables/useLocalStorage.ts";
+const themeStorage = useLocalStorage(THEME_STORAGE_KEY, defaultTheme);
+const uiThemeVars = ref<UiThemeVars>(themeStorage.value);
 
 provide(uiThemeKey, uiThemeVars);
 
 watch(
     uiThemeVars,
     newVal => {
-        localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(newVal));
+        themeStorage.value = newVal;
         console.log('UI theme vars updated and saved to localStorage.');
     },
     { deep: true }

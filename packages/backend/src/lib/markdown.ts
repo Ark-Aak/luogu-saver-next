@@ -128,6 +128,20 @@ async function getProcessor() {
             .use(rehypeCustomContainers)
             .use(rehypeShiki, {
                 themes: { light: 'github-light', dark: 'github-light' },
+                langs: [
+                    'javascript',
+                    'typescript',
+                    'python',
+                    'java',
+                    'c',
+                    'cpp',
+                    'go',
+                    'rust',
+                    'bash',
+                    'json',
+                    'yaml',
+                    'markdown'
+                ],
                 defaultColor: false
             })
             .use(rehypeStringify);

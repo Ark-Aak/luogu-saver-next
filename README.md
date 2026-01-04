@@ -67,7 +67,7 @@ Or build them individually using npm workspaces:
 npm run build -w @luogu-saver-next/frontend
 ```
 
-*The compiled static files will be located in `packages/frontend/dist`.*
+_The compiled static files will be located in `packages/frontend/dist`._
 
 **Backend Only:**
 
@@ -75,7 +75,7 @@ npm run build -w @luogu-saver-next/frontend
 npm run build -w @luogu-saver-next/backend
 ```
 
-*The compiled backend files will be located in `packages/backend/dist`.*
+_The compiled backend files will be located in `packages/backend/dist`._
 
 ## Deployment
 

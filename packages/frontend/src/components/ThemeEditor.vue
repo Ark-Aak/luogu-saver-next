@@ -50,7 +50,7 @@ const handleReset = () => {
                 <n-form-item label="主色 (primaryColorPressed)" path="primaryColorPressed">
                     <n-color-picker v-model:value="uiTheme.primaryColorPressed" />
                 </n-form-item>
-                <n-form-item label="主色 (primaryColorSup pl)" path="primaryColorSuppl">
+                <n-form-item label="主色 (primaryColorSuppl)" path="primaryColorSuppl">
                     <n-color-picker v-model:value="uiTheme.primaryColorSuppl" />
                 </n-form-item>
                 <n-form-item label="卡片颜色 (cardColor)" path="cardColor">

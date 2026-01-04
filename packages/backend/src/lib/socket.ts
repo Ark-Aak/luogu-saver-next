@@ -39,6 +39,7 @@ export function emitToRoom(room: string, event: string, data: any = {}) {
         logger.warn('Socket.io not initialized, skipping emit');
         return;
     }
+    logger.debug({ room, event, data }, 'Emitting event to room');
     io.to(room).emit(event, data);
 }
 

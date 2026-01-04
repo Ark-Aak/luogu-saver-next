@@ -3,7 +3,7 @@ import type { ApiResponse } from '@/types/common';
 import type { Article, PlazaArticle, ArticleHistory } from '@/types/article';
 import type { SaveTask } from '@/types/task';
 import { SaveTarget, TaskType } from '@/shared/task';
-import { createTask } from "@/api/task.ts";
+import { createTask } from '@/api/task.ts';
 
 export async function getArticleById(id: string) {
     return (await apiFetch(`/article/query/${id}`)) as ApiResponse<Article>;
