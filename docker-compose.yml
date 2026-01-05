@@ -1,0 +1,44 @@
+services:
+  db:
+    image: mariadb:latest
+    container_name: mariadb-docker
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      # Change your root password. THIS IS VERY IMPORTANT!
+      MARIADB_ROOT_PASSWORD: 123456
+      TZ: Asia/Shanghai
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+
+  redis:
+    image: redis:alpine
+    container_name: redis-docker
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - ./redis-data:/data
+
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: chroma
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./chroma-data:/chroma/chroma
+
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    container_name: meilisearch
+    restart: always
+    ports:
+      - "7700:7700"
+    environment:
+      - MEILI_MASTER_KEY=CHANGE_YOUR_KEY_HERE
+      - MEILI_NO_ANALYTICS=true
+    volumes:
+      - ./meili-data:/meili_data

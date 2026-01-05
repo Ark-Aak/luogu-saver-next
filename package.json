@@ -1,22 +1,31 @@
 {
-    "name": "luogu-saver-next",
-    "version": "1.0.0",
-    "private": true,
-    "license": "AGPL-3.0-or-later",
-    "workspaces": [
-        "packages/*"
-    ],
-    "scripts": {
-        "dev": "concurrently -n \"FRONT,BACK\" -c \"green,blue\" \"npm run dev -w @luogu-saver-next/frontend\" \"npm run dev -w @luogu-saver-next/backend\"",
-        "build": "npm run build --workspaces",
-        "lint": "prettier --check .",
-        "format": "prettier --write ."
-    },
-    "devDependencies": {
-        "concurrently": "^9.2.1",
-        "cross-env": "^10.1.0",
-        "prettier": "^3.7.4",
-        "typescript": "~5.9.3",
-        "@types/node": "^24.10.0"
-    }
+	"name": "luogu-saver-next",
+	"version": "1.0.0",
+	"private": true,
+	"license": "AGPL-3.0-or-later",
+	"workspaces": [
+		"packages/*"
+	],
+	"scripts": {
+		"dev": "concurrently -n \"FRONT,BACK\" -c \"green,blue\" \"npm run dev -w @luogu-saver-next/frontend\" \"npm run dev -w @luogu-saver-next/backend\"",
+		"build": "npm run build --workspaces",
+		"lint": "prettier --check .",
+		"format": "prettier --write .",
+		"test": "echo \"No tests yet!\"",
+		"prepare": "husky"
+	},
+	"devDependencies": {
+		"@types/node": "^24.10.0",
+		"concurrently": "^9.2.1",
+		"cross-env": "^10.1.0",
+		"husky": "^9.1.7",
+		"lint-staged": "^16.2.7",
+		"prettier": "^3.7.4",
+		"typescript": "~5.9.3"
+	},
+	"lint-staged": {
+		"*.{ts,tsx,js,json,md,vue,yml}": [
+			"prettier --write"
+		]
+	}
 }
