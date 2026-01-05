@@ -27,13 +27,13 @@ export function bootstrap() {
     );
 
     process.on('SIGINT', async () => {
-        console.log('Shutting down workers...');
+        logger.info('Shutting down workers...');
         await saveWorkerHost.close();
         process.exit(0);
     });
 
     process.on('SIGTERM', async () => {
-        console.log('Shutting down workers...');
+        logger.info('Shutting down workers...');
         await saveWorkerHost.close();
         process.exit(0);
     });
