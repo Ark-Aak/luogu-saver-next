@@ -42,7 +42,7 @@ jobs:
                     --delete \
                     --exclude "index.html"
 
-            - name: Deploy Frontend
+            - name: Deploy Frontend HTML
               uses: appleboy/scp-action@master
               with:
                   host: ${{ secrets.SERVER_A_HOST }}
@@ -52,9 +52,34 @@ jobs:
                   target: '/opt/luogu-saver-frontend'
                   strip_components: 3
 
+    deploy-infra:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v6.0.1
+
+            - name: Deploy Docker Compose File
+              uses: appleboy/scp-action@master
+              with:
+                  host: ${{ secrets.SERVER_B_HOST }}
+                  username: root
+                  password: ${{ secrets.SERVER_B_PASSWORD }}
+                  source: 'docker-compose.yml'
+                  target: '/opt/infrastructure'
+
+            - name: Start Infrastructure
+              uses: appleboy/ssh-action@master
+              with:
+                  host: ${{ secrets.SERVER_B_HOST }}
+                  username: root
+                  password: ${{ secrets.SERVER_B_PASSWORD }}
+                  script: |
+                      cd /opt/infrastructure
+                      docker compose pull
+                      docker compose up -d --remove-orphans
+
     deploy-backend:
         runs-on: ubuntu-latest
-        needs: deploy-frontend
+        needs: [deploy-frontend, deploy-infra]
         steps:
             - uses: actions/checkout@v6.0.1
             - uses: actions/setup-node@v6.1.0
@@ -66,7 +91,7 @@ jobs:
                   npm install
                   npm run build -w @luogu-saver-next/backend
 
-            - name: Deploy Backend
+            - name: Deploy Backend Artifacts
               uses: appleboy/scp-action@master
               with:
                   host: ${{ secrets.SERVER_B_HOST }}
@@ -90,12 +115,12 @@ jobs:
 
                       npm install --production
 
+                      # 此时 Infrastructure (Redis/DB等) 已经由上一个 Job 启动完毕
                       pm2 describe luogu-backend > /dev/null
                       if [ $? -eq 0 ]; then
                         pm2 reload luogu-backend
                         echo "✅ PM2 Reloaded"
                       else
-                        # 确保指向 dist/index.js
                         pm2 start dist/index.js --name "luogu-backend"
                         pm2 save
                         echo "✅ PM2 Started"
