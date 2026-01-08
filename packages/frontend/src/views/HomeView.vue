@@ -36,8 +36,8 @@ const handleSave = () => {
 
         <div class="main-content">
             <n-grid :x-gap="24" :y-gap="24" cols="1 m:2 l:3" responsive="screen">
-                <n-gi span="1 m:2 l:2">
-                    <Card title="公告" style="height: 100%" :hoverable="true">
+                <n-gi span="1 m:1 l:2">
+                    <Card title="公告" style="height: 100%">
                         <template #header-extra>
                             <n-icon
                                 size="20"
@@ -50,7 +50,7 @@ const handleSave = () => {
                 </n-gi>
 
                 <n-gi>
-                    <Card style="height: 100%" :hoverable="true">
+                    <Card style="height: 100%">
                         <div class="stats-container">
                             <div class="stat-item">
                                 <div
@@ -95,7 +95,6 @@ const handleSave = () => {
 
 <style scoped>
 .home-container {
-    min-height: 80vh;
     display: flex;
     flex-direction: column;
     gap: 40px;
