@@ -37,7 +37,7 @@ const handleSave = () => {
         <div class="main-content">
             <n-grid :x-gap="24" :y-gap="24" cols="1 m:2 l:3" responsive="screen">
                 <n-gi span="1 m:1 l:2">
-                    <Card title="公告" style="height: 100%">
+                    <Card title="公告" style="height: calc(100% - 48px)">
                         <template #header-extra>
                             <n-icon
                                 size="20"
@@ -50,7 +50,7 @@ const handleSave = () => {
                 </n-gi>
 
                 <n-gi>
-                    <Card style="height: 100%">
+                    <Card style="height: calc(100% - 48px)">
                         <div class="stats-container">
                             <div class="stat-item">
                                 <div
