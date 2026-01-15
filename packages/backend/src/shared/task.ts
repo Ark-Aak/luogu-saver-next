@@ -30,11 +30,6 @@ export interface AiTask extends CommonTask {
     };
 }
 
-export interface TaskHandler<T extends CommonTask> {
-    handle(task: T): Promise<void>;
-    taskType: string;
-}
-
 export enum TaskStatus {
     PENDING = 0,
     PROCESSING = 1,

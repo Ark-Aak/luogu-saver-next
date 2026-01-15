@@ -1,4 +1,5 @@
-import { SaveTask, TaskHandler } from '@/shared/task';
+import { SaveTask } from '@/shared/task';
+import { TaskHandler } from '@/workers/types';
 import { fetch } from '@/utils/fetch';
 import { C3vkMode } from '@/shared/c3vk';
 import type { Paste as LuoguPaste, DataResponse } from '@/types/luogu-api';

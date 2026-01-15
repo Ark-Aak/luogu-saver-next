@@ -1,4 +1,5 @@
-import { type CommonTask, type TaskHandler } from '@/shared/task';
+import { type CommonTask } from '@/shared/task';
+import { type TaskHandler } from '@/workers/types';
 import { Job, UnrecoverableError } from 'bullmq';
 
 export class TaskProcessor<T extends CommonTask> {

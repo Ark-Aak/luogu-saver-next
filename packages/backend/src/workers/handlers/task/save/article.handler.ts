@@ -1,4 +1,5 @@
-import type { SaveTask, TaskHandler } from '@/shared/task';
+import type { SaveTask } from '@/shared/task';
+import type { TaskHandler } from '@/workers/types';
 import { fetch } from '@/utils/fetch';
 import { C3vkMode } from '@/shared/c3vk';
 import type { ArticleData, LentilleDataResponse } from '@/types/luogu-api';
