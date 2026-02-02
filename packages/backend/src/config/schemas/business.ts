@@ -11,10 +11,22 @@ export const RecommendationSchema = z.object({
 });
 
 export const QueueSchema = z.object({
-    concurrencyLimit: z.number().default(5),
-    maxRequestToken: z.number().default(20),
-    regenerationSpeed: z.number().default(1),
-    regenerationInterval: z.number().default(1000),
-    maxQueueLength: z.number().default(1000),
-    processInterval: z.number().default(100)
+    save: z.object({
+        concurrencyLimit: z.number().default(2),
+        maxRequestToken: z.number().default(20),
+        regenerationInterval: z.number().default(1000),
+        maxQueueLength: z.number().default(1000)
+    }),
+    ai: z.object({
+        concurrencyLimit: z.number().default(10),
+        maxRequestToken: z.number().default(50),
+        regenerationInterval: z.number().default(1000),
+        maxQueueLength: z.number().default(2000)
+    }),
+    update: z.object({
+        concurrencyLimit: z.number().default(2),
+        maxRequestToken: z.number().default(20),
+        regenerationInterval: z.number().default(1000),
+        maxQueueLength: z.number().default(1000)
+    })
 });

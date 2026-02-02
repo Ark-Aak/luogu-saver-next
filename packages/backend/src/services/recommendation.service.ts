@@ -1,4 +1,4 @@
-import { VectorService } from '@/services/vector.service';
+import { EmbeddingService } from '@/services/embedding.service';
 import { ArticleService } from '@/services/article.service';
 import { redisClient } from '@/lib/redis';
 import { config } from '@/config';
@@ -11,11 +11,11 @@ type RecommendedArticle = Article & { reason: string };
 
 export class RecommendationService {
     private static async getSimilarArticles(id: string, count: number): Promise<string[]> {
-        const vector = await VectorService.getVector(id);
+        const vector = await EmbeddingService.getVector(id);
         if (!vector) {
             return [];
         }
-        const results = await VectorService.getNearestVectors(vector, count + 1);
+        const results = await EmbeddingService.getNearestVectors(vector, count + 1);
         const similarIds = results.ids[0].filter((articleId: string) => articleId !== id);
         return similarIds.slice(0, count);
     }
@@ -25,14 +25,14 @@ export class RecommendationService {
         count: number
     ): Promise<string[]> {
         if (!profile) return [];
-        const results = await VectorService.getNearestVectors(profile, count);
+        const results = await EmbeddingService.getNearestVectors(profile, count);
         return results.ids[0];
     }
 
     private static async drawProfile(articles: string[]): Promise<number[]> {
         const validItems: { id: string; vec: number[] }[] = [];
         for (const articleId of articles) {
-            const vector = await VectorService.getVector(articleId);
+            const vector = await EmbeddingService.getVector(articleId);
             if (vector) {
                 validItems.push({ id: articleId, vec: vector });
             }

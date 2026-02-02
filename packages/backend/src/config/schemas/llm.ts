@@ -31,6 +31,9 @@ export const LLMConfigSchema = z.object({
         }),
         embedding: z.object({
             use: z.string()
+        }),
+        censor: z.object({
+            use: z.string()
         })
     })
 });

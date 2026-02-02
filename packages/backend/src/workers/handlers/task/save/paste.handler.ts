@@ -1,18 +1,24 @@
 import { SaveTask } from '@/shared/task';
-import { TaskHandler } from '@/workers/types';
+import { TaskHandler, TaskTextResult, WorkflowResult } from '@/workers/types';
 import { fetch } from '@/utils/fetch';
 import { C3vkMode } from '@/shared/c3vk';
 import type { Paste as LuoguPaste, DataResponse } from '@/types/luogu-api';
+import { createHash } from 'crypto';
 import { PasteService } from '@/services/paste.service';
 import { Paste } from '@/entities/paste';
 import { buildUser } from '@/utils/luogu-api';
 import { User } from '@/entities/user';
 import { UserService } from '@/services/user.service';
+import { logger } from '@/lib/logger';
+
+function sha256(data: string): string {
+    return createHash('sha256').update(data).digest('hex');
+}
 
 export class PasteHandler implements TaskHandler<SaveTask> {
     public taskType = 'save:paste';
 
-    public async handle(task: SaveTask): Promise<void> {
+    public async handle(task: SaveTask): Promise<WorkflowResult<TaskTextResult>> {
         const url = `https://www.luogu.com/paste/${task.payload.targetId}`;
         const resp: DataResponse<{ paste: LuoguPaste }> = await fetch(url, C3vkMode.MODERN);
 
@@ -26,9 +32,20 @@ export class PasteHandler implements TaskHandler<SaveTask> {
         await UserService.saveUser(user!);
 
         const data = resp.currentData.paste;
+        const hash = sha256(data.data);
         let paste = await PasteService.getPasteByIdWithoutCache(data.id);
+        if (!task.payload.metadata.forceUpdate && paste && paste.contentHash === hash) {
+            logger.info({ pasteId: paste.id }, 'Paste content unchanged, skipping update');
+            return {
+                skipNextStep: true,
+                data: {
+                    text: ''
+                }
+            };
+        }
         const incomingData: Partial<Paste> = {
             content: data.data,
+            contentHash: hash,
             authorId: data.user.uid
         };
         if (paste) {
@@ -40,5 +57,11 @@ export class PasteHandler implements TaskHandler<SaveTask> {
             Object.assign(paste, incomingData);
         }
         await PasteService.savePaste(paste);
+        return {
+            skipNextStep: false,
+            data: {
+                text: paste.content || ''
+            }
+        };
     }
 }

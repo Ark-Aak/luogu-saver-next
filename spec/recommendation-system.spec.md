@@ -8,7 +8,7 @@ The recommendation system provides personalized article recommendations using a 
 
 ### 2.1 Vector Service
 
-The `VectorService` interfaces with ChromaDB for vector-based similarity search.
+The `EmbeddingService` interfaces with ChromaDB for vector-based similarity search.
 
 #### getVector(articleId: string): Promise<number[] | null>
 
@@ -83,44 +83,48 @@ The decay factor gives higher weight to more recent articles.
 Get personalized recommendations for the plaza page.
 
 **Request:**
+
 - Query parameter: `count` (number, optional) - Number of recommendations (default: 10)
 - Header: `X-Device-Id` (string) - Anonymous device identifier
 
 **Response:**
+
 - 200: Array of recommended articles with `reason` field
 - 501: Not implemented (for authenticated users)
 
 **Response Fields per Article:**
 
-| Field      | Type     | Description                    |
-|------------|----------|--------------------------------|
-| `id`       | string   | Article ID                     |
-| `title`    | string   | Article title                  |
-| `summary`  | string   | First 100 characters of content|
-| `author`   | User     | Author information             |
-| `updatedAt`| Date     | Last update timestamp          |
-| `category` | number   | Article category               |
-| `tags`     | string[] | Article tags                   |
-| `reason`   | string   | Recommendation source          |
+| Field       | Type     | Description                     |
+| ----------- | -------- | ------------------------------- |
+| `id`        | string   | Article ID                      |
+| `title`     | string   | Article title                   |
+| `summary`   | string   | First 100 characters of content |
+| `author`    | User     | Author information              |
+| `updatedAt` | Date     | Last update timestamp           |
+| `category`  | number   | Article category                |
+| `tags`      | string[] | Article tags                    |
+| `reason`    | string   | Recommendation source           |
 
 **Reason Values:**
 
-| Value    | Description                              |
-|----------|------------------------------------------|
-| `vector` | Vector similarity recommendation         |
-| `random` | Random selection                         |
-| `hot`    | High view count                          |
-| `title`  | Title similarity to source article       |
-| `other`  | Other/fallback source                    |
+| Value    | Description                        |
+| -------- | ---------------------------------- |
+| `vector` | Vector similarity recommendation   |
+| `random` | Random selection                   |
+| `hot`    | High view count                    |
+| `title`  | Title similarity to source article |
+| `other`  | Other/fallback source              |
 
 ### 5.2 GET /article/relevant/:id
 
 Get articles relevant to a specific article.
 
 **Request:**
+
 - Path parameter: `id` (string) - Article ID
 
 **Response:**
+
 - 200: Array of relevant articles with `reason` field
 
 ## 6. Recommendation Algorithms
@@ -176,13 +180,13 @@ Get articles relevant to a specific article.
 
 ## 7. Configuration
 
-| Field                          | Description                                      |
-|--------------------------------|--------------------------------------------------|
-| `recommendation.anonymous.expireTime` | TTL for anonymous behavior data (seconds)  |
-| `recommendation.anonymous.maxCount`   | Max behavior records per device            |
-| `recommendation.maxHistory`           | Max history for profile calculation        |
-| `recommendation.decayFactor`          | Weight decay for profile vectors (0-1)     |
-| `recommendation.relevantThreshold`    | Min title similarity for matching (0-1)    |
+| Field                                 | Description                               |
+| ------------------------------------- | ----------------------------------------- |
+| `recommendation.anonymous.expireTime` | TTL for anonymous behavior data (seconds) |
+| `recommendation.anonymous.maxCount`   | Max behavior records per device           |
+| `recommendation.maxHistory`           | Max history for profile calculation       |
+| `recommendation.decayFactor`          | Weight decay for profile vectors (0-1)    |
+| `recommendation.relevantThreshold`    | Min title similarity for matching (0-1)   |
 
 ## 8. Invariants
 
@@ -195,6 +199,6 @@ Get articles relevant to a specific article.
 ## 9. File Locations
 
 - Recommendation service: `packages/backend/src/services/recommendation.service.ts`
-- Vector service: `packages/backend/src/services/vector.service.ts`
+- Vector service: `packages/backend/src/services/embedding.service.ts`
 - Plaza router: `packages/backend/src/routers/plaza.router.ts`
 - Configuration: `packages/backend/src/config/schemas/business.ts`

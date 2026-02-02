@@ -40,6 +40,9 @@ export class Paste extends BaseEntity {
     @Column({ name: 'delete_reason', default: '管理员删除' })
     deleteReason: string;
 
+    @Column({ type: 'varchar', name: 'content_hash', nullable: true })
+    contentHash?: string;
+
     @ManyToOne(() => User)
     @JoinColumn({ name: 'author_id' })
     author?: User;

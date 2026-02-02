@@ -36,6 +36,14 @@ export class TypedQueue<T> {
      * @return The added job.
      */
     async add(name: string, data: T, options?: JobsOptions): Promise<Job<T>> {
+        if (
+            (await this.queue
+                .getJobCounts('waiting', 'delayed')
+                .then(counts => counts.waiting + counts.delayed)) >=
+            config.queue.save.maxQueueLength
+        ) {
+            throw new Error('Queue is full. Please try again later.');
+        }
         return this.queue.add(name, data, options);
     }
 

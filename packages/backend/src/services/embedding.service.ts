@@ -1,15 +1,15 @@
 import { ChromaDataSource } from '@/data-source';
-import type { Collection } from 'chromadb';
+import type { Collection, Metadata } from 'chromadb';
 import { config } from '@/config';
 import { logger } from '@/lib/logger';
 
-export class VectorService {
+export class EmbeddingService {
     private static _collection: Collection | null = null;
 
     private static async getCollection(): Promise<Collection> {
         if (!this._collection) {
             try {
-                this._collection = await ChromaDataSource.getCollection({
+                this._collection = await ChromaDataSource.getOrCreateCollection({
                     name: config.chroma.collectionName
                 });
                 logger.info(
@@ -61,6 +61,28 @@ export class VectorService {
         } catch (error) {
             logger.error({ error }, 'Failed to get nearest vectors');
             return { ids: [[]], distances: [[]] };
+        }
+    }
+
+    static async upsertVector(
+        id: string,
+        metadata: Metadata,
+        document: string,
+        embedding: number[]
+    ) {
+        if (!config.chroma.enable) return;
+        try {
+            const collection = await this.getCollection();
+            await collection.upsert({
+                ids: [id],
+                metadatas: [metadata],
+                documents: [document],
+                embeddings: [embedding]
+            });
+            logger.info({ id }, 'Upserted vector to Chroma');
+        } catch (error) {
+            logger.error({ error, id }, 'Failed to upsert vector');
+            throw error;
         }
     }
 }

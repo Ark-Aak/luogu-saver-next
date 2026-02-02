@@ -18,6 +18,7 @@ export class TaskService {
     static async dispatchTask(taskId: string) {
         const task = await Task.findOne({ where: { id: taskId } });
         if (!task) throw new Error(`Task with ID ${taskId} not found.`);
+
         if (task.type === TaskType.SAVE) {
             const queueSave = getQueueByType(TaskType.SAVE);
 
@@ -32,13 +33,13 @@ export class TaskService {
             );
         }
 
-        if (task.type === TaskType.AI_PROCESS) {
-            const queueAi = getQueueByType(TaskType.AI_PROCESS);
+        if (task.type === TaskType.LLM) {
+            const queueAi = getQueueByType(TaskType.LLM);
             await queueAi.add(
-                TaskType.AI_PROCESS,
+                TaskType.LLM,
                 {
                     id: task.id,
-                    type: TaskType.AI_PROCESS,
+                    type: TaskType.LLM,
                     payload: task.payload
                 },
                 { jobId: task.id }

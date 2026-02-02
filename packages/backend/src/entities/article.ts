@@ -73,6 +73,9 @@ export class Article extends BaseEntity {
     @Column({ name: 'view_count', default: 0 })
     viewCount: number;
 
+    @Column({ type: 'text', nullable: true })
+    summary?: string;
+
     @ManyToOne(() => User)
     @JoinColumn({ name: 'author_id' })
     author?: User;

@@ -1,5 +1,5 @@
 import type { SaveTask } from '@/shared/task';
-import type { TaskHandler } from '@/workers/types';
+import type { TaskHandler, TaskTextResult, WorkflowResult } from '@/workers/types';
 import { fetch } from '@/utils/fetch';
 import { C3vkMode } from '@/shared/c3vk';
 import type { ArticleData, LentilleDataResponse } from '@/types/luogu-api';
@@ -21,7 +21,7 @@ function sha256(data: string): string {
 export class ArticleHandler implements TaskHandler<SaveTask> {
     public taskType = 'save:article';
 
-    public async handle(task: SaveTask): Promise<void> {
+    public async handle(task: SaveTask): Promise<WorkflowResult<TaskTextResult>> {
         const url = `https://www.luogu.com/article/${task.payload.targetId}`;
         const resp: LentilleDataResponse<ArticleData> = await fetch(url, C3vkMode.MODERN);
 
@@ -37,9 +37,19 @@ export class ArticleHandler implements TaskHandler<SaveTask> {
         const data = resp.data.article;
         const hash = sha256(data.content);
         let article = await ArticleService.getArticleByIdWithoutCache(data.lid);
-        if (article && article.title === data.title && article.contentHash === hash) {
+        if (
+            !task.payload.metadata.forceUpdate &&
+            article &&
+            article.title === data.title &&
+            article.contentHash === hash
+        ) {
             logger.info({ articleId: article.id }, 'Article content unchanged, skipping update');
-            return;
+            return {
+                skipNextStep: true,
+                data: {
+                    text: ''
+                }
+            };
         }
         const incomingData: Partial<Article> = {
             title: data.title,
@@ -66,5 +76,12 @@ export class ArticleHandler implements TaskHandler<SaveTask> {
         await ArticleService.saveArticle(article);
         await ArticleHistoryService.pushNewVersion(article.id, article.title, article.content);
         emitToRoom(`article_${article.id}`, `article:${article.id}:updated`);
+
+        return {
+            skipNextStep: false,
+            data: {
+                text: article.content
+            }
+        };
     }
 }

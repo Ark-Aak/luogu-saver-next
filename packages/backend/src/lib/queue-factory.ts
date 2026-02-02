@@ -20,6 +20,14 @@ export function getQueueByType<T extends TaskType>(type: T): TypedQueue<TaskDefi
     return queuePool.get(queueName) as TypedQueue<TaskDefinition[T]>;
 }
 
+export function getQueueByName(queueName: string): TypedQueue<any> {
+    if (!queuePool.has(queueName)) {
+        const queue = new TypedQueue<any>(queueName);
+        queuePool.set(queueName, queue);
+    }
+    return queuePool.get(queueName) as TypedQueue<any>;
+}
+
 export async function closeAllQueues() {
     logger.info(`Closing ${queuePool.size} active queues...`);
     const closePromises = [];

@@ -13,20 +13,27 @@ export interface SaveTask extends CommonTask {
     payload: {
         target: SaveTarget;
         targetId: string;
+        metadata: {
+            forceUpdate?: boolean;
+        };
+    };
+}
+
+export interface AiTask extends CommonTask {
+    type: TaskType.LLM;
+    payload: {
+        target: 'summary' | 'embedding' | 'chat';
+        sourceId?: string;
         metadata: Record<string, never>;
     };
 }
 
-export interface AiMetadata {
-    model: string;
-    // TODO: add more fields as needed
-}
-
-export interface AiTask extends CommonTask {
-    type: TaskType.AI_PROCESS;
+export interface UpdateTask extends CommonTask {
+    type: TaskType.UPDATE;
     payload: {
-        target: string;
-        metadata: AiMetadata;
+        target: UpdateTarget;
+        targetId: string;
+        metadata: Record<string, any>;
     };
 }
 
@@ -39,13 +46,20 @@ export enum TaskStatus {
 
 export enum TaskType {
     SAVE = 'save',
-    AI_PROCESS = 'ai_process'
+    LLM = 'llm',
+    UPDATE = 'update'
 }
 
 export type TaskDefinition = {
     [TaskType.SAVE]: SaveTask;
-    [TaskType.AI_PROCESS]: AiTask;
+    [TaskType.LLM]: AiTask;
+    [TaskType.UPDATE]: CommonTask;
 };
+
+export enum UpdateTarget {
+    ARTICLE = 'article',
+    PASTE = 'paste'
+}
 
 export enum SaveTarget {
     ARTICLE = 'article',

@@ -20,7 +20,7 @@ export class WorkerHost<T extends CommonTask> {
     constructor(
         queueName: string,
         private processor: TaskProcessor<T>,
-        private pointGuard: PointGuard,
+        private pointGuard?: PointGuard,
         options?: WorkerOptions
     ) {
         this.worker = new Worker<T>(queueName, this.handleJob, {
@@ -41,10 +41,12 @@ export class WorkerHost<T extends CommonTask> {
     }
 
     private handleJob = async (job: Job<T>) => {
-        const hasPoints = await this.pointGuard.consume(1);
-        if (!hasPoints) {
-            logger.warn({ jobId: job.id }, 'Rate limited by PointGuard, delaying job...');
-            throw new RateLimitError();
+        if (this.pointGuard) {
+            const hasPoints = await this.pointGuard.consume(1);
+            if (!hasPoints) {
+                logger.warn({ jobId: job.id }, 'Rate limited by PointGuard, delaying job...');
+                throw new RateLimitError();
+            }
         }
         return await this.processor.process(job);
     };

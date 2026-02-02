@@ -18,6 +18,6 @@ export class TaskProcessor<T extends CommonTask> {
             throw new UnrecoverableError(`No handler registered for task type: ${typeName}`);
         }
         await job.updateProgress('Sending to handler');
-        await handler.handle(task);
+        return await handler.handle(task, job);
     };
 }
