@@ -34,7 +34,7 @@ export class PasteHandler implements TaskHandler<SaveTask> {
         const data = resp.currentData.paste;
         const hash = sha256(data.data);
         let paste = await PasteService.getPasteByIdWithoutCache(data.id);
-        if (!task.payload.metadata.forceUpdate && paste && paste.contentHash === hash) {
+        if (!task.payload.metadata?.forceUpdate && paste && paste.contentHash === hash) {
             logger.info({ pasteId: paste.id }, 'Paste content unchanged, skipping update');
             return {
                 skipNextStep: true,

@@ -1,8 +1,7 @@
 import { ChildrenValues, TaskCensorResult, TaskHandler, WorkflowResult } from '@/workers/types';
 import { AiTask } from '@/shared/task';
-import { getSourceTextById, shouldSkip } from '@/workers/helpers/common.helper';
+import { extractUpsteamData, getSourceTextById, shouldSkip } from '@/workers/helpers/common.helper';
 import { Job } from 'bullmq';
-import { logger } from '@/lib/logger';
 import { llm } from '@/lib/llm';
 
 export class CensorHandler implements TaskHandler<AiTask> {
@@ -25,17 +24,7 @@ export class CensorHandler implements TaskHandler<AiTask> {
             };
         }
 
-        const childKeys = Object.keys(childrenValues);
-
-        for (const childKey of childKeys) {
-            const upstreamData = childrenValues[childKey];
-            if (upstreamData && typeof upstreamData.data.text === 'string') {
-                const result = upstreamData.data as { text: string };
-                logger.info({ jobId: job.id }, 'Using upstream data from workflow for censoring');
-                content = result.text;
-                break;
-            }
-        }
+        content = extractUpsteamData(childrenValues, data => typeof data.text === 'string')?.text;
 
         if (!content) {
             if (task.payload.sourceId) {

@@ -10,15 +10,15 @@ The paste system manages code/text pastes archived from Luogu. It provides stora
 
 Table name: `paste`
 
-| Column         | Type         | Constraints              | Description                    |
-|----------------|--------------|--------------------------|--------------------------------|
-| `id`           | VARCHAR(8)   | PRIMARY KEY              | Paste ID (from Luogu)          |
-| `content`      | MEDIUMTEXT   | NOT NULL                 | Paste content                  |
-| `author_id`    | INT UNSIGNED | NOT NULL, FK -> user.id  | Author user ID                 |
-| `deleted`      | TINYINT      | DEFAULT 0                | Soft delete flag               |
-| `created_at`   | DATETIME     | NOT NULL                 | Record creation timestamp      |
-| `updated_at`   | DATETIME     | NOT NULL                 | Record update timestamp        |
-| `delete_reason`| VARCHAR      | DEFAULT '管理员删除'       | Reason for deletion           |
+| Column          | Type         | Constraints             | Description               |
+| --------------- | ------------ | ----------------------- | ------------------------- |
+| `id`            | VARCHAR(8)   | PRIMARY KEY             | Paste ID (from Luogu)     |
+| `content`       | MEDIUMTEXT   | NOT NULL                | Paste content             |
+| `author_id`     | INT UNSIGNED | NOT NULL, FK -> user.id | Author user ID            |
+| `deleted`       | TINYINT      | DEFAULT 0               | Soft delete flag          |
+| `created_at`    | DATETIME     | NOT NULL                | Record creation timestamp |
+| `updated_at`    | DATETIME     | NOT NULL                | Record update timestamp   |
+| `delete_reason` | VARCHAR      | DEFAULT '管理员删除'    | Reason for deletion       |
 
 ### 2.2 Indexes
 
@@ -35,9 +35,11 @@ Table name: `paste`
 Retrieve a single paste by ID.
 
 **Request:**
+
 - Path parameter: `id` (string) - Paste ID
 
 **Response:**
+
 - 200: Paste object with rendered content
 - 403: If `deleted = true`, returns `deleteReason` as error message
 - 404: Paste not found
@@ -48,6 +50,7 @@ Retrieve a single paste by ID.
 Get total count of non-deleted pastes.
 
 **Response:**
+
 - 200: `{ count: number }`
 - 500: Server error
 
@@ -55,11 +58,11 @@ Get total count of non-deleted pastes.
 
 ### 4.1 PasteService
 
-| Method                  | Cache TTL | Cache Key Pattern        | Eviction                      |
-|-------------------------|-----------|--------------------------|-------------------------------|
-| `getPasteById(id)`      | 600s      | `paste:${id}`            | -                             |
-| `getPasteCount()`       | 600s      | `paste:count`            | -                             |
-| `savePaste(paste)`      | evicts    | -                        | `paste:${id}`, `paste:count`  |
+| Method             | Cache TTL | Cache Key Pattern | Eviction                     |
+| ------------------ | --------- | ----------------- | ---------------------------- |
+| `getPasteById(id)` | 600s      | `paste:${id}`     | -                            |
+| `getPasteCount()`  | 600s      | `paste:count`     | -                            |
+| `savePaste(paste)` | evicts    | -                 | `paste:${id}`, `paste:count` |
 
 ### 4.2 Method Specifications
 
@@ -88,6 +91,7 @@ Get total count of non-deleted pastes.
 ## 5. Content Rendering
 
 The `paste.renderContent()` method:
+
 1. If `content` is non-empty, render Markdown to HTML using the `renderMarkdown` library.
 2. Store the result in `paste.renderedContent`.
 

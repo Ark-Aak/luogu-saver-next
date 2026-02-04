@@ -1,7 +1,7 @@
 import { ChildrenValues, TaskHandler, TaskTextResult, WorkflowResult } from '@/workers/types';
 import { AiTask } from '@/shared/task';
 import { Job, UnrecoverableError } from 'bullmq';
-import { getSourceTextById, shouldSkip } from '@/workers/helpers/common.helper';
+import { extractUpsteamData, getSourceTextById, shouldSkip } from '@/workers/helpers/common.helper';
 import { llm } from '@/lib/llm';
 
 export class ChatHandler implements TaskHandler<AiTask> {
@@ -21,16 +21,7 @@ export class ChatHandler implements TaskHandler<AiTask> {
             };
         }
 
-        const childKeys = Object.keys(childrenValues);
-
-        for (const childKey of childKeys) {
-            const upstreamData = childrenValues[childKey];
-            if (upstreamData && typeof upstreamData.data.text === 'string') {
-                const result = upstreamData.data as TaskTextResult;
-                content = result.text;
-                break;
-            }
-        }
+        content = extractUpsteamData(childrenValues, data => typeof data.text === 'string')?.text;
 
         if (!content) {
             if (task.payload.sourceId) {

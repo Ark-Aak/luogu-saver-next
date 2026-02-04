@@ -20,6 +20,7 @@ export function shouldSkip(childrenValues: ChildrenValues) {
             return true;
         }
     }
+    return false;
 }
 
 export function parseSourceId(sourceId: string) {
@@ -67,4 +68,23 @@ export async function getSourceTextById(sourceId: string, jobId: string | undefi
     } else {
         throw new UnrecoverableError(`Invalid sourceId in job ${jobId}`);
     }
+}
+
+type PredicateFunction = (data: any) => boolean;
+
+export function extractUpsteamData(
+    childrenValues: ChildrenValues,
+    predicate: PredicateFunction,
+    jobId?: string
+) {
+    const childKeys = Object.keys(childrenValues);
+    for (const childKey of childKeys) {
+        const upstreamData = childrenValues[childKey];
+        if (upstreamData && predicate(upstreamData.data)) {
+            const result = upstreamData.data;
+            logger.info({ jobId }, `Using upstream data from workflow`);
+            return result;
+        }
+    }
+    return null;
 }

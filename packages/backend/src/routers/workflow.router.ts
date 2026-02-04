@@ -2,6 +2,7 @@ import Router from 'koa-router';
 import { Context, DefaultState } from 'koa';
 import { WorkflowService } from '@/services/workflow.service';
 import { logger } from '@/lib/logger';
+import { validateFlowStructure } from '@/utils/flow-validator';
 
 const router = new Router<DefaultState, Context>({ prefix: '/workflow' });
 
@@ -9,8 +10,14 @@ router.post('/create', async (ctx: Context) => {
     const flowDef = ctx.request.body as any;
 
     if (!flowDef) {
-        // Removed name check as it can be inferred or in children
         ctx.fail(400, 'Invalid flow definition.');
+        return;
+    }
+
+    try {
+        validateFlowStructure(flowDef);
+    } catch (error) {
+        ctx.fail(400, error instanceof Error ? error.message : 'Invalid flow structure');
         return;
     }
 

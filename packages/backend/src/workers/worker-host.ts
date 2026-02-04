@@ -20,7 +20,7 @@ export class WorkerHost<T extends CommonTask> {
     constructor(
         queueName: string,
         private processor: TaskProcessor<T>,
-        private pointGuard?: PointGuard,
+        private pointGuard: PointGuard | null,
         options?: WorkerOptions
     ) {
         this.worker = new Worker<T>(queueName, this.handleJob, {

@@ -10,9 +10,9 @@ During the development process, you must strictly adhere to the rules in this do
 - You are an automated coding / tooling agent working inside this repository.
 - You must **not** modify files outside the project root.
 - Whenever you change observable behavior of the system, you **must**:
-  1. Update the corresponding specification file under `spec/`.
-  2. Update the implementation.
-  3. Keep the spec and code exactly aligned.
+    1. Update the corresponding specification file under `spec/`.
+    2. Update the implementation.
+    3. Keep the spec and code exactly aligned.
 
 If any rule in this document conflicts with ad-hoc instructions, this document takes precedence.
 
@@ -74,11 +74,11 @@ When fixing a bug:
 1. Read the relevant spec first.
 2. Walk through the logic defined in the spec to locate the expected behavior.
 3. If the spec itself is logically incorrect or incomplete:
-   - Update the spec to the corrected behavior.
-   - Then update the code to match the corrected spec.
+    - Update the spec to the corrected behavior.
+    - Then update the code to match the corrected spec.
 4. If the spec is correct:
-   - Compare the current implementation with the spec.
-   - Fix the implementation so that it conforms to the spec.
+    - Compare the current implementation with the spec.
+    - Fix the implementation so that it conforms to the spec.
 
 Under all circumstances, the **spec is the single source of truth** for expected behavior.
 
@@ -87,12 +87,12 @@ Under all circumstances, the **spec is the single source of truth** for expected
 During code review:
 
 - If no spec exists for the subsystem:
-  - Derive a spec from the existing code behavior.
-  - Write it into a new `*.spec.md` under `spec/`.
-  - Then review both the spec’s logical soundness and the code quality.
+    - Derive a spec from the existing code behavior.
+    - Write it into a new `*.spec.md` under `spec/`.
+    - Then review both the spec’s logical soundness and the code quality.
 - Always check alignment between code and spec.
 - If the spec is not low-entropy, concrete, and written as specified above:
-  - Reject the change and request a spec rewrite.
+    - Reject the change and request a spec rewrite.
 
 ---
 
@@ -115,10 +115,10 @@ Examples of acceptable comments:
 Examples of unacceptable comments:
 
 ```ts
-i++ // increment i  (❌ redundant)
+i++; // increment i  (❌ redundant)
 
 // fetch data
-const res = await fetch(url) // (❌ restates the obvious)
+const res = await fetch(url); // (❌ restates the obvious)
 ```
 
 Docstrings for public APIs (explaining inputs, outputs, and behavior) are allowed and

@@ -10,12 +10,12 @@ The authentication system validates API requests using Bearer tokens stored in t
 
 Table name: `token`
 
-| Column      | Type         | Constraints         | Description                    |
-|-------------|--------------|---------------------|--------------------------------|
-| `id`        | VARCHAR(32)  | PRIMARY KEY         | Token string (the bearer token)|
-| `uid`       | INT UNSIGNED | UNIQUE, NOT NULL    | Associated user ID             |
-| `role`      | INT UNSIGNED | NOT NULL            | User role identifier           |
-| `created_at`| DATETIME     | NOT NULL, DEFAULT   | Token creation timestamp       |
+| Column       | Type         | Constraints       | Description                     |
+| ------------ | ------------ | ----------------- | ------------------------------- |
+| `id`         | VARCHAR(32)  | PRIMARY KEY       | Token string (the bearer token) |
+| `uid`        | INT UNSIGNED | UNIQUE, NOT NULL  | Associated user ID              |
+| `role`       | INT UNSIGNED | NOT NULL          | User role identifier            |
+| `created_at` | DATETIME     | NOT NULL, DEFAULT | Token creation timestamp        |
 
 ### 2.2 Token Validation
 
@@ -35,9 +35,9 @@ For each incoming request:
 
 1. Check if the `Authorization` header is present.
 2. If present:
-   - Extract the token by removing the `Bearer ` prefix.
-   - Call `Token.validate(token)`.
-   - If validation returns a user ID, attach it to `ctx.userId`.
+    - Extract the token by removing the `Bearer ` prefix.
+    - Call `Token.validate(token)`.
+    - If validation returns a user ID, attach it to `ctx.userId`.
 3. If the header is absent or validation fails, `ctx.userId` remains `undefined`.
 4. Always call `next()` to continue request processing.
 
@@ -59,13 +59,13 @@ function authorization(ctx, next):
 
 Table name: `user`
 
-| Column      | Type         | Constraints     | Description                      |
-|-------------|--------------|-----------------|----------------------------------|
-| `id`        | INT UNSIGNED | PRIMARY KEY     | User ID (from Luogu)             |
-| `name`      | VARCHAR      | NOT NULL        | Display name                     |
-| `color`     | VARCHAR      | NOT NULL        | User color/badge (UserColor enum)|
-| `created_at`| DATETIME     | NOT NULL        | Record creation timestamp        |
-| `updated_at`| DATETIME     | NOT NULL        | Record update timestamp          |
+| Column       | Type         | Constraints | Description                       |
+| ------------ | ------------ | ----------- | --------------------------------- |
+| `id`         | INT UNSIGNED | PRIMARY KEY | User ID (from Luogu)              |
+| `name`       | VARCHAR      | NOT NULL    | Display name                      |
+| `color`      | VARCHAR      | NOT NULL    | User color/badge (UserColor enum) |
+| `created_at` | DATETIME     | NOT NULL    | Record creation timestamp         |
+| `updated_at` | DATETIME     | NOT NULL    | Record update timestamp           |
 
 ### 4.2 UserColor Enum
 
@@ -85,10 +85,10 @@ The `User.findById(id)` method is cached for 3 days (259200 seconds) with key pa
 
 ## 5. Authorization States
 
-| `ctx.userId`  | Interpretation                     |
-|---------------|------------------------------------|
-| `undefined`   | Unauthenticated request            |
-| `number`      | Authenticated user with given ID   |
+| `ctx.userId` | Interpretation                   |
+| ------------ | -------------------------------- |
+| `undefined`  | Unauthenticated request          |
+| `number`     | Authenticated user with given ID |
 
 ## 6. Security Constraints
 

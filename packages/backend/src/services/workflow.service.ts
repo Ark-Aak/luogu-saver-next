@@ -1,9 +1,10 @@
-import { FlowProducer, Job, QueueEvents } from 'bullmq';
+import { FlowProducer, Job, JobNode, QueueEvents } from 'bullmq';
 import { config } from '@/config';
 import { getQueueByName } from '@/lib/queue-factory';
 import { Workflow } from '@/entities/workflow';
 import { QUEUE_NAMES } from '@/shared/constants';
 import { logger } from '@/lib/logger';
+import { TaskDefinition, validateFlowStructure } from '@/utils/flow-validator';
 
 export class WorkflowService {
     private static flowProducer: FlowProducer;
@@ -73,7 +74,79 @@ export class WorkflowService {
         return def;
     }
 
-    private static async transformFlow(flowNode: any): Promise<any> {
+    private static linearizeWorkflow(tasks: TaskDefinition[]): any {
+        const adj = new Map<string, string[]>(); // key -> dependants
+        const inDegree = new Map<string, number>();
+        const taskMap = new Map<string, TaskDefinition>();
+
+        tasks.forEach(task => {
+            taskMap.set(task.name, task);
+            inDegree.set(task.name, 0);
+            adj.set(task.name, []);
+        });
+
+        tasks.forEach(task => {
+            if (task.fathers) {
+                task.fathers.forEach(fatherName => {
+                    if (adj.has(fatherName)) {
+                        adj.get(fatherName)!.push(task.name);
+                        inDegree.set(task.name, (inDegree.get(task.name) || 0) + 1);
+                    }
+                });
+            }
+        });
+
+        const queue: string[] = [];
+        inDegree.forEach((degree, name) => {
+            if (degree === 0) queue.push(name);
+        });
+
+        const sortedNames: string[] = [];
+        while (queue.length > 0) {
+            const u = queue.shift()!;
+            sortedNames.push(u);
+            if (adj.has(u)) {
+                for (const v of adj.get(u)!) {
+                    inDegree.set(v, inDegree.get(v)! - 1);
+                    if (inDegree.get(v) === 0) {
+                        queue.push(v);
+                    }
+                }
+            }
+        }
+
+        if (sortedNames.length !== tasks.length) {
+            throw new Error('Cycle detected or disconnected graph issues during linearization');
+        }
+
+        // Build BullMQ Flow Chain
+        // Execution Order: sortedNames[0] -> sortedNames[1] -> ... -> sortedNames[last]
+        // BullMQ Definition: Last -> child: Second Last -> ... -> child: First
+
+        let childNode: any = null;
+
+        for (const name of sortedNames) {
+            const task = taskMap.get(name)!;
+            // Current node becomes child of the next node in execution order (which is parent in BullMQ tree)
+            // WAIT.
+            // If A runs after B. BullMQ: A depends on B. A is Parent.
+            // sortedNames: [B, A].
+            // Loop 1: B. childNode = B.
+            // Loop 2: A. A.children = [B]. childNode = A.
+            childNode = {
+                name: task.name,
+                queueName: task.queueName,
+                data: { ...task.data, __fathers: task.fathers || [] },
+                children: childNode ? [childNode] : []
+            };
+        }
+
+        return childNode;
+    }
+
+    private static async transformFlow(
+        flowNode: JobNode
+    ): Promise<{ jobId: string; jobName: string; status: string }[] | null> {
         if (!flowNode || !flowNode.job) return null;
 
         const status = await flowNode.job.getState();
@@ -81,15 +154,21 @@ export class WorkflowService {
 
         if (flowNode.children) {
             for (const child of flowNode.children) {
-                simplifiedChildren.push(await this.transformFlow(child));
+                const childTransformed = await this.transformFlow(child);
+                if (childTransformed) {
+                    simplifiedChildren.push(...childTransformed);
+                }
             }
         }
 
-        return {
-            jobId: flowNode.job.id,
-            status,
-            children: simplifiedChildren
-        };
+        return [
+            ...simplifiedChildren,
+            {
+                jobId: flowNode.job.id || 'unknown',
+                jobName: flowNode.job.name || 'unnamed',
+                status
+            }
+        ];
     }
 
     /**
@@ -111,10 +190,12 @@ export class WorkflowService {
         name: string;
         queueName: string;
     }> {
-        const flowProducer = this.getFlowProducer();
-        const preparedDef = this.inferQueueName(flowDef);
-        const jobNode = await flowProducer.add(preparedDef);
+        validateFlowStructure(flowDef);
 
+        const flowProducer = this.getFlowProducer();
+        const linearDef = this.linearizeWorkflow(flowDef);
+        const preparedDef = this.inferQueueName(linearDef);
+        const jobNode = await flowProducer.add(preparedDef);
         const workflow = new Workflow();
         workflow.rootJobId = jobNode.job.id!;
         workflow.queueName = jobNode.job.queueName;
@@ -142,7 +223,6 @@ export class WorkflowService {
      *   rootJobId: string,
      *   queueName: string,
      *   status: string,
-     *   definition: any,
      *   createdAt: Date,
      *   updatedAt: Date,
      *   tasks: any
@@ -151,24 +231,18 @@ export class WorkflowService {
     static async getWorkflowById(id: string): Promise<{
         id: string;
         rootJobId: string;
-        queueName: string;
         status: string;
-        definition: any;
         createdAt: Date;
         updatedAt: Date;
         tasks: any;
     } | null> {
         const workflow = await Workflow.findOne({ where: { id } });
         if (!workflow) return null;
-
         try {
-            this.getFlowProducer();
-
             const queueWrapper = getQueueByName(workflow.queueName);
             if (!queueWrapper) {
                 throw new Error(`Queue wrapper for ${workflow.queueName} could not be obtained`);
             }
-
             if (workflow.status !== 'completed' && workflow.status !== 'failed') {
                 const job = await Job.fromId(queueWrapper.queue, workflow.rootJobId);
                 if (!job) {
@@ -196,9 +270,7 @@ export class WorkflowService {
             return {
                 id: workflow.id,
                 rootJobId: workflow.rootJobId,
-                queueName: workflow.queueName,
                 status: workflow.status,
-                definition: workflow.definition,
                 createdAt: workflow.createdAt,
                 updatedAt: workflow.updatedAt,
                 tasks

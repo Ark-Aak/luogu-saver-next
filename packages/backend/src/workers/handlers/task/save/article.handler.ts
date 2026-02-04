@@ -38,7 +38,7 @@ export class ArticleHandler implements TaskHandler<SaveTask> {
         const hash = sha256(data.content);
         let article = await ArticleService.getArticleByIdWithoutCache(data.lid);
         if (
-            !task.payload.metadata.forceUpdate &&
+            !task.payload.metadata?.forceUpdate &&
             article &&
             article.title === data.title &&
             article.contentHash === hash

@@ -14,6 +14,7 @@ import { ChatHandler } from '@/workers/handlers/task/llm/chat.handler';
 import { CensorHandler } from '@/workers/handlers/task/llm/censor.handler';
 import { UpdateArticleSummaryHandler } from '@/workers/handlers/task/update/update-article-summary.handler';
 import { UpdateArticleEmbeddingHandler } from '@/workers/handlers/task/update/update-article-embedding.handler';
+import { UpdateCensorResultHandler } from '@/workers/handlers/task/update/update-censor-result';
 import { config } from '@/config';
 import { WorkerOptions } from 'bullmq';
 
@@ -30,11 +31,6 @@ export function bootstrap() {
         config.queue.ai.regenerationInterval
     );
     const aiProcessor = new TaskProcessor<AiTask>();
-    const updateTaskPointGuard = new PointGuard(
-        'update_task_guard',
-        config.queue.update.maxRequestToken,
-        config.queue.update.regenerationInterval
-    );
     const updateProcessor = new TaskProcessor<UpdateTask>();
 
     saveProcessor.registerHandler(new ArticleHandler());
@@ -47,6 +43,7 @@ export function bootstrap() {
 
     updateProcessor.registerHandler(new UpdateArticleSummaryHandler());
     updateProcessor.registerHandler(new UpdateArticleEmbeddingHandler());
+    updateProcessor.registerHandler(new UpdateCensorResultHandler());
 
     const saveWorkerHost = new WorkerHost<SaveTask>(
         QUEUE_NAMES[TaskType.SAVE],
@@ -69,7 +66,7 @@ export function bootstrap() {
     const updateWorkerHost = new WorkerHost<UpdateTask>(
         QUEUE_NAMES[TaskType.UPDATE],
         updateProcessor,
-        updateTaskPointGuard,
+        null,
         {
             concurrency: config.queue.update.concurrencyLimit
         } as WorkerOptions

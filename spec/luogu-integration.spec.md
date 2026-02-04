@@ -10,25 +10,26 @@ The Luogu integration handles HTTP communication with Luogu's API endpoints to f
 
 All requests to Luogu include:
 
-| Header               | Value                                      |
-|----------------------|--------------------------------------------|
-| `User-Agent`         | Chrome 98 on Windows 10 (see below)        |
-| `Content-Type`       | `application/json; charset=UTF-8`          |
-| `x-luogu-type`       | `content-only`                             |
-| `x-lentille-request` | `content-only`                             |
+| Header               | Value                               |
+| -------------------- | ----------------------------------- |
+| `User-Agent`         | Chrome 98 on Windows 10 (see below) |
+| `Content-Type`       | `application/json; charset=UTF-8`   |
+| `x-luogu-type`       | `content-only`                      |
+| `x-lentille-request` | `content-only`                      |
 
 User-Agent string:
+
 ```
 Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36
 ```
 
 ### 2.2 Request Configuration
 
-| Setting          | Value  | Description                              |
-|------------------|--------|------------------------------------------|
-| `maxRedirects`   | 0      | Do not follow redirects automatically    |
-| `validateStatus` | () => true | Accept all HTTP status codes        |
-| `timeout`        | config.network.timeout | Request timeout in ms     |
+| Setting          | Value                  | Description                           |
+| ---------------- | ---------------------- | ------------------------------------- |
+| `maxRedirects`   | 0                      | Do not follow redirects automatically |
+| `validateStatus` | () => true             | Accept all HTTP status codes          |
+| `timeout`        | config.network.timeout | Request timeout in ms                 |
 
 ## 3. C3VK Challenge Handling
 
@@ -37,7 +38,7 @@ Luogu uses a challenge-response mechanism called C3VK to prevent automated acces
 ### 3.1 C3vkMode Enum
 
 | Value    | Description                    |
-|----------|--------------------------------|
+| -------- | ------------------------------ |
 | `LEGACY` | Old-style inline token         |
 | `MODERN` | New-style redirect-based token |
 
@@ -46,6 +47,7 @@ Luogu uses a challenge-response mechanism called C3VK to prevent automated acces
 **Trigger:** Response body contains pattern `C3VK=([a-zA-Z0-9]+);`
 
 **Algorithm:**
+
 1. Parse response body for C3VK token.
 2. If found:
    a. Extract token value.
@@ -58,6 +60,7 @@ Luogu uses a challenge-response mechanism called C3VK to prevent automated acces
 **Trigger:** Response status is 302 AND `location` header is present.
 
 **Algorithm:**
+
 1. Extract `Set-Cookie` headers from response.
 2. Parse and merge cookies with existing cookie header.
 3. Retry the original request with merged cookies.
@@ -78,11 +81,7 @@ Luogu uses a challenge-response mechanism called C3VK to prevent automated acces
 ### 4.1 Signature
 
 ```typescript
-async function fetch(
-    url: string,
-    mode: C3vkMode,
-    cookie?: Record<string, string>
-): Promise<any>
+async function fetch(url: string, mode: C3vkMode, cookie?: Record<string, string>): Promise<any>;
 ```
 
 ### 4.2 Flow
@@ -106,16 +105,16 @@ async function fetch(
 
 ### 4.3 Error Handling
 
-| Error Code/Type  | Behavior                                   |
-|------------------|--------------------------------------------|
-| `ECONNABORTED`   | Throw retriable network error              |
-| `ETIMEDOUT`      | Throw retriable network error              |
-| `ECONNREFUSED`   | Throw retriable network error              |
-| `ECONNRESET`     | Throw retriable network error              |
-| timeout message  | Throw retriable network error              |
-| Other errors     | Throw `UnrecoverableError`                 |
-| HTTP 401         | Throw `UnrecoverableError("Unauthorized")` |
-| JSON parse fail  | Throw `UnrecoverableError`                 |
+| Error Code/Type | Behavior                                   |
+| --------------- | ------------------------------------------ |
+| `ECONNABORTED`  | Throw retriable network error              |
+| `ETIMEDOUT`     | Throw retriable network error              |
+| `ECONNREFUSED`  | Throw retriable network error              |
+| `ECONNRESET`    | Throw retriable network error              |
+| timeout message | Throw retriable network error              |
+| Other errors    | Throw `UnrecoverableError`                 |
+| HTTP 401        | Throw `UnrecoverableError("Unauthorized")` |
+| JSON parse fail | Throw `UnrecoverableError`                 |
 
 Network errors are retriable by BullMQ; `UnrecoverableError` stops retries.
 
@@ -126,6 +125,7 @@ Network errors are retriable by BullMQ; `UnrecoverableError` stops retries.
 **URL Pattern:** `https://www.luogu.com.cn/article/{articleId}`
 
 **Response Structure:**
+
 ```typescript
 {
     currentData: {
@@ -146,6 +146,7 @@ Network errors are retriable by BullMQ; `UnrecoverableError` stops retries.
 **URL Pattern:** `https://www.luogu.com.cn/paste/{pasteId}`
 
 **Response Structure:**
+
 ```typescript
 {
     currentData: {
@@ -190,6 +191,7 @@ Convert Luogu user summary to local User entity:
 **Task Type:** `save:article`
 
 **Payload:**
+
 ```typescript
 {
     target: "article",
@@ -199,13 +201,14 @@ Convert Luogu user summary to local User entity:
 ```
 
 **Processing:**
+
 1. Fetch article from Luogu API.
 2. Extract article data from response.
 3. Build or update User entity for author.
 4. Build Article entity with:
-   - `id`, `title`, `content`, `category`, `tags`
-   - `authorId` linked to user
-   - Compute `contentHash` (SHA-256)
+    - `id`, `title`, `content`, `category`, `tags`
+    - `authorId` linked to user
+    - Compute `contentHash` (SHA-256)
 5. Check for existing article:
    a. If exists with same hash and title, skip.
    b. Otherwise, push new history version.
@@ -217,6 +220,7 @@ Convert Luogu user summary to local User entity:
 **Task Type:** `save:paste`
 
 **Payload:**
+
 ```typescript
 {
     target: "paste",
@@ -226,12 +230,13 @@ Convert Luogu user summary to local User entity:
 ```
 
 **Processing:**
+
 1. Fetch paste from Luogu API.
 2. Extract paste data from response.
 3. Build or update User entity for author.
 4. Build Paste entity with:
-   - `id`, `content`
-   - `authorId` linked to user
+    - `id`, `content`
+    - `authorId` linked to user
 5. Save paste to database.
 6. Update task status to COMPLETED.
 

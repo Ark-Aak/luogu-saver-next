@@ -2,8 +2,7 @@ import { ChildrenValues, TaskEmbeddingResult, TaskHandler, WorkflowResult } from
 import { AiTask } from '@/shared/task';
 import { UnrecoverableError, Job } from 'bullmq';
 import { llm } from '@/lib/llm';
-import { logger } from '@/lib/logger';
-import { getSourceTextById, shouldSkip } from '@/workers/helpers/common.helper';
+import { extractUpsteamData, getSourceTextById, shouldSkip } from '@/workers/helpers/common.helper';
 
 export class EmbeddingHandler implements TaskHandler<AiTask> {
     public taskType = 'llm:embedding';
@@ -25,17 +24,11 @@ export class EmbeddingHandler implements TaskHandler<AiTask> {
             };
         }
 
-        const childKeys = Object.keys(childrenValues);
-
-        for (const childKey of childKeys) {
-            const upstreamData = childrenValues[childKey];
-            if (upstreamData && typeof upstreamData.data.text === 'string') {
-                const result = upstreamData.data as TaskEmbeddingResult;
-                logger.info({ jobId: job.id }, 'Using upstream data from workflow for embedding');
-                content = result.text;
-                break;
-            }
-        }
+        content = extractUpsteamData(
+            childrenValues,
+            data => typeof data.text === 'string',
+            job.id
+        )?.text;
 
         if (!content) {
             if (task.payload.sourceId) {

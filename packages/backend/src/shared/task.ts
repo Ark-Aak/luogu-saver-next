@@ -57,8 +57,9 @@ export type TaskDefinition = {
 };
 
 export enum UpdateTarget {
-    ARTICLE = 'article',
-    PASTE = 'paste'
+    ARTICLE_SUMMARY = 'article_summary',
+    ARTICLE_EMBEDDING = 'article_embedding',
+    CENSOR = 'censor'
 }
 
 export enum SaveTarget {
@@ -67,4 +68,9 @@ export enum SaveTarget {
     BENBEN = 'benben',
     JUDGEMENT = 'judgement',
     PROFILE = 'profile'
+}
+
+export enum CensorTarget {
+    ARTICLE = 'article',
+    PASTE = 'paste'
 }
