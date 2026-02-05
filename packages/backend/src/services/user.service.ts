@@ -32,4 +32,10 @@ export class UserService {
     static async saveUser(user: User): Promise<User> {
         return await user.save();
     }
+
+    static createUser(data: Partial<User>): User {
+        const user = new User();
+        Object.assign(user, data);
+        return user;
+    }
 }

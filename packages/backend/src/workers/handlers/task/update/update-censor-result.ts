@@ -51,14 +51,14 @@ export class UpdateCensorResultHandler implements TaskHandler<UpdateTask> {
                         `Article with ID ${task.payload.targetId} not found for job ${job.id}`
                     );
                 }
-                const censorship = await CensorshipService.createCensorship(
-                    CensorTarget.ARTICLE,
-                    task.payload.targetId,
-                    result.rating,
-                    result.category,
-                    result.reason,
-                    result.userDisplayMessage
-                );
+                const censorship = await CensorshipService.createCensorship({
+                    type: CensorTarget.ARTICLE,
+                    targetId: task.payload.targetId,
+                    rating: result.rating,
+                    category: result.category,
+                    reason: result.reason,
+                    userDisplayMessage: result.userDisplayMessage
+                });
                 await CensorshipService.saveCensorship(censorship);
                 break;
             }
@@ -69,14 +69,14 @@ export class UpdateCensorResultHandler implements TaskHandler<UpdateTask> {
                         `Paste with ID ${task.payload.targetId} not found for job ${job.id}`
                     );
                 }
-                const censorship = await CensorshipService.createCensorship(
-                    CensorTarget.PASTE,
-                    task.payload.targetId,
-                    result.rating,
-                    result.category,
-                    result.reason,
-                    result.userDisplayMessage
-                );
+                const censorship = await CensorshipService.createCensorship({
+                    type: CensorTarget.PASTE,
+                    targetId: task.payload.targetId,
+                    rating: result.rating,
+                    category: result.category,
+                    reason: result.reason,
+                    userDisplayMessage: result.userDisplayMessage
+                });
                 await CensorshipService.saveCensorship(censorship);
                 break;
             }

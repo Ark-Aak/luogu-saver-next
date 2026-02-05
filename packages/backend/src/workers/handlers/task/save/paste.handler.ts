@@ -7,7 +7,6 @@ import { createHash } from 'crypto';
 import { PasteService } from '@/services/paste.service';
 import { Paste } from '@/entities/paste';
 import { buildUser } from '@/utils/luogu-api';
-import { User } from '@/entities/user';
 import { UserService } from '@/services/user.service';
 import { logger } from '@/lib/logger';
 
@@ -27,7 +26,7 @@ export class PasteHandler implements TaskHandler<SaveTask> {
         if (user) {
             Object.assign(user, incomingUser);
         } else {
-            user = User.create(incomingUser) as User;
+            user = UserService.createUser(incomingUser);
         }
         await UserService.saveUser(user!);
 

@@ -8,7 +8,6 @@ import { ArticleService } from '@/services/article.service';
 import { ArticleHistoryService } from '@/services/article-history.service';
 import { UserService } from '@/services/user.service';
 import { Article } from '@/entities/article';
-import { User } from '@/entities/user';
 import { ArticleCategory } from '@/shared/article';
 import { logger } from '@/lib/logger';
 import { buildUser } from '@/utils/luogu-api';
@@ -30,7 +29,7 @@ export class ArticleHandler implements TaskHandler<SaveTask> {
         if (user) {
             Object.assign(user, incomingUser);
         } else {
-            user = User.create(incomingUser) as User;
+            user = UserService.createUser(incomingUser);
         }
         await UserService.saveUser(user!);
 

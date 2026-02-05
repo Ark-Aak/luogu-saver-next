@@ -12,8 +12,8 @@ import { CensorTarget } from '@/shared/task';
 
 @Entity({ name: 'censorship' })
 @Index('idx_censor_results_type_target_id', ['type', 'targetId'])
-@Index('idx_censor_results_type_target_id_updated_at', ['type', 'targetId', 'updatedAt'])
-@Index('idx_censor_results_updated_at', ['updatedAt'])
+@Index('idx_censor_results_type_target_id_created_at', ['type', 'targetId', 'createdAt'])
+@Index('idx_censor_results_created_at', ['createdAt'])
 @Index('idx_censor_results_rating', ['rating'])
 export class Censorship extends BaseEntity {
     @PrimaryGeneratedColumn()
@@ -24,7 +24,7 @@ export class Censorship extends BaseEntity {
 
     @CreateDateColumn({ name: 'created_at' })
     @Type(() => Date)
-    updatedAt: Date;
+    createdAt: Date;
 
     @Column({ type: 'int' })
     rating: number;

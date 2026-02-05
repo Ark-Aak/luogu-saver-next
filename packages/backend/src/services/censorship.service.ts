@@ -2,21 +2,9 @@ import { Censorship } from '@/entities/censorship';
 import { CensorTarget } from '@/shared/task';
 
 export class CensorshipService {
-    static async createCensorship(
-        type: CensorTarget,
-        targetId: string,
-        rating: number,
-        category: string,
-        reason: string,
-        userDisplayMessage: string
-    ): Promise<Censorship> {
+    static async createCensorship(data: Partial<Censorship>): Promise<Censorship> {
         const censorship = new Censorship();
-        censorship.type = type;
-        censorship.targetId = targetId;
-        censorship.rating = rating;
-        censorship.reason = reason;
-        censorship.category = category;
-        censorship.userDisplayMessage = userDisplayMessage;
+        Object.assign(censorship, data);
         return censorship;
     }
 
@@ -24,10 +12,10 @@ export class CensorshipService {
         return await censorship.save();
     }
 
-    static async getCensorshipByTypeAndId(
+    static async getCensorshipsByTypeAndId(
         type: CensorTarget,
         targetId: string
-    ): Promise<Censorship | null> {
-        return await Censorship.findOne({ where: { type, targetId } });
+    ): Promise<Censorship[] | null> {
+        return await Censorship.find({ where: { type, targetId }, order: { createdAt: 'DESC' } });
     }
 }
