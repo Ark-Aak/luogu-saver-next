@@ -1,6 +1,12 @@
 import { TaskDefinition } from '@/utils/flow-validator';
+import { Permission } from '@/shared/permission';
 
 export type WorkflowTemplateBuilder = (params: any) => TaskDefinition[];
+
+export const WORKFLOW_TEMPLATES_PERMISSION: { [key: string]: Permission } = {
+    'article-save-pipeline': Permission.LOGIN,
+    'article-censor-pipeline': Permission.CREATE_WORKFLOW
+};
 
 export const WORKFLOW_TEMPLATES: Record<string, WorkflowTemplateBuilder> = {
     'article-save-pipeline': (params: any) => {

@@ -2,7 +2,7 @@ import Router from 'koa-router';
 import { Context, DefaultState } from 'koa';
 import { WorkflowService } from '@/services/workflow.service';
 import { logger } from '@/lib/logger';
-import { requiresPermission } from '@/middlewares/authorization';
+import { checkWorkflowPermission, requiresPermission } from '@/middlewares/authorization';
 import { Permission } from '@/shared/permission';
 
 const router = new Router<DefaultState, Context>({ prefix: '/workflow' });
@@ -27,6 +27,7 @@ router.post('/create', requiresPermission(Permission.CREATE_WORKFLOW), async (ct
 router.post(
     '/create/template/:name',
     requiresPermission(Permission.LOGIN),
+    checkWorkflowPermission,
     async (ctx: Context) => {
         const { name } = ctx.params;
         const params = ctx.request.body;
