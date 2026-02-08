@@ -69,7 +69,7 @@ export class WorkflowService {
         const workflow = await Workflow.findOne({ where: { id } });
         if (!workflow) return null;
 
-        if (['completed', 'failed', 'expired'].includes(workflow.status)) {
+        if (workflow.status === 'expired') {
             return this.formatWorkflowResponse(workflow, null);
         }
 
