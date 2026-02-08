@@ -3,7 +3,7 @@ import { TrackingEvent } from '@/shared/event';
 import { RecommendationService } from '@/services/recommendation.service';
 import { logger } from '@/lib/logger';
 
-export const trackingMiddleware = async (ctx: Context, next: Next) => {
+export const tracking = async (ctx: Context, next: Next) => {
     if (ctx.headers['x-consent-tracking'] === 'true') {
         if (ctx.userId) {
             // user has logged in so do not use device id

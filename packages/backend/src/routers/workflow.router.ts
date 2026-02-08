@@ -2,22 +2,16 @@ import Router from 'koa-router';
 import { Context, DefaultState } from 'koa';
 import { WorkflowService } from '@/services/workflow.service';
 import { logger } from '@/lib/logger';
-import { validateFlowStructure } from '@/utils/flow-validator';
+import { requiresPermission } from '@/middlewares/authorization';
+import { Permission } from '@/shared/permission';
 
 const router = new Router<DefaultState, Context>({ prefix: '/workflow' });
 
-router.post('/create', async (ctx: Context) => {
+router.post('/create', requiresPermission(Permission.CREATE_WORKFLOW), async (ctx: Context) => {
     const flowDef = ctx.request.body as any;
 
     if (!flowDef) {
         ctx.fail(400, 'Invalid flow definition.');
-        return;
-    }
-
-    try {
-        validateFlowStructure(flowDef);
-    } catch (error) {
-        ctx.fail(400, error instanceof Error ? error.message : 'Invalid flow structure');
         return;
     }
 

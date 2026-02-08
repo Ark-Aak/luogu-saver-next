@@ -10,7 +10,7 @@ export class Token extends BaseEntity {
     @Column({ unsigned: true, unique: true })
     uid: number;
 
-    @Column({ unsigned: true })
+    @Column()
     role: number;
 
     @CreateDateColumn({ name: 'created_at' })

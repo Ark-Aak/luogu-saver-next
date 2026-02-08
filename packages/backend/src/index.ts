@@ -8,7 +8,7 @@ import router from './routers';
 import { logger } from './lib/logger';
 
 import { authorization } from '@/middlewares/authorization';
-import { trackingMiddleware } from './middlewares/tracking';
+import { tracking } from './middlewares/tracking';
 import { responseHelper } from './middlewares/response';
 import * as worker from '@/workers';
 import { initSocket } from './lib/socket';
@@ -21,7 +21,7 @@ initSocket(server, socketJoinHandler);
 
 app.use(bodyParser());
 app.use(authorization);
-app.use(trackingMiddleware);
+app.use(tracking);
 app.use(responseHelper);
 app.use(router.routes()).use(router.allowedMethods());
 
