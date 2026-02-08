@@ -96,5 +96,26 @@ export const WORKFLOW_TEMPLATES: Record<string, WorkflowTemplateBuilder> = {
                 }
             }
         ];
+    },
+    'article-censor-pipeline': (params: any) => {
+        const { targetId } = params;
+        if (!targetId) {
+            throw new Error('targetId is required for article-censor-pipeline');
+        }
+
+        return [
+            {
+                name: 'censor',
+                track: true,
+                data: {
+                    type: 'llm',
+                    payload: {
+                        target: 'censor',
+                        sourceId: `article:${targetId}`,
+                        metadata: {}
+                    }
+                }
+            }
+        ];
     }
 };
