@@ -2,6 +2,9 @@ import { Cacheable } from '@/decorators/cacheable';
 import { CacheEvict } from '@/decorators/cache-evict';
 import { Article } from '@/entities/article';
 import { In, MoreThan } from 'typeorm';
+import { createHash } from 'crypto'; // Imported
+import { ArticleHistoryService } from './article-history.service'; // Imported
+import { ArticleCategory } from '@/shared/article'; // Imported
 
 export class ArticleService {
     /*
@@ -152,5 +155,64 @@ export class ArticleService {
     @CacheEvict((article: Article) => [`article:${article.id}`, `article:count`])
     static async saveArticle(article: Article) {
         await article.save();
+    }
+
+    static async saveLuoguArticle(
+        data: any,
+        forceUpdate: boolean = false
+    ): Promise<{ skipped: boolean; content: string }> {
+        let result = { skipped: false, content: '' };
+
+        await Article.transaction(async manager => {
+            const hash = createHash('sha256').update(data.content).digest('hex');
+            let article = await manager.findOne(Article, {
+                where: { id: data.lid },
+                lock: { mode: 'pessimistic_write' }
+            });
+
+            if (
+                !forceUpdate &&
+                article &&
+                article.title === data.title &&
+                article.contentHash === hash
+            ) {
+                result = { skipped: true, content: '' };
+                return;
+            }
+
+            const incomingData: Partial<Article> = {
+                title: data.title,
+                authorId: data.author.uid,
+                content: data.content,
+                contentHash: hash,
+                category: data.category as ArticleCategory,
+                solutionForPid: data.solutionFor?.pid,
+                upvote: data.upvote,
+                favorCount: data.favorCount
+            };
+
+            if (article) {
+                Object.assign(article, incomingData);
+            } else {
+                article = new Article();
+                article.id = data.lid;
+                article.deleted = false;
+                article.viewCount = 0;
+                article.tags = [];
+                article.priority = 0;
+                Object.assign(article, incomingData);
+            }
+            await manager.save(article);
+            await ArticleHistoryService.pushNewVersion(
+                article.id,
+                article.title,
+                article.content,
+                manager
+            );
+
+            result = { skipped: false, content: article.content };
+        });
+
+        return result;
     }
 }

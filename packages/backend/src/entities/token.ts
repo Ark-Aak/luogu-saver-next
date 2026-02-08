@@ -1,4 +1,5 @@
-import { Entity, BaseEntity, PrimaryColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryColumn, Column, CreateDateColumn } from 'typeorm';
+import { BaseEntity } from './base';
 
 import { Type } from 'class-transformer';
 

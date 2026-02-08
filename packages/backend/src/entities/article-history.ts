@@ -1,11 +1,5 @@
-import {
-    BaseEntity,
-    Entity,
-    PrimaryGeneratedColumn,
-    Column,
-    Index,
-    CreateDateColumn
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, Index, CreateDateColumn } from 'typeorm';
+import { BaseEntity } from './base';
 
 @Entity({ name: 'article_history' })
 @Index('idx_article_id_version', ['articleId', 'version'])

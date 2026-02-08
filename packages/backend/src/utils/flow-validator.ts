@@ -2,6 +2,7 @@ export interface TaskDefinition {
     name: string;
     data?: any;
     fathers?: string[];
+    track?: boolean;
     [key: string]: any;
 }
 

@@ -1,284 +1,152 @@
-import { FlowProducer, Job, JobNode, QueueEvents } from 'bullmq';
+import { FlowProducer, JobNode, Job } from 'bullmq';
 import { config } from '@/config';
-import { getQueueByName } from '@/lib/queue-factory';
 import { Workflow } from '@/entities/workflow';
-import { QUEUE_NAMES } from '@/shared/constants';
 import { logger } from '@/lib/logger';
-import { TaskDefinition, validateFlowStructure } from '@/utils/flow-validator';
+import { validateFlowStructure } from '@/utils/flow-validator';
+import { WORKFLOW_TEMPLATES } from '@/lib/workflow-templates';
+import { randomUUID } from 'node:crypto';
+import { WorkflowBuilder } from './helpers/workflow-builder.helper';
+import { getQueueByName } from '@/lib/queue-factory';
 
 export class WorkflowService {
-    private static flowProducer: FlowProducer;
-    private static queueEvents: Map<string, QueueEvents> = new Map();
+    private static _flowProducer: FlowProducer;
 
-    private static getFlowProducer() {
-        if (!this.flowProducer) {
-            this.flowProducer = new FlowProducer({
-                connection: {
-                    host: config.redis.host,
-                    port: config.redis.port,
-                    password: config.redis.password
-                }
+    private static get flowProducer() {
+        if (!this._flowProducer) {
+            this._flowProducer = new FlowProducer({
+                connection: config.redis
             });
-            this.setupQueueEvents();
         }
-        return this.flowProducer;
+        return this._flowProducer;
     }
 
-    private static setupQueueEvents() {
-        if (this.queueEvents.size > 0) return;
-
-        Object.values(QUEUE_NAMES).forEach(queueName => {
-            const events = new QueueEvents(queueName, {
-                connection: {
-                    host: config.redis.host,
-                    port: config.redis.port,
-                    password: config.redis.password
-                }
-            });
-
-            events.on('completed', async ({ jobId }) => {
-                await this.updateWorkflowStatus(jobId, 'completed');
-            });
-
-            events.on('failed', async ({ jobId, failedReason }) => {
-                await this.updateWorkflowStatus(jobId, 'failed', failedReason);
-            });
-
-            this.queueEvents.set(queueName, events);
-        });
-    }
-
-    private static async updateWorkflowStatus(jobId: string, status: string, reason?: string) {
-        try {
-            const workflow = await Workflow.findOne({ where: { rootJobId: jobId } });
-            if (workflow) {
-                workflow.status = status;
-                await workflow.save();
-                logger.info({ workflowId: workflow.id, status, reason }, 'Workflow status updated');
-            }
-        } catch (err) {
-            logger.error({ err, jobId }, 'Failed to update workflow status');
-        }
-    }
-
-    private static inferQueueName(def: any): any {
-        if (!def.queueName && def.data?.type) {
-            const type = def.data.type;
-            // @ts-expect-error ignore
-            def.queueName = QUEUE_NAMES[type] || 'default';
-        }
-
-        if (def.children) {
-            def.children = def.children.map((child: any) => this.inferQueueName(child));
-        }
-        return def;
-    }
-
-    private static linearizeWorkflow(tasks: TaskDefinition[]): any {
-        const adj = new Map<string, string[]>(); // key -> dependants
-        const inDegree = new Map<string, number>();
-        const taskMap = new Map<string, TaskDefinition>();
-
-        tasks.forEach(task => {
-            taskMap.set(task.name, task);
-            inDegree.set(task.name, 0);
-            adj.set(task.name, []);
-        });
-
-        tasks.forEach(task => {
-            if (task.fathers) {
-                task.fathers.forEach(fatherName => {
-                    if (adj.has(fatherName)) {
-                        adj.get(fatherName)!.push(task.name);
-                        inDegree.set(task.name, (inDegree.get(task.name) || 0) + 1);
-                    }
-                });
-            }
-        });
-
-        const queue: string[] = [];
-        inDegree.forEach((degree, name) => {
-            if (degree === 0) queue.push(name);
-        });
-
-        const sortedNames: string[] = [];
-        while (queue.length > 0) {
-            const u = queue.shift()!;
-            sortedNames.push(u);
-            if (adj.has(u)) {
-                for (const v of adj.get(u)!) {
-                    inDegree.set(v, inDegree.get(v)! - 1);
-                    if (inDegree.get(v) === 0) {
-                        queue.push(v);
-                    }
-                }
-            }
-        }
-
-        if (sortedNames.length !== tasks.length) {
-            throw new Error('Cycle detected or disconnected graph issues during linearization');
-        }
-
-        // Build BullMQ Flow Chain
-        // Execution Order: sortedNames[0] -> sortedNames[1] -> ... -> sortedNames[last]
-        // BullMQ Definition: Last -> child: Second Last -> ... -> child: First
-
-        let childNode: any = null;
-
-        for (const name of sortedNames) {
-            const task = taskMap.get(name)!;
-            // Current node becomes child of the next node in execution order (which is parent in BullMQ tree)
-            // WAIT.
-            // If A runs after B. BullMQ: A depends on B. A is Parent.
-            // sortedNames: [B, A].
-            // Loop 1: B. childNode = B.
-            // Loop 2: A. A.children = [B]. childNode = A.
-            childNode = {
-                name: task.name,
-                queueName: task.queueName,
-                data: { ...task.data, __fathers: task.fathers || [] },
-                children: childNode ? [childNode] : []
-            };
-        }
-
-        return childNode;
-    }
-
-    private static async transformFlow(
-        flowNode: JobNode
-    ): Promise<{ jobId: string; jobName: string; status: string }[] | null> {
-        if (!flowNode || !flowNode.job) return null;
-
-        const status = await flowNode.job.getState();
-        const simplifiedChildren = [];
-
-        if (flowNode.children) {
-            for (const child of flowNode.children) {
-                const childTransformed = await this.transformFlow(child);
-                if (childTransformed) {
-                    simplifiedChildren.push(...childTransformed);
-                }
-            }
-        }
-
-        return [
-            ...simplifiedChildren,
-            {
-                jobId: flowNode.job.id || 'unknown',
-                jobName: flowNode.job.name || 'unnamed',
-                status
-            }
-        ];
-    }
-
-    /**
-     * Creates a new workflow based on the provided flow definition.
-     * This method initializes the flow producer, prepares the flow definition by inferring queue names,
-     * adds the flow to the queue, and persists the workflow metadata in the database.
-     *
-     * @param {any} flowDef - The definition of the flow (job tree) to be executed.
-     * @returns {Promise<{
-     *   workflowId: string,
-     *   jobId: string,
-     *   name: string,
-     *   queueName: string
-     * }>} An object containing the new workflow's ID, root job ID, name, and queue name.
-     */
-    static async createWorkflow(flowDef: any): Promise<{
-        workflowId: string;
-        jobId: string;
-        name: string;
-        queueName: string;
-    }> {
+    static async createWorkflow(flowDef: any[]) {
         validateFlowStructure(flowDef);
 
-        const flowProducer = this.getFlowProducer();
-        const linearDef = this.linearizeWorkflow(flowDef);
-        const preparedDef = this.inferQueueName(linearDef);
-        const jobNode = await flowProducer.add(preparedDef);
-        const workflow = new Workflow();
-        workflow.rootJobId = jobNode.job.id!;
-        workflow.queueName = jobNode.job.queueName;
-        workflow.definition = flowDef;
-        workflow.status = 'active';
+        const workflowId = randomUUID();
+        const rootJobNode = WorkflowBuilder.buildLinearFlow(flowDef, workflowId);
+        const jobNode = await this.flowProducer.add(rootJobNode);
+        const jobIds = this.extractJobIds(jobNode);
+
+        const result: Record<string, any> = {};
+        flowDef.forEach(task => {
+            if (task.track && jobIds[task.name]) {
+                result[task.name] = null;
+            }
+        });
+
+        const workflow = Workflow.create({
+            id: workflowId,
+            rootJobId: jobNode.job.id!,
+            queueName: jobNode.job.queueName,
+            definition: flowDef,
+            status: 'active',
+            result
+        });
+
         await workflow.save();
+        logger.info({ workflowId, rootJobId: workflow.rootJobId }, 'Workflow created');
 
         return {
-            workflowId: workflow.id,
-            jobId: jobNode.job.id || 'unknown',
-            name: jobNode.job.name,
-            queueName: jobNode.job.queueName
+            workflowId,
+            rootJobId: workflow.rootJobId,
+            jobIds
         };
     }
 
-    /**
-     * Retrieves a workflow by its unique identifier.
-     * This method fetches the workflow record, validates its state against the actual job state in the queue,
-     * retrieves the full flow structure from the producer, and transforms it into a detailed response.
-     * If the root job cannot be found (e.g., expired), the workflow record is removed.
-     *
-     * @param {string} id - The unique identifier of the workflow to retrieve.
-     * @returns {Promise<{
-     *   id: string,
-     *   rootJobId: string,
-     *   queueName: string,
-     *   status: string,
-     *   createdAt: Date,
-     *   updatedAt: Date,
-     *   tasks: any
-     * } | null>} The workflow details including its task structure, or null if not found or expired.
-     */
-    static async getWorkflowById(id: string): Promise<{
-        id: string;
-        rootJobId: string;
-        status: string;
-        createdAt: Date;
-        updatedAt: Date;
-        tasks: any;
-    } | null> {
+    static async createWorkflowFromTemplate(templateName: string, params: any) {
+        const builder = WORKFLOW_TEMPLATES[templateName];
+        if (!builder) throw new Error(`Template ${templateName} not found`);
+        return this.createWorkflow(builder(params));
+    }
+
+    static async getWorkflowById(id: string) {
         const workflow = await Workflow.findOne({ where: { id } });
         if (!workflow) return null;
-        try {
-            const queueWrapper = getQueueByName(workflow.queueName);
-            if (!queueWrapper) {
-                throw new Error(`Queue wrapper for ${workflow.queueName} could not be obtained`);
-            }
-            if (workflow.status !== 'completed' && workflow.status !== 'failed') {
-                const job = await Job.fromId(queueWrapper.queue, workflow.rootJobId);
-                if (!job) {
-                    throw new Error(`Root job ${workflow.rootJobId} not found in queue`);
-                }
-                const state = await job.getState();
-                if (state !== workflow.status) {
-                    workflow.status = state;
-                    await workflow.save();
-                }
-            }
 
-            const flowProducer = this.getFlowProducer();
-            const flow = await flowProducer.getFlow({
+        if (['completed', 'failed', 'expired'].includes(workflow.status)) {
+            return this.formatWorkflowResponse(workflow, null);
+        }
+
+        try {
+            await this.syncWorkflowStatus(workflow);
+
+            const flowStructure = await this.flowProducer.getFlow({
                 id: workflow.rootJobId,
                 queueName: workflow.queueName
             });
 
-            if (!flow) {
-                throw new Error('Flow structure not found');
-            }
+            if (!flowStructure) throw new Error('Flow structure missing in Redis');
 
-            const tasks = await this.transformFlow(flow);
-
-            return {
-                id: workflow.id,
-                rootJobId: workflow.rootJobId,
-                status: workflow.status,
-                createdAt: workflow.createdAt,
-                updatedAt: workflow.updatedAt,
-                tasks
-            };
+            const tasks = await this.transformFlowTree(flowStructure);
+            return this.formatWorkflowResponse(workflow, tasks);
         } catch (error) {
-            logger.info({ error, id }, 'Workflow expired. Deleting workflow record.');
-            await workflow.remove();
-            return null;
+            logger.warn(
+                { err: error, workflowId: id },
+                'Workflow execution info unavailable, marking expired'
+            );
+
+            workflow.status = 'expired';
+            await Workflow.update({ id }, { status: 'expired' });
+
+            return this.formatWorkflowResponse(workflow, null);
         }
+    }
+
+    private static async syncWorkflowStatus(workflow: Workflow): Promise<void> {
+        const queueWrapper = getQueueByName(workflow.queueName);
+        if (!queueWrapper) return;
+
+        const job = await Job.fromId(queueWrapper.queue, workflow.rootJobId);
+        if (!job) {
+            throw new Error('Root job not found');
+        }
+
+        const state = await job.getState();
+        if (state && state !== workflow.status) {
+            workflow.status = state;
+            await Workflow.update({ id: workflow.id }, { status: state });
+        }
+    }
+
+    private static extractJobIds(node: JobNode): Record<string, string> {
+        const map: Record<string, string> = {};
+        const traverse = (n: JobNode) => {
+            if (n.job?.name && n.job?.id) map[n.job.name] = n.job.id;
+            n.children?.forEach(traverse);
+        };
+        traverse(node);
+        return map;
+    }
+
+    private static async transformFlowTree(flowNode: JobNode): Promise<any[]> {
+        if (!flowNode.job) return [];
+
+        const status = await flowNode.job.getState();
+        const current = {
+            jobId: flowNode.job.id,
+            jobName: flowNode.job.name,
+            status
+        };
+
+        let childrenResult: any[] = [];
+        if (flowNode.children) {
+            const childrenPromises = flowNode.children.map(child => this.transformFlowTree(child));
+            const nested = await Promise.all(childrenPromises);
+            childrenResult = nested.flat();
+        }
+
+        return [...childrenResult, current];
+    }
+
+    private static formatWorkflowResponse(workflow: Workflow, tasks: any) {
+        return {
+            id: workflow.id,
+            status: workflow.status,
+            createdAt: workflow.createdAt,
+            updatedAt: workflow.updatedAt,
+            tasks,
+            result: workflow.result
+        };
     }
 }

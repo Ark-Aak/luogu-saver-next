@@ -1,11 +1,6 @@
-import {
-    Entity,
-    BaseEntity,
-    PrimaryColumn,
-    Column,
-    CreateDateColumn,
-    UpdateDateColumn
-} from 'typeorm';
+import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+
+import { BaseEntity } from './base';
 
 import { UserColor } from '@/shared/user';
 import { Cacheable } from '@/decorators/cacheable';

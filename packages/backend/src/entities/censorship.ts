@@ -1,11 +1,5 @@
-import {
-    Entity,
-    BaseEntity,
-    Column,
-    Index,
-    PrimaryGeneratedColumn,
-    CreateDateColumn
-} from 'typeorm';
+import { Entity, Column, Index, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+import { BaseEntity } from './base';
 
 import { Type } from 'class-transformer';
 import { CensorTarget } from '@/shared/task';

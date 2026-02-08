@@ -1,21 +1,13 @@
 import type { SaveTask } from '@/shared/task';
-import type { TaskHandler, TaskTextResult, WorkflowResult } from '@/workers/types';
 import { fetch } from '@/utils/fetch';
 import { C3vkMode } from '@/shared/c3vk';
 import type { ArticleData, LentilleDataResponse } from '@/types/luogu-api';
-import { createHash } from 'crypto';
 import { ArticleService } from '@/services/article.service';
-import { ArticleHistoryService } from '@/services/article-history.service';
 import { UserService } from '@/services/user.service';
-import { Article } from '@/entities/article';
-import { ArticleCategory } from '@/shared/article';
 import { logger } from '@/lib/logger';
 import { buildUser } from '@/utils/luogu-api';
 import { emitToRoom } from '@/lib/socket';
-
-function sha256(data: string): string {
-    return createHash('sha256').update(data).digest('hex');
-}
+import { TaskHandler, TaskTextResult, WorkflowResult } from '@/workers/types';
 
 export class ArticleHandler implements TaskHandler<SaveTask> {
     public taskType = 'save:article';
@@ -34,15 +26,14 @@ export class ArticleHandler implements TaskHandler<SaveTask> {
         await UserService.saveUser(user!);
 
         const data = resp.data.article;
-        const hash = sha256(data.content);
-        let article = await ArticleService.getArticleByIdWithoutCache(data.lid);
-        if (
-            !task.payload.metadata?.forceUpdate &&
-            article &&
-            article.title === data.title &&
-            article.contentHash === hash
-        ) {
-            logger.info({ articleId: article.id }, 'Article content unchanged, skipping update');
+
+        const saveResult = await ArticleService.saveLuoguArticle(
+            data,
+            task.payload.metadata?.forceUpdate
+        );
+
+        if (saveResult.skipped) {
+            logger.info({ articleId: data.lid }, 'Article content unchanged, skipping update');
             return {
                 skipNextStep: true,
                 data: {
@@ -50,37 +41,16 @@ export class ArticleHandler implements TaskHandler<SaveTask> {
                 }
             };
         }
-        const incomingData: Partial<Article> = {
-            title: data.title,
-            authorId: data.author.uid,
-            content: data.content,
-            contentHash: hash,
-            category: data.category as ArticleCategory,
-            solutionForPid: data.solutionFor?.pid,
-            upvote: data.upvote,
-            favorCount: data.favorCount
-        };
 
-        if (article) {
-            Object.assign(article, incomingData);
-        } else {
-            article = new Article();
-            article.id = data.lid;
-            article.deleted = false;
-            article.viewCount = 0;
-            article.tags = [];
-            article.priority = 0;
-            Object.assign(article, incomingData);
+        if (saveResult.content) {
+            emitToRoom(`article_${data.lid}`, `article:${data.lid}:updated`);
+            return {
+                skipNextStep: false,
+                data: {
+                    text: saveResult.content
+                }
+            };
         }
-        await ArticleService.saveArticle(article);
-        await ArticleHistoryService.pushNewVersion(article.id, article.title, article.content);
-        emitToRoom(`article_${article.id}`, `article:${article.id}:updated`);
-
-        return {
-            skipNextStep: false,
-            data: {
-                text: article.content
-            }
-        };
+        throw new Error('Failed to save article');
     }
 }

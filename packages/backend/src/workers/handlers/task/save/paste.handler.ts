@@ -3,16 +3,10 @@ import { TaskHandler, TaskTextResult, WorkflowResult } from '@/workers/types';
 import { fetch } from '@/utils/fetch';
 import { C3vkMode } from '@/shared/c3vk';
 import type { Paste as LuoguPaste, DataResponse } from '@/types/luogu-api';
-import { createHash } from 'crypto';
 import { PasteService } from '@/services/paste.service';
-import { Paste } from '@/entities/paste';
 import { buildUser } from '@/utils/luogu-api';
 import { UserService } from '@/services/user.service';
 import { logger } from '@/lib/logger';
-
-function sha256(data: string): string {
-    return createHash('sha256').update(data).digest('hex');
-}
 
 export class PasteHandler implements TaskHandler<SaveTask> {
     public taskType = 'save:paste';
@@ -31,10 +25,14 @@ export class PasteHandler implements TaskHandler<SaveTask> {
         await UserService.saveUser(user!);
 
         const data = resp.currentData.paste;
-        const hash = sha256(data.data);
-        let paste = await PasteService.getPasteByIdWithoutCache(data.id);
-        if (!task.payload.metadata?.forceUpdate && paste && paste.contentHash === hash) {
-            logger.info({ pasteId: paste.id }, 'Paste content unchanged, skipping update');
+
+        const saveResult = await PasteService.saveLuoguPaste(
+            data,
+            task.payload.metadata?.forceUpdate
+        );
+
+        if (saveResult.skipped) {
+            logger.info({ pasteId: data.id }, 'Paste content unchanged, skipping update');
             return {
                 skipNextStep: true,
                 data: {
@@ -42,24 +40,11 @@ export class PasteHandler implements TaskHandler<SaveTask> {
                 }
             };
         }
-        const incomingData: Partial<Paste> = {
-            content: data.data,
-            contentHash: hash,
-            authorId: data.user.uid
-        };
-        if (paste) {
-            Object.assign(paste, incomingData);
-        } else {
-            paste = new Paste();
-            paste.id = data.id;
-            paste.deleted = false;
-            Object.assign(paste, incomingData);
-        }
-        await PasteService.savePaste(paste);
+
         return {
             skipNextStep: false,
             data: {
-                text: paste.content || ''
+                text: saveResult.content
             }
         };
     }

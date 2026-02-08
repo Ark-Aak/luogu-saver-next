@@ -1,4 +1,5 @@
-import { BaseEntity, Entity, PrimaryColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryColumn, Column, CreateDateColumn } from 'typeorm';
+import { BaseEntity } from './base';
 import { TaskStatus, TaskType } from '@/shared/task';
 
 @Entity({ name: 'task' })

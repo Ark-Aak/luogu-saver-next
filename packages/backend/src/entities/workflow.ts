@@ -1,11 +1,11 @@
 import {
     Entity,
-    BaseEntity,
     PrimaryGeneratedColumn,
     Column,
     CreateDateColumn,
     UpdateDateColumn
 } from 'typeorm';
+import { BaseEntity } from './base';
 
 @Entity({ name: 'workflow' })
 export class Workflow extends BaseEntity {
@@ -20,6 +20,9 @@ export class Workflow extends BaseEntity {
 
     @Column({ default: 'pending' })
     status: string;
+
+    @Column({ type: 'json', nullable: true })
+    result: any;
 
     @Column({ type: 'json' })
     definition: any;

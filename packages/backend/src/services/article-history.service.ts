@@ -1,6 +1,8 @@
 import { ArticleHistory } from '@/entities/article-history';
 import { CacheEvict } from '@/decorators/cache-evict';
 import { Cacheable } from '@/decorators/cacheable';
+import { Article } from '@/entities/article'; // Import Article for locking
+import { EntityManager } from 'typeorm';
 
 export class ArticleHistoryService {
     /*
@@ -16,20 +18,34 @@ export class ArticleHistoryService {
     public static async pushNewVersion(
         articleId: string,
         title: string,
-        content: string
+        content: string,
+        transactionalEntityManager?: EntityManager
     ): Promise<void> {
-        const latestHistory = await ArticleHistory.findOne({
-            where: { articleId },
-            order: { version: 'DESC' }
-        });
-        const newVersion = latestHistory ? latestHistory.version + 1 : 1;
-        const newHistory = ArticleHistory.create({
-            articleId,
-            version: newVersion,
-            title,
-            content
-        });
-        await newHistory.save();
+        const run = async (manager: EntityManager) => {
+            await manager.findOne(Article, {
+                where: { id: articleId },
+                lock: { mode: 'pessimistic_write' }
+            });
+
+            const latestHistory = await manager.findOne(ArticleHistory, {
+                where: { articleId },
+                order: { version: 'DESC' }
+            });
+            const newVersion = latestHistory ? latestHistory.version + 1 : 1;
+            const newHistory = ArticleHistory.create({
+                articleId,
+                version: newVersion,
+                title,
+                content
+            });
+            await manager.save(newHistory);
+        };
+
+        if (transactionalEntityManager) {
+            await run(transactionalEntityManager);
+        } else {
+            await ArticleHistory.transaction(run);
+        }
     }
 
     /*

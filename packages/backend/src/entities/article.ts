@@ -1,6 +1,5 @@
 import {
     Entity,
-    BaseEntity,
     PrimaryColumn,
     Column,
     CreateDateColumn,
@@ -9,6 +8,8 @@ import {
     ManyToOne,
     JoinColumn
 } from 'typeorm';
+
+import { BaseEntity } from './base';
 
 import { Type } from 'class-transformer';
 import { User } from './user';

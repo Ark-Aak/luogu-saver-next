@@ -24,6 +24,28 @@ router.post('/create', requiresPermission(Permission.CREATE_WORKFLOW), async (ct
     }
 });
 
+router.post(
+    '/create/template/:name',
+    requiresPermission(Permission.LOGIN),
+    async (ctx: Context) => {
+        const { name } = ctx.params;
+        const params = ctx.request.body;
+
+        if (!name) {
+            ctx.fail(400, 'Template name is required');
+            return;
+        }
+
+        try {
+            const result = await WorkflowService.createWorkflowFromTemplate(name, params);
+            ctx.success(result);
+        } catch (error) {
+            logger.error({ error, name }, 'Failed to create workflow from template');
+            ctx.fail(500, error instanceof Error ? error.message : 'Unknown error');
+        }
+    }
+);
+
 router.get('/query/:id', async (ctx: Context) => {
     const { id } = ctx.params;
 
