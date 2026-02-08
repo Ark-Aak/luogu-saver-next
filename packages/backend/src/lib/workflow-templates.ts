@@ -115,6 +115,20 @@ export const WORKFLOW_TEMPLATES: Record<string, WorkflowTemplateBuilder> = {
                         metadata: {}
                     }
                 }
+            },
+            {
+                name: 'update-censor',
+                fathers: ['censor'],
+                data: {
+                    type: 'update',
+                    payload: {
+                        target: 'censor',
+                        targetId: targetId,
+                        metadata: {
+                            censorTarget: 'article'
+                        }
+                    }
+                }
             }
         ];
     }
