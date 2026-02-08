@@ -43,7 +43,7 @@ export const requiresPermission = (permissionBit: number) => async (ctx: Context
     await next();
 };
 
-export const checkWorkflowPermission = () => async (ctx: Context, next: Next) => {
+export const checkWorkflowPermission = async (ctx: Context, next: Next) => {
     const templateId = ctx.params.name;
     const permission = WORKFLOW_TEMPLATES_PERMISSION[templateId];
     if (!permission) {
