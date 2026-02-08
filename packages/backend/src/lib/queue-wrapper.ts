@@ -10,7 +10,8 @@ export class TypedQueue<T> {
             connection: {
                 host: config.redis.host,
                 port: config.redis.port,
-                password: config.redis.password
+                password: config.redis.password,
+                keyPrefix: config.redis.keyPrefix
             },
             defaultJobOptions: {
                 removeOnComplete: 100,

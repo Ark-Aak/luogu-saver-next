@@ -27,7 +27,8 @@ export class WorkerHost<T extends CommonTask> {
             connection: {
                 host: config.redis.host,
                 port: config.redis.port,
-                password: config.redis.password
+                password: config.redis.password,
+                keyPrefix: config.redis.keyPrefix
             },
             concurrency: 5,
             limiter: {
@@ -56,7 +57,8 @@ export class WorkerHost<T extends CommonTask> {
             connection: {
                 host: config.redis.host,
                 port: config.redis.port,
-                password: config.redis.password
+                password: config.redis.password,
+                keyPrefix: config.redis.keyPrefix
             }
         });
 
