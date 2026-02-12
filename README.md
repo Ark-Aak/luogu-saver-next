@@ -57,7 +57,7 @@ docker compose up -d
 ### 1. Clone the Repository
 
 ```bash
-git clone [https://github.com/Ark-Aak/luogu-saver-next.git](https://github.com/Ark-Aak/luogu-saver-next.git)
+git clone https://github.com/Ark-Aak/luogu-saver-next.git
 cd luogu-saver-next
 ```
 
