@@ -26,7 +26,19 @@ async function getProcessor() {
                 div: [...(defaultSchema.attributes?.div || []), 'style', ['data*']],
                 span: [...(defaultSchema.attributes?.span || []), 'className', 'style'],
                 pre: ['className', 'style'],
-                code: ['className', 'style']
+                code: ['className', 'style'],
+                iframe: [
+                    'src',
+                    'scrolling',
+                    'border',
+                    'frameborder',
+                    'framespacing',
+                    'allowfullscreen',
+                    'width',
+                    'height',
+                    'className',
+                    'style'
+                ]
             },
             tagNames: [
                 ...(defaultSchema.tagNames || []),
@@ -80,6 +92,54 @@ async function getProcessor() {
                                 'data-open': open.toString()
                             };
                         }
+                    }
+                });
+            };
+        }
+
+        // B站视频内嵌处理
+        function remarkBV() {
+            return (tree: any) => {
+                visit(tree, 'image', (node: any) => {
+                    if (node.url.startsWith('bilibili:')) {
+                        const bilibiliUrl = node.url.substring(9); // 去 `bilibili:`
+                        const [videoID, queryString] = bilibiliUrl.split('?');
+                        let bvid = '';
+                        let aid = '';
+
+                        if (videoID.startsWith('BV')) {
+                            bvid = videoID;
+                        } else if (videoID.startsWith('av')) {
+                            aid = videoID.substring(2);
+                        } else if (/^\d+$/.test(videoID)) {
+                            aid = videoID;
+                        }
+
+                        const params = new URLSearchParams(queryString || '');
+                        const page = params.get('page') || '1';
+                        const t = params.get('t') || '0';
+                        let iframeURL = 'https://player.bilibili.com/player.html?';
+                        if (bvid) {
+                            // bv
+                            iframeURL += `bvid=${bvid}`;
+                        } else if (aid) {
+                            // av
+                            iframeURL += `aid=${aid}`;
+                        }
+                        iframeURL += `&page=${page}`;
+                        if (t !== '0') {
+                            // av
+                            iframeURL += `&t=${t}`;
+                        }
+
+                        iframeURL += '&high_quality=1&autoplay=0';
+
+                        node.type = 'html';
+                        node.value = `<div class="bilibili-video-container"><iframe src="${iframeURL}" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" width="100%" height="500"></iframe></div>`;
+
+                        delete node.url;
+                        delete node.alt;
+                        delete node.title;
                     }
                 });
             };
@@ -168,6 +228,7 @@ async function getProcessor() {
             .use(remarkSmartypants)
             .use(remarkDirective)
             .use(remarkCustomContainers)
+            .use(remarkBV)
             .use(remarkRehype, { allowDangerousHtml: true })
             .use(rehypeRaw)
             .use(rehypeSanitize, schema)
