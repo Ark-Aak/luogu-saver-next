@@ -30,4 +30,5 @@ chroma
 chroma-data
 mysql-data
 meili-data
+redis-data
 /.husky/_/
