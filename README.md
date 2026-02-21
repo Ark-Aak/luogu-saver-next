@@ -7,6 +7,7 @@
         <img src="https://img.shields.io/github/actions/workflow/status/Ark-Aak/luogu-saver-next/deploy.yml" alt="Build Status">
         <img src="https://img.shields.io/github/license/Ark-Aak/luogu-saver-next" alt="License"/>
     </p>
+    <p><a href="README.cn.md">简体中文</a> | English</p>
 </div>
 
 ## Description

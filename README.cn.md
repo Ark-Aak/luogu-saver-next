@@ -7,6 +7,7 @@
         <img src="https://img.shields.io/github/actions/workflow/status/Ark-Aak/luogu-saver-next/deploy.yml" alt="构建状态">
         <img src="https://img.shields.io/github/license/Ark-Aak/luogu-saver-next" alt="许可证"/>
     </p>
+    <p>简体中文 | <a href="README.md">English</a></p>
 </div>
 
 ## 项目描述
