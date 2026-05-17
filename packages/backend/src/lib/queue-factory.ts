@@ -5,6 +5,14 @@ import { logger } from '@/lib/logger';
 
 const queuePool = new Map<string, TypedQueue<any>>();
 
+function getOrCreateQueue<T>(queueName: string): TypedQueue<T> {
+    if (!queuePool.has(queueName)) {
+        queuePool.set(queueName, new TypedQueue<T>(queueName));
+    }
+
+    return queuePool.get(queueName) as TypedQueue<T>;
+}
+
 export function getQueueByType<T extends TaskType>(type: T): TypedQueue<TaskDefinition[T]> {
     const queueName = QUEUE_NAMES[type];
 
@@ -12,20 +20,11 @@ export function getQueueByType<T extends TaskType>(type: T): TypedQueue<TaskDefi
         throw new Error(`No queue name defined for task type: ${type}`);
     }
 
-    if (!queuePool.has(queueName)) {
-        const queue = new TypedQueue<TaskDefinition[T]>(queueName);
-        queuePool.set(queueName, queue);
-    }
-
-    return queuePool.get(queueName) as TypedQueue<TaskDefinition[T]>;
+    return getOrCreateQueue<TaskDefinition[T]>(queueName);
 }
 
 export function getQueueByName(queueName: string): TypedQueue<any> {
-    if (!queuePool.has(queueName)) {
-        const queue = new TypedQueue<any>(queueName);
-        queuePool.set(queueName, queue);
-    }
-    return queuePool.get(queueName) as TypedQueue<any>;
+    return getOrCreateQueue<any>(queueName);
 }
 
 export async function closeAllQueues() {

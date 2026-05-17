@@ -31,6 +31,17 @@ const renderMath = () => {
     }
 };
 
+const toggleMarkdownBlock = (event: Event) => {
+    const title = event.currentTarget as HTMLElement;
+    const body = title.nextElementSibling as HTMLElement | null;
+    const btn = title.querySelector('.toggle-btn');
+    if (!body || !btn) return;
+
+    const isHidden = body.style.display === 'none';
+    body.style.display = isHidden ? 'block' : 'none';
+    btn.classList.toggle('expanded', isHidden);
+};
+
 const initMarkdownBlocks = () => {
     if (!contentRef.value) return;
 
@@ -47,20 +58,8 @@ const initMarkdownBlocks = () => {
             btn.classList.add('expanded');
         }
 
-        title.removeEventListener('click', () => {});
-        title.addEventListener('click', () => {
-            if (!body) return;
-
-            const isHidden = body.style.display === 'none';
-
-            if (isHidden) {
-                body.style.display = 'block';
-                btn.classList.add('expanded');
-            } else {
-                body.style.display = 'none';
-                btn.classList.remove('expanded');
-            }
-        });
+        title.removeEventListener('click', toggleMarkdownBlock);
+        title.addEventListener('click', toggleMarkdownBlock);
     });
 };
 

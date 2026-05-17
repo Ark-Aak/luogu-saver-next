@@ -9,6 +9,18 @@ export function useContentSaver() {
     const router = useRouter();
     const isSaving = ref(false);
     const hasUpdate = ref(false);
+    const cleanupCallbacks = new Set<() => void>();
+
+    const addCleanup = (cleanup: () => void) => {
+        cleanupCallbacks.add(cleanup);
+    };
+
+    onUnmounted(() => {
+        for (const cleanup of cleanupCallbacks) {
+            cleanup();
+        }
+        cleanupCallbacks.clear();
+    });
 
     const handle404 = (saveAction: () => Promise<any>, onCancel?: () => void) => {
         dialog.warning({
@@ -61,7 +73,7 @@ export function useContentSaver() {
 
         socket.getInstance().on(event, handleUpdate);
 
-        onUnmounted(() => {
+        addCleanup(() => {
             socket.getInstance().off(event, handleUpdate);
             socket.leaveRoom(room);
         });
@@ -72,27 +84,40 @@ export function useContentSaver() {
         onComplete: () => void,
         onFail: (error: string) => void
     ) => {
+        if (!taskId) return () => {};
+
         const roomId = `task:${taskId}`;
         const completeEvent = `task:${taskId}:completed`;
         const failEvent = `task:${taskId}:failed`;
         socket.joinRoom(roomId);
 
-        const handleComplete = () => {
-            onComplete();
-        };
-
-        const handleFail = (data: { error: string }) => {
-            onFail(data.error);
-        };
-
+        let active = true;
         socket.getInstance().on(completeEvent, handleComplete);
         socket.getInstance().on(failEvent, handleFail);
 
-        onUnmounted(() => {
+        addCleanup(cleanup);
+        return cleanup;
+
+        function cleanup() {
+            if (!active) return;
+            active = false;
             socket.getInstance().off(completeEvent, handleComplete);
             socket.getInstance().off(failEvent, handleFail);
             socket.leaveRoom(roomId);
-        });
+            cleanupCallbacks.delete(cleanup);
+        }
+
+        function handleComplete() {
+            stopSaving();
+            onComplete();
+            cleanup();
+        }
+
+        function handleFail(data: { error: string }) {
+            stopSaving();
+            onFail(data.error);
+            cleanup();
+        }
     };
 
     const handleRefresh = (onRefresh: () => void) => {

@@ -8,8 +8,13 @@ const socket: Socket = io(URL, {
     transports: ['websocket', 'polling']
 });
 
+const joinedRooms = new Map<string, number>();
+
 socket.on('connect', () => {
     console.log('WebSocket connected', socket.id);
+    for (const room of joinedRooms.keys()) {
+        socket.emit('join', room);
+    }
 });
 
 socket.on('disconnect', () => {
@@ -17,19 +22,20 @@ socket.on('disconnect', () => {
 });
 
 export const joinRoom = (room: string) => {
-    if (socket.connected) {
-        socket.emit('join', room);
-    } else {
-        socket.once('connect', () => {
-            socket.emit('join', room);
-        });
-    }
+    const currentCount = joinedRooms.get(room) || 0;
+    joinedRooms.set(room, currentCount + 1);
+    if (currentCount === 0 && socket.connected) socket.emit('join', room);
 };
 
 export const leaveRoom = (room: string) => {
-    if (socket.connected) {
-        socket.emit('leave', room);
+    const currentCount = joinedRooms.get(room) || 0;
+    if (currentCount <= 1) {
+        joinedRooms.delete(room);
+        if (socket.connected) socket.emit('leave', room);
+        return;
     }
+
+    joinedRooms.set(room, currentCount - 1);
 };
 
 export default {

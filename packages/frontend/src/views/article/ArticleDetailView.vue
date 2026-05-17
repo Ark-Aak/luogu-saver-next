@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import {
     useMessage,
@@ -86,13 +86,13 @@ const triggerRefresh = () => {
 };
 
 const lastUpdate = useLocalStorage(CACHE_STORAGE_KEY + `_article_${articleId}_updated_at`, 0);
-if (Date.now() - lastUpdate.value > 60 * 60 * 1000) {
-    // Request update automatically if last update was more than 1 hour ago
+const maybeAutoUpdateArticle = () => {
+    if (Date.now() - lastUpdate.value <= 60 * 60 * 1000) return;
+
     console.log('Auto update triggered for article', articleId);
-    saveArticle(articleId);
-    // We not set the lastTaskId here because we don't care whether the update succeeds or not
+    saveArticle(articleId).catch(err => console.error('Auto update failed', err));
     lastUpdate.value = Date.now();
-}
+};
 
 const loadRelevant = async () => {
     if (!articleId) return;
@@ -127,19 +127,25 @@ const loadHistory = async () => {
     }
 };
 
-let lastTaskId = ref('');
-watch(lastTaskId, newTaskId => {
-    setupTaskUpdateListener(
-        newTaskId,
-        () => {},
+let stopTaskListener: (() => void) | null = null;
+
+const trackSaveTask = (taskId?: string) => {
+    if (!taskId) return;
+    stopTaskListener?.();
+    stopTaskListener = setupTaskUpdateListener(
+        taskId,
+        () => {
+            stopTaskListener = null;
+        },
         error => {
+            stopTaskListener = null;
             dialog.error({
                 title: '保存失败',
                 content: error || '文章保存过程中出现错误，请重试。',
                 positiveText: '重试',
                 negativeText: '取消',
                 onPositiveClick: async () => {
-                    lastTaskId.value = (await saveArticle(articleId)).data.taskId;
+                    trackSaveTask((await saveArticle(articleId)).data.taskId);
                 },
                 maskClosable: false,
                 closable: false,
@@ -147,14 +153,20 @@ watch(lastTaskId, newTaskId => {
             });
         }
     );
-});
+};
+
+const submitSaveArticle = async () => {
+    const response = await saveArticle(articleId);
+    trackSaveTask(response.data.taskId);
+    return response;
+};
 
 const loadData = async () => {
     loading.value = true;
     try {
         const res = await getArticleById(articleId);
         if (res.code === 404) {
-            handle404(async () => (lastTaskId.value = (await saveArticle(articleId)).data.taskId));
+            handle404(submitSaveArticle);
             return;
         }
         article.value = res.data;
@@ -166,6 +178,7 @@ const loadData = async () => {
         }
 
         await Promise.all([loadRelevant(), loadHistory()]);
+        maybeAutoUpdateArticle();
     } catch (err: any) {
         message.error(err.message || '加载失败');
     } finally {
@@ -195,7 +208,7 @@ const handleCopy = async () => {
 const handleUpdate = async () => {
     if (!articleId) return;
     try {
-        lastTaskId.value = (await saveArticle(articleId)).data.taskId;
+        await submitSaveArticle();
         message.success('更新请求已提交');
     } catch (err: any) {
         message.error(err.message || '更新请求失败');

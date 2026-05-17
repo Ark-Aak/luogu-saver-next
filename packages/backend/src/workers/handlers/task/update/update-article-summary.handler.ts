@@ -29,7 +29,7 @@ export class UpdateArticleSummaryHandler implements TaskHandler<UpdateTask> {
             );
         }
 
-        const article = await ArticleService.getArticleById(task.payload.targetId);
+        const article = await ArticleService.getArticleByIdWithoutCache(task.payload.targetId);
         if (!article) {
             throw new UnrecoverableError(
                 `Article with id ${task.payload.targetId} not found for job ${job.id}`

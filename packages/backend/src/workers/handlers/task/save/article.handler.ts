@@ -17,13 +17,7 @@ export class ArticleHandler implements TaskHandler<SaveTask> {
         const resp: LentilleDataResponse<ArticleData> = await fetch(url, C3vkMode.MODERN);
 
         const incomingUser = buildUser(resp.data.article.author);
-        let user = await UserService.getUserByIdWithoutCache(incomingUser.id!);
-        if (user) {
-            Object.assign(user, incomingUser);
-        } else {
-            user = UserService.createUser(incomingUser);
-        }
-        await UserService.saveUser(user!);
+        await UserService.upsertLuoguUser(incomingUser);
 
         const data = resp.data.article;
 

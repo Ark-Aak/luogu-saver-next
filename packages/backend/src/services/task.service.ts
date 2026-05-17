@@ -2,17 +2,20 @@ import { Task } from '@/entities/task';
 import { TaskStatus, TaskType } from '@/shared/task';
 import { getQueueByType } from '@/lib/queue-factory';
 import { getRandomString } from '@/utils/string';
+import { retryOnDuplicateKey } from '@/utils/db-errors';
 
 export class TaskService {
     static async createTask(type: TaskType, payload: any): Promise<Task> {
-        const task = new Task();
+        return retryOnDuplicateKey(async () => {
+            const task = new Task();
 
-        task.id = getRandomString(8);
-        task.type = type;
-        task.payload = payload;
-        task.status = TaskStatus.PENDING;
-        await task.save();
-        return task;
+            task.id = getRandomString(8);
+            task.type = type;
+            task.payload = payload;
+            task.status = TaskStatus.PENDING;
+            await task.save();
+            return task;
+        }, 5);
     }
 
     static async dispatchTask(taskId: string) {

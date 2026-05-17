@@ -4,6 +4,7 @@ import { QUEUE_NAMES } from '@/shared/constants';
 import { Job, QueueEvents } from 'bullmq';
 import { getQueueByName } from '@/lib/queue-factory';
 import { config } from '@/config';
+import { WorkflowStatusStore } from '@/services/helpers/workflow-status-store.helper';
 
 export class FlowManager {
     private static queueEvents: Map<string, QueueEvents> = new Map();
@@ -36,9 +37,9 @@ export class FlowManager {
 
     static async updateWorkflowStatus(jobId: string, status: string, reason?: string) {
         try {
-            const updateResult = await Workflow.update({ rootJobId: jobId }, { status: status });
+            const affected = await WorkflowStatusStore.updateByRootJobId(jobId, status);
 
-            if (updateResult.affected && updateResult.affected > 0) {
+            if (affected > 0) {
                 logger.info({ jobId, status, reason }, 'Workflow status updated');
             }
         } catch (err) {
@@ -85,5 +86,11 @@ export class FlowManager {
 
             this.queueEvents.set(queueName, events);
         });
+    }
+
+    static async closeQueueEvents() {
+        const events = [...this.queueEvents.values()];
+        this.queueEvents.clear();
+        await Promise.all(events.map(event => event.close()));
     }
 }

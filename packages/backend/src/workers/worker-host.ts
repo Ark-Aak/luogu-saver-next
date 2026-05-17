@@ -16,6 +16,7 @@ import { emitToRoom } from '@/lib/socket';
 
 export class WorkerHost<T extends CommonTask> {
     public worker: Worker<T>;
+    private queueEvents: QueueEvents;
 
     constructor(
         queueName: string,
@@ -53,7 +54,7 @@ export class WorkerHost<T extends CommonTask> {
     };
 
     private setupEvents() {
-        const queueEvents = new QueueEvents(this.worker.name, {
+        this.queueEvents = new QueueEvents(this.worker.name, {
             connection: {
                 host: config.redis.host,
                 port: config.redis.port,
@@ -106,16 +107,16 @@ export class WorkerHost<T extends CommonTask> {
                 await TaskService.updateTask(job.id, TaskStatus.PROCESSING, progress as string);
         });
 
-        queueEvents.on('delayed', (job: { jobId: string; delay: number }) => {
+        this.queueEvents.on('delayed', (job: { jobId: string; delay: number }) => {
             logger.warn({ jobId: job.jobId, delay: job.delay }, 'Job has been delayed.');
         });
 
-        queueEvents.on('waiting', (job: { jobId: string }) => {
+        this.queueEvents.on('waiting', (job: { jobId: string }) => {
             logger.debug({ jobId: job?.jobId }, 'Job queued.');
         });
     }
 
     public async close() {
-        await this.worker.close();
+        await Promise.all([this.worker.close(), this.queueEvents.close()]);
     }
 }

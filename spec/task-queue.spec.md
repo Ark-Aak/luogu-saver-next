@@ -143,7 +143,8 @@ Query task status.
 1. Generate an 8-character random string as `task.id`.
 2. Set `status` to `PENDING`.
 3. Save the task to the database.
-4. Return the created task.
+4. If the database rejects the insert because `task.id` already exists, retry ID generation and insert up to 5 total attempts.
+5. Return the created task.
 
 ### 5.2 dispatchTask(taskId)
 
@@ -231,6 +232,7 @@ Queue behavior is controlled by `config.queue`:
 2. Task status transitions: PENDING -> PROCESSING -> (COMPLETED | FAILED).
 3. Failed tasks are marked with `FAILED` status and error info.
 4. Queue names are derived from task types via constant mapping.
+5. A duplicate random task ID does not overwrite an existing task row.
 
 ## 10. File Locations
 

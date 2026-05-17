@@ -32,7 +32,7 @@ export class UpdateArticleEmbeddingHandler implements TaskHandler<UpdateTask> {
             );
         }
 
-        const article = await ArticleService.getArticleById(task.payload.targetId);
+        const article = await ArticleService.getArticleByIdWithoutCache(task.payload.targetId);
 
         await EmbeddingService.upsertVector(
             task.payload.targetId,

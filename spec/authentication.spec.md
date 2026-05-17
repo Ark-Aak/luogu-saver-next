@@ -83,6 +83,17 @@ Cheater - Flagged user
 
 The `User.findById(id)` method is cached for 3 days (259200 seconds) with key pattern `user:${id}`.
 
+### 4.4 Luogu User Upsert
+
+The `UserService.upsertLuoguUser(data)` method SHALL:
+
+1. Throw an error if `data.id` is `undefined`.
+2. Use `data.id` as the unique user key.
+3. Insert a user row when no row exists for `data.id`.
+4. Update the existing row when a row exists for `data.id`.
+5. Execute as one database upsert operation so concurrent saves for the same user do not fail with a duplicate primary-key error.
+6. After a successful upsert, evict Redis cache key `user:{data.id}`.
+
 ## 5. Authorization States
 
 | `ctx.userId` | Interpretation                   |

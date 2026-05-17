@@ -5,28 +5,34 @@ import { logger } from '@/lib/logger';
 
 export class EmbeddingService {
     private static _collection: Collection | null = null;
+    private static _collectionPromise: Promise<Collection> | null = null;
 
     private static async getCollection(): Promise<Collection> {
-        if (!this._collection) {
-            try {
-                this._collection = await ChromaDataSource.getOrCreateCollection({
-                    name: config.chroma.collectionName
+        if (this._collection) return this._collection;
+
+        if (!this._collectionPromise) {
+            this._collectionPromise = ChromaDataSource.getOrCreateCollection({
+                name: config.chroma.collectionName
+            })
+                .then(collection => {
+                    this._collection = collection;
+                    logger.info(
+                        { collection: config.chroma.collectionName },
+                        'Chroma collection loaded successfully'
+                    );
+                    return collection;
+                })
+                .catch(error => {
+                    this._collectionPromise = null;
+                    logger.error(
+                        { error, collection: config.chroma.collectionName },
+                        'Failed to get Chroma collection'
+                    );
+                    throw error;
                 });
-                logger.info(
-                    { collection: config.chroma.collectionName },
-                    'Chroma collection loaded successfully'
-                );
-            } catch (error) {
-                logger.error(
-                    { error, collection: config.chroma.collectionName },
-                    'Failed to get Chroma collection'
-                );
-            }
         }
-        if (!this._collection) {
-            throw new Error('Unable to get Chroma collection');
-        }
-        return this._collection;
+
+        return this._collectionPromise;
     }
 
     static async getVector(articleId: string) {

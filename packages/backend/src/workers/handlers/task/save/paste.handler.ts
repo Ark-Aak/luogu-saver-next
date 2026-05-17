@@ -16,13 +16,7 @@ export class PasteHandler implements TaskHandler<SaveTask> {
         const resp: DataResponse<{ paste: LuoguPaste }> = await fetch(url, C3vkMode.MODERN);
 
         const incomingUser = buildUser(resp.currentData.paste.user);
-        let user = await UserService.getUserByIdWithoutCache(incomingUser.id!);
-        if (user) {
-            Object.assign(user, incomingUser);
-        } else {
-            user = UserService.createUser(incomingUser);
-        }
-        await UserService.saveUser(user!);
+        await UserService.upsertLuoguUser(incomingUser);
 
         const data = resp.currentData.paste;
 

@@ -9,6 +9,8 @@ import stringSimilarity from 'string-similarity';
 
 type RecommendedArticle = Article & { reason: string };
 
+type RedisSortedSetEntry = [score: number, member: string];
+
 export class RecommendationService {
     private static async getSimilarArticles(id: string, count: number): Promise<string[]> {
         const vector = await EmbeddingService.getVector(id);
@@ -63,17 +65,35 @@ export class RecommendationService {
         return filtered;
     }
 
+    private static async addRecentSortedSetEntries(
+        key: string,
+        entries: RedisSortedSetEntry[],
+        maxCount: number,
+        expireSeconds: number
+    ) {
+        if (entries.length === 0) return;
+
+        const redisArgs: (string | number)[] = entries.flatMap(([score, member]) => [
+            score,
+            member
+        ]);
+        const transaction = redisClient.multi();
+        transaction.zadd(key, ...redisArgs);
+        transaction.zremrangebyrank(key, 0, -maxCount - 1);
+        transaction.expire(key, expireSeconds);
+        await transaction.exec();
+    }
+
     static async recordAnonymousBehavior(deviceId: string, articleId: string) {
         try {
             const key = `anon_behavior:${deviceId}`;
             const now = Date.now();
-            await redisClient.zadd(key, now, articleId);
-            await redisClient.zremrangebyrank(
+            await this.addRecentSortedSetEntries(
                 key,
-                0,
-                -config.recommendation.anonymous.maxCount - 1
+                [[now, articleId]],
+                config.recommendation.anonymous.maxCount,
+                config.recommendation.anonymous.expireTime
             );
-            await redisClient.expire(key, config.recommendation.anonymous.expireTime);
         } catch (error) {
             logger.error({ error, deviceId, articleId }, `Failed to record anonymous behavior`);
         }
@@ -83,19 +103,12 @@ export class RecommendationService {
         try {
             const key = `anon_recommendations:${deviceId}`;
             const now = Date.now();
-            const entries: (string | number)[] = [];
-            for (const articleId of articleIds) {
-                entries.push(now, articleId);
-            }
-            if (entries.length > 0) {
-                await redisClient.zadd(key, ...entries);
-                await redisClient.zremrangebyrank(
-                    key,
-                    0,
-                    -config.recommendation.anonymous.maxCount - 1
-                );
-                await redisClient.expire(key, 3 * 60 * 60);
-            }
+            await this.addRecentSortedSetEntries(
+                key,
+                articleIds.map(articleId => [now, articleId]),
+                config.recommendation.anonymous.maxCount,
+                3 * 60 * 60
+            );
         } catch (error) {
             logger.error({ error, deviceId, articleIds }, `Failed to record recommended articles`);
         }

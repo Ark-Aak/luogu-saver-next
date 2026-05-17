@@ -44,8 +44,11 @@ Output:
 Postconditions:
 
 1. A `workflow` row is created with `id = workflowId`.
-2. The submitted flow is pushed to BullMQ.
-3. `taskId` equals the BullMQ root job ID and can be used with existing websocket task rooms (`task:{taskId}`).
+2. The `workflow` row is created before the submitted flow is pushed to BullMQ.
+3. Each BullMQ job in the flow has a job ID assigned before submission.
+4. The submitted flow is pushed to BullMQ.
+5. `taskId` equals the BullMQ root job ID and can be used with existing websocket task rooms (`task:{taskId}`).
+6. If workflow creation fails before the API response is sent, no `workflow` row with `id = workflowId` remains in the database.
 
 ### 3.2 POST `/workflow/create/template/:name`
 
@@ -87,7 +90,8 @@ Output:
 }
 ```
 
-If runtime flow data cannot be loaded from Redis, status is set to `expired` and `tasks` is returned as `null`.
+If runtime flow data cannot be loaded from Redis and current status is not terminal, status is set to `expired` and `tasks` is returned as `null`.
+If runtime flow data cannot be loaded from Redis and current status is terminal, status is unchanged and `tasks` is returned as `null`.
 For tracked task entries that are not finished yet, `result[taskName]` is `null`.
 
 ## 4. Template Definitions
@@ -131,6 +135,10 @@ Permission: `CREATE_WORKFLOW`.
     "result": "<returnvalue.__result>"
 }
 ```
+
+4. Status writes are monotonic with respect to terminal states.
+5. If current `workflow.status` is `completed`, `failed`, or `expired`, later queue status reads or queue events MUST NOT replace it.
+6. If current `workflow.status` is not terminal, a queue status read or queue event MAY replace it with the observed BullMQ state.
 
 ## 6. Invariants
 

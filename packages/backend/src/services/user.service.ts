@@ -1,6 +1,7 @@
 import { Cacheable } from '@/decorators/cacheable';
 import { CacheEvict } from '@/decorators/cache-evict';
 import { User } from '@/entities/user';
+import { EntityManager } from 'typeorm';
 
 export class UserService {
     /*
@@ -36,6 +37,18 @@ export class UserService {
     static createUser(data: Partial<User>): User {
         const user = new User();
         Object.assign(user, data);
+        return user;
+    }
+
+    @CacheEvict((data: Partial<User>) => (data.id === undefined ? [] : `user:${data.id}`))
+    static async upsertLuoguUser(data: Partial<User>, manager?: EntityManager): Promise<User> {
+        if (data.id === undefined) {
+            throw new Error('User ID is required');
+        }
+
+        const repository = manager ? manager.getRepository(User) : User.getRepository();
+        const user = repository.create(data);
+        await repository.upsert(user, ['id']);
         return user;
     }
 }

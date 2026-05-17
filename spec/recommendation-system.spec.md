@@ -42,12 +42,15 @@ Anonymous user behavior is stored in Redis sorted sets:
 1. Add `(timestamp, articleId)` to sorted set `anon_behavior:{deviceId}`.
 2. Trim set to keep only the most recent `config.recommendation.anonymous.maxCount` entries.
 3. Set TTL to `config.recommendation.anonymous.expireTime` seconds.
+4. Steps 1 through 3 execute in one Redis transaction.
 
 ### 3.3 recordRecommendedArticles(deviceId, articleIds)
 
 1. Add all article IDs with current timestamp to `anon_recommendations:{deviceId}`.
 2. Trim to `config.recommendation.anonymous.maxCount` entries.
 3. Set TTL to 3 hours (10800 seconds).
+4. If `articleIds` is empty, no Redis command is executed.
+5. Steps 1 through 3 execute in one Redis transaction.
 
 ### 3.4 getRecommendedArticles(deviceId)
 

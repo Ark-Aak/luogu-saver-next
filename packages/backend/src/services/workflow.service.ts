@@ -1,4 +1,4 @@
-import { FlowProducer, JobNode, Job } from 'bullmq';
+import { FlowJob, FlowProducer, Job, JobNode } from 'bullmq';
 import { config } from '@/config';
 import { Workflow } from '@/entities/workflow';
 import { logger } from '@/lib/logger';
@@ -7,6 +7,7 @@ import { WORKFLOW_TEMPLATES } from '@/lib/workflow-templates';
 import { randomUUID } from 'node:crypto';
 import { WorkflowBuilder } from './helpers/workflow-builder.helper';
 import { getQueueByName } from '@/lib/queue-factory';
+import { WorkflowStatusStore } from '@/services/helpers/workflow-status-store.helper';
 
 export class WorkflowService {
     private static _flowProducer: FlowProducer;
@@ -30,12 +31,11 @@ export class WorkflowService {
 
         const workflowId = randomUUID();
         const rootJobNode = WorkflowBuilder.buildLinearFlow(flowDef, workflowId);
-        const jobNode = await this.flowProducer.add(rootJobNode);
-        const taskId = jobNode.job.id;
-        if (!taskId) {
+        const rootJobId = rootJobNode.opts?.jobId;
+        if (!rootJobId) {
             throw new Error('Workflow root job ID missing');
         }
-        const jobIds = this.extractJobIds(jobNode);
+        const jobIds = this.extractJobIdsFromDefinition(rootJobNode);
 
         const result: Record<string, any> = {};
         flowDef.forEach(task => {
@@ -46,19 +46,29 @@ export class WorkflowService {
 
         const workflow = Workflow.create({
             id: workflowId,
-            rootJobId: taskId,
-            queueName: jobNode.job.queueName,
+            rootJobId,
+            queueName: rootJobNode.queueName,
             definition: flowDef,
             status: 'active',
             result
         });
 
-        await workflow.save();
+        try {
+            await workflow.save();
+            await this.flowProducer.add(rootJobNode);
+        } catch (error) {
+            try {
+                await Workflow.delete({ id: workflowId });
+            } catch (cleanupError) {
+                logger.error({ cleanupError, workflowId }, 'Failed to clean up workflow row');
+            }
+            throw error;
+        }
         logger.info({ workflowId, rootJobId: workflow.rootJobId }, 'Workflow created');
 
         return {
             workflowId,
-            taskId,
+            taskId: rootJobId,
             jobIds
         };
     }
@@ -95,8 +105,8 @@ export class WorkflowService {
                 'Workflow execution info unavailable, marking expired'
             );
 
-            workflow.status = 'expired';
-            await Workflow.update({ id }, { status: 'expired' });
+            const storedStatus = await WorkflowStatusStore.updateById(id, 'expired');
+            workflow.status = storedStatus || workflow.status;
 
             return this.formatWorkflowResponse(workflow, null);
         }
@@ -113,15 +123,15 @@ export class WorkflowService {
 
         const state = await job.getState();
         if (state && state !== workflow.status) {
-            workflow.status = state;
-            await Workflow.update({ id: workflow.id }, { status: state });
+            const storedStatus = await WorkflowStatusStore.updateById(workflow.id, state);
+            workflow.status = storedStatus || workflow.status;
         }
     }
 
-    private static extractJobIds(node: JobNode): Record<string, string> {
+    private static extractJobIdsFromDefinition(node: FlowJob): Record<string, string> {
         const map: Record<string, string> = {};
-        const traverse = (n: JobNode) => {
-            if (n.job?.name && n.job?.id) map[n.job.name] = n.job.id;
+        const traverse = (n: FlowJob) => {
+            if (n.name && n.opts?.jobId) map[n.name] = n.opts.jobId;
             n.children?.forEach(traverse);
         };
         traverse(node);

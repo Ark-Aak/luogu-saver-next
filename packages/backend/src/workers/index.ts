@@ -73,19 +73,23 @@ export function bootstrap() {
         } as WorkerOptions
     );
 
-    process.on('SIGINT', async () => {
+    const closeWorkers = async () => {
         logger.info('Shutting down workers...');
-        await saveWorkerHost.close();
-        await aiWorkerHost.close();
-        await updateWorkerHost.close();
+        await Promise.all([
+            saveWorkerHost.close(),
+            aiWorkerHost.close(),
+            updateWorkerHost.close(),
+            FlowManager.closeQueueEvents()
+        ]);
+    };
+
+    process.on('SIGINT', async () => {
+        await closeWorkers();
         process.exit(0);
     });
 
     process.on('SIGTERM', async () => {
-        logger.info('Shutting down workers...');
-        await saveWorkerHost.close();
-        await aiWorkerHost.close();
-        await updateWorkerHost.close();
+        await closeWorkers();
         process.exit(0);
     });
 

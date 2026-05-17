@@ -1,6 +1,7 @@
 import { TaskDefinition } from '@/utils/flow-validator';
 import { QUEUE_NAMES } from '@/shared/constants';
 import { FlowJob } from 'bullmq';
+import { TaskType } from '@/shared/task';
 
 interface FlowTask extends TaskDefinition {
     track?: boolean;
@@ -13,13 +14,16 @@ export class WorkflowBuilder {
 
         let childNode: FlowJob | undefined = undefined;
 
-        for (const task of sortedTasks) {
-            // @ts-expect-error ignore
-            const queueName = task.queueName || QUEUE_NAMES[task.data?.type] || 'default';
+        for (const [index, task] of sortedTasks.entries()) {
+            const queueName =
+                task.queueName || QUEUE_NAMES[task.data?.type as TaskType] || 'default';
 
             childNode = {
                 name: task.name,
                 queueName: queueName,
+                opts: {
+                    jobId: `${workflowId}-${index}`
+                },
                 data: {
                     ...task.data,
                     workflowId,
