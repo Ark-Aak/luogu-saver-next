@@ -10,6 +10,7 @@ import stringSimilarity from 'string-similarity';
 type RecommendedArticle = Article & { reason: string };
 
 type RedisSortedSetEntry = [score: number, member: string];
+type CandidatePools = Record<string, string[]>;
 
 export class RecommendationService {
     private static async getSimilarArticles(id: string, count: number): Promise<string[]> {
@@ -57,12 +58,41 @@ export class RecommendationService {
 
     private static filterArticles(recommendations: string[], articles: Set<string>): string[] {
         const filtered: string[] = [];
+        const inResult: Set<string> = new Set();
         for (const articleId of recommendations) {
+            if (inResult.has(articleId)) continue;
             if (!articles.has(articleId)) {
                 filtered.push(articleId);
+                inResult.add(articleId);
             }
         }
         return filtered;
+    }
+
+    private static shuffleArticles(articleIds: string[]): string[] {
+        return [...articleIds].sort(() => 0.5 - Math.random());
+    }
+
+    private static getReason(articleId: string, candidatePools: CandidatePools): string {
+        for (const [reason, articleIds] of Object.entries(candidatePools)) {
+            if (articleIds.includes(articleId)) return reason;
+        }
+        return 'other';
+    }
+
+    private static async hydrateRecommendations(
+        articleIds: string[],
+        candidatePools: CandidatePools
+    ): Promise<Partial<RecommendedArticle>[]> {
+        const result: Article[] = await ArticleService.getArticlesByIds(articleIds);
+        const resultWithReason = result.map(
+            article =>
+                ({
+                    ...article,
+                    reason: this.getReason(article.id, candidatePools)
+                }) as RecommendedArticle
+        );
+        return this.filterUselessFields(resultWithReason);
     }
 
     private static async addRecentSortedSetEntries(
@@ -141,7 +171,11 @@ export class RecommendationService {
         });
     }
 
-    static async getAnonymousRecommendations(deviceId: string, count: number = 10) {
+    static async getAnonymousRecommendations(
+        deviceId: string,
+        count: number = 10,
+        excludedArticles: string[] = []
+    ) {
         const key = `anon_behavior:${deviceId}`;
         const articleIds = await redisClient.zrevrange(
             key,
@@ -168,39 +202,58 @@ export class RecommendationService {
         logger.debug({ deviceId, articleIds }, `Read articles`);
         logger.debug({ deviceId, randomResults }, `Random articles`);
         logger.debug({ deviceId, hotResults }, `Hot articles`);
-        const recommendations = [...vectorResults, ...randomResults, ...hotResults];
-        recommendations.sort(() => 0.5 - Math.random());
+        const recommendations = this.shuffleArticles([
+            ...vectorResults,
+            ...randomResults,
+            ...hotResults
+        ]);
         const readArticles = new Set(articleIds);
         const previouslyRecommended = await this.getRecommendedArticles(deviceId);
         for (const recId of previouslyRecommended) readArticles.add(recId);
+        for (const excludedArticle of excludedArticles) readArticles.add(excludedArticle);
         const filtered = this.filterArticles(recommendations, readArticles).slice(0, count);
-        const result: Article[] = await ArticleService.getArticlesByIds(filtered);
         await this.recordRecommendedArticles(deviceId, filtered);
         logger.debug({ deviceId, recommendation: filtered }, `Final recommendations`);
-        const resultWithReason: RecommendedArticle[] = [];
-        for (const article of result) {
-            if (vectorResults.includes(article.id))
-                resultWithReason.push({
-                    ...article,
-                    reason: 'vector'
-                } as RecommendedArticle);
-            else if (randomResults.includes(article.id))
-                resultWithReason.push({
-                    ...article,
-                    reason: 'random'
-                } as RecommendedArticle);
-            else if (hotResults.includes(article.id))
-                resultWithReason.push({
-                    ...article,
-                    reason: 'hot'
-                } as RecommendedArticle);
-            else
-                resultWithReason.push({
-                    ...article,
-                    reason: 'other'
-                } as RecommendedArticle);
-        }
-        return this.filterUselessFields(resultWithReason);
+        return this.hydrateRecommendations(filtered, {
+            vector: vectorResults,
+            random: randomResults,
+            hot: hotResults
+        });
+    }
+
+    static async getPublicRecommendations(count: number = 10, excludedArticles: string[] = []) {
+        const randomResults = (await ArticleService.getRandomArticles(20)).map(a => a.id);
+        const hotResults = (await ArticleService.getArticlesOrderedByViewCount(50)).map(a => a.id);
+        const recentResults = (await ArticleService.getRecentArticlesWithoutCache(count * 5)).map(
+            a => a.id
+        );
+
+        const recommendations = this.shuffleArticles([
+            ...randomResults,
+            ...hotResults,
+            ...recentResults
+        ]);
+        const filtered = this.filterArticles(recommendations, new Set(excludedArticles)).slice(
+            0,
+            count
+        );
+
+        logger.debug(
+            {
+                excludedArticles,
+                rL: randomResults.length,
+                hL: hotResults.length,
+                recentL: recentResults.length,
+                recommendation: filtered
+            },
+            `Public recommendations`
+        );
+
+        return this.hydrateRecommendations(filtered, {
+            random: randomResults,
+            hot: hotResults,
+            other: recentResults
+        });
     }
 
     static async getRelevantArticle(articleId: string, fromVector: number = 5) {

@@ -34,7 +34,8 @@ const loadMore = async () => {
     error.value = false;
 
     try {
-        const newArticles = (await getRecommendations()).data || [];
+        const excludedArticleIds = articles.value.map(article => article.id);
+        const newArticles = (await getRecommendations(excludedArticleIds)).data || [];
 
         if (newArticles.length > 0) {
             everReturned.value = true;

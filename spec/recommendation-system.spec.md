@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-The recommendation system provides personalized article recommendations using a hybrid approach combining vector similarity, title matching, view history, and popularity metrics. It supports both anonymous users (via device ID) and authenticated users.
+The recommendation system provides article recommendations using a hybrid approach combining vector similarity, title matching, view history, and popularity metrics. It supports consented anonymous users via device ID. If a request has no consented device ID, the system returns public recommendations without reading or writing a user-specific key.
 
 ## 2. Components
 
@@ -27,11 +27,11 @@ The `EmbeddingService` interfaces with ChromaDB for vector-based similarity sear
 
 The `RecommendationService` provides recommendation algorithms.
 
-## 3. Anonymous Behavior Tracking
+## 3. Consented Anonymous Behavior Tracking
 
 ### 3.1 Data Structure
 
-Anonymous user behavior is stored in Redis sorted sets:
+Consented anonymous user behavior is stored in Redis sorted sets:
 
 - Key: `anon_behavior:{deviceId}`
 - Score: Unix timestamp in milliseconds
@@ -88,7 +88,9 @@ Get personalized recommendations for the plaza page.
 **Request:**
 
 - Query parameter: `count` (number, optional) - Number of recommendations (default: 10)
-- Header: `X-Device-Id` (string) - Anonymous device identifier
+- Query parameter: `exclude` (string, optional) - Comma-separated article IDs that must not appear in the response. Empty IDs are ignored. Duplicate IDs are removed in first-seen order. At most the first 200 unique IDs are used.
+- Header: `X-Consent-Tracking` (string, optional) - If the value is exactly `true`, the request may use a device ID for consented anonymous personalization.
+- Header: `X-Device-Id` (string, optional) - Anonymous device identifier. This header is used only when `X-Consent-Tracking` is exactly `true`.
 
 **Response:**
 
@@ -132,7 +134,7 @@ Get articles relevant to a specific article.
 
 ## 6. Recommendation Algorithms
 
-### 6.1 getAnonymousRecommendations(deviceId, count)
+### 6.1 getAnonymousRecommendations(deviceId, count, excludedArticles)
 
 **Algorithm:**
 
@@ -146,8 +148,9 @@ Get articles relevant to a specific article.
 4. Merge all candidates
 5. Shuffle randomly
 6. Filter out:
-   a. Already read articles (from behavior)
-   b. Previously recommended articles
+    a. Already read articles (from behavior)
+    b. Previously recommended articles
+    c. Articles in excludedArticles
 7. Take first `count` articles
 8. Fetch full article data
 9. Record recommended articles
@@ -155,7 +158,32 @@ Get articles relevant to a specific article.
 11. Return filtered fields
 ```
 
-### 6.2 getRelevantArticle(articleId, fromVector)
+### 6.2 getPublicRecommendations(count, excludedArticles)
+
+This algorithm is used when `GET /plaza/get` has no consented device ID.
+
+**Algorithm:**
+
+```
+1. Get candidate pools:
+   a. randomResults: random recent articles
+   b. hotResults: articles ordered by view count
+   c. recentResults: recent articles ordered by priority and update time
+2. Merge all candidates.
+3. Shuffle randomly.
+4. Filter out articles in excludedArticles.
+5. Take first `count` articles.
+6. Fetch full article data.
+7. Add reason field based on source pool:
+   a. "random" for randomResults
+   b. "hot" for hotResults
+   c. "other" for recentResults or any fallback source
+8. Return filtered fields.
+```
+
+No Redis key is read or written by `getPublicRecommendations`.
+
+### 6.3 getRelevantArticle(articleId, fromVector)
 
 **Algorithm:**
 
@@ -173,7 +201,7 @@ Get articles relevant to a specific article.
 8. Return filtered fields
 ```
 
-### 6.3 getSimilarArticles(id, count)
+### 6.4 getSimilarArticles(id, count)
 
 1. Get the article's embedding vector.
 2. If no vector, return empty array.
@@ -198,6 +226,9 @@ Get articles relevant to a specific article.
 3. Profile vectors are normalized by the number of valid articles.
 4. Recent articles have higher weight in profile calculation.
 5. Title similarity uses the `string-similarity` library's `compareTwoStrings` function.
+6. Public recommendations do not require a device ID.
+7. Public recommendations do not read or write user-specific Redis keys.
+8. `GET /plaza/get` excludes all parsed `exclude` article IDs from both consented anonymous and public recommendation responses.
 
 ## 9. File Locations
 
