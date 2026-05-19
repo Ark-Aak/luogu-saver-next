@@ -123,14 +123,15 @@ The `RegisteredUserService.upsertCpOAuthUser(data)` method SHALL:
 
 1. Require `data.cpOAuthSub` to be a non-empty string.
 2. Require `data.luoguUid` to be a positive integer.
-3. Use `data.cpOAuthSub` as the upsert conflict key.
-4. Store `data.luoguUid` in `registered_user.luogu_uid`.
-5. Store `data.name` as the display name. If `data.name` is empty, store `User {luoguUid}`.
-6. Store `data.avatarUrl` when it is present. Store `NULL` when it is absent.
-7. Insert a registered user row when no row exists for `data.cpOAuthSub`.
-8. Update the existing registered user row when a row exists for `data.cpOAuthSub`.
-9. Return the row after the upsert.
-10. Not read or write the `user` table.
+3. If a row exists where `luogu_uid=data.luoguUid` and `cp_oauth_sub != data.cpOAuthSub`, reject the operation and do not modify that row.
+4. If a concurrent insert creates a row where `luogu_uid=data.luoguUid` and `cp_oauth_sub != data.cpOAuthSub`, reject the operation.
+5. Store `data.luoguUid` in `registered_user.luogu_uid`.
+6. Store `data.name` as the display name. If `data.name` is empty, store `User {luoguUid}`.
+7. Store `data.avatarUrl` when it is present. Store `NULL` when it is absent.
+8. Insert a registered user row when no row exists for `data.cpOAuthSub`.
+9. Update the existing registered user row when a row exists for `data.cpOAuthSub`.
+10. Return the row after the insert or update.
+11. Not read or write the `user` table.
 
 ## 6. CP OAuth Login
 
@@ -190,9 +191,9 @@ Complete the CP OAuth authorization code flow.
 2. If `frontendRedirectUri` is a root-relative path, redirect to that path with appended callback query parameters.
 3. If `error` is present, redirect to `frontendRedirectUri` with query parameters `error` and `message`.
 4. If `code` or `state` is absent, redirect to `frontendRedirectUri` with `error=invalid_request`.
-5. Read Redis key `auth:cp:state:{state}`.
+5. Atomically read and delete Redis key `auth:cp:state:{state}` in one Redis command.
 6. If no state data exists, redirect to `frontendRedirectUri` with `error=invalid_state`.
-7. Delete Redis key `auth:cp:state:{state}` before exchanging the code.
+7. The callback SHALL NOT exchange the authorization code unless the atomic read-and-delete operation returned state data.
 8. Exchange `code` at the discovered `token_endpoint` using JSON request body:
     - `grant_type=authorization_code`
     - `code=code`
@@ -210,8 +211,8 @@ Complete the CP OAuth authorization code flow.
     - `name = platformUsername` when present, otherwise `display_name`, otherwise `username`, otherwise `User {luoguUid}`
     - `avatarUrl = avatar_url` when present
 14. The callback SHALL NOT write to the `user` table.
-15. Find an existing local token where `uid` equals `registered_user.id`.
-16. If no token exists, create a new 32-character hex token with `uid=registered_user.id` and `role=ROLE_DEFAULT`.
+15. Get or create a local token where `uid` equals `registered_user.id` using insert-if-absent semantics on unique column `token.uid`.
+16. If concurrent callbacks for the same `registered_user.id` attempt token creation, all successful callbacks SHALL return the token row stored for that `uid` and SHALL NOT fail due to a duplicate `token.uid` key.
 17. Redirect to `frontendRedirectUri` with query parameters:
     - `token=local token`
     - `uid=registered user ID`
@@ -239,7 +240,7 @@ Return the authenticated local user.
 1. Tokens are stored as plaintext in the database.
 2. Token validation is performed on every request with an Authorization header.
 3. The middleware does NOT reject unauthenticated requests; downstream handlers must check `ctx.user` if authentication is required.
-4. CP OAuth state values are single-use because the callback deletes the Redis state key before token exchange.
+4. CP OAuth state values are single-use because the callback atomically reads and deletes the Redis state key before token exchange.
 5. CP OAuth login SHALL NOT accept a CP OAuth user without a linked Luogu account.
 6. CP OAuth login SHALL NOT mutate the article display `user` table.
 

@@ -96,10 +96,9 @@ export class AuthService {
 
     private static async consumeState(state: string): Promise<StoredOAuthState | null> {
         const key = this.getStateKey(state);
-        const rawState = await redisClient.get(key);
+        const rawState = await redisClient.getdel(key);
         if (!rawState) return null;
 
-        await redisClient.del(key);
         return JSON.parse(rawState) as StoredOAuthState;
     }
 
@@ -177,12 +176,20 @@ export class AuthService {
         const existing = await Token.findOne({ where: { uid } });
         if (existing) return existing;
 
-        const token = new Token();
-        token.id = crypto.randomBytes(16).toString('hex');
-        token.uid = uid;
-        token.role = ROLE_DEFAULT;
-        await token.save();
-        return token;
+        const repository = Token.getRepository();
+        await repository
+            .createQueryBuilder()
+            .insert()
+            .into(Token)
+            .values({
+                id: crypto.randomBytes(16).toString('hex'),
+                uid,
+                role: ROLE_DEFAULT
+            })
+            .orIgnore()
+            .execute();
+
+        return repository.findOneByOrFail({ uid });
     }
 
     static async completeCpOAuthLogin(code: string, state: string): Promise<LocalLoginResult> {

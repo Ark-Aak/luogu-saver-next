@@ -1,4 +1,5 @@
 import { RegisteredUser } from '@/entities/registered-user';
+import { Not } from 'typeorm';
 
 type CpOAuthRegisteredUserData = {
     cpOAuthSub: string;
@@ -8,6 +9,15 @@ type CpOAuthRegisteredUserData = {
 };
 
 export class RegisteredUserService {
+    private static isDuplicateKeyError(error: unknown): boolean {
+        return (
+            typeof error === 'object' &&
+            error !== null &&
+            'code' in error &&
+            (error as { code?: string }).code === 'ER_DUP_ENTRY'
+        );
+    }
+
     static async upsertCpOAuthUser(data: CpOAuthRegisteredUserData): Promise<RegisteredUser> {
         if (!data.cpOAuthSub) throw new Error('CP OAuth sub is required');
         if (!Number.isInteger(data.luoguUid) || data.luoguUid <= 0) {
@@ -15,6 +25,17 @@ export class RegisteredUserService {
         }
 
         const repository = RegisteredUser.getRepository();
+        const duplicateLuoguUid = await repository.findOne({
+            where: {
+                luoguUid: data.luoguUid,
+                cpOAuthSub: Not(data.cpOAuthSub)
+            }
+        });
+
+        if (duplicateLuoguUid) {
+            throw new Error('Luogu account is already bound to another CP OAuth account');
+        }
+
         const registeredUser = repository.create({
             cpOAuthSub: data.cpOAuthSub,
             luoguUid: data.luoguUid,
@@ -22,7 +43,14 @@ export class RegisteredUserService {
             avatarUrl: data.avatarUrl || null
         });
 
-        await repository.upsert(registeredUser, ['cpOAuthSub']);
+        try {
+            await repository.upsert(registeredUser, ['cpOAuthSub']);
+        } catch (error) {
+            if (this.isDuplicateKeyError(error)) {
+                throw new Error('Luogu account is already bound to another CP OAuth account');
+            }
+            throw error;
+        }
 
         const saved = await repository.findOneByOrFail({ cpOAuthSub: data.cpOAuthSub });
         return saved;
