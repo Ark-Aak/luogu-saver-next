@@ -64,7 +64,16 @@ The configuration is validated using Zod schemas. All fields have default values
 | `port`           | number  | 8000           | Chroma server port            |
 | `collectionName` | string  | "lgs_articles" | Chroma collection name        |
 
-### 3.5 Recommendation Configuration (`recommendation`)
+### 3.5 Meilisearch Configuration (`meilisearch`)
+
+| Field              | Type    | Default                 | Description                    |
+| ------------------ | ------- | ----------------------- | ------------------------------ |
+| `enable`           | boolean | false                   | Enable Meilisearch integration |
+| `host`             | string  | "http://127.0.0.1:7700" | Meilisearch server URL         |
+| `apiKey`           | string  | ""                      | Meilisearch API key            |
+| `articleIndexName` | string  | "lgs_articles"          | Article index name             |
+
+### 3.6 Recommendation Configuration (`recommendation`)
 
 | Field                  | Type   | Default         | Description                                            |
 | ---------------------- | ------ | --------------- | ------------------------------------------------------ |
@@ -74,7 +83,7 @@ The configuration is validated using Zod schemas. All fields have default values
 | `decayFactor`          | number | 0.9             | Decay factor for weighted profile vector calculation   |
 | `relevantThreshold`    | number | 0.75            | Minimum string similarity for title-based matching     |
 
-### 3.6 Queue Configuration (`queue`)
+### 3.7 Queue Configuration (`queue`)
 
 | Field                  | Type   | Default | Description                             |
 | ---------------------- | ------ | ------- | --------------------------------------- |

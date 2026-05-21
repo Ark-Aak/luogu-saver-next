@@ -1,10 +1,10 @@
 import Router from 'koa-router';
 import { Context, DefaultState } from 'koa';
-import crypto from 'crypto';
-import { Token } from '@/entities/token';
-import { Permission, ROLE_ADMIN, ROLE_DEFAULT } from '@/shared/permission';
+import { Permission, ROLE_ADMIN } from '@/shared/permission';
 import { VerificationService } from '@/services/verification.service';
 import { requiresPermission } from '@/middlewares/authorization';
+import { RegisteredUser } from '@/entities/registered-user';
+import { RegisteredUserService } from '@/services/registered-user.service';
 
 const router = new Router<DefaultState, Context>({ prefix: '/token' });
 
@@ -21,44 +21,7 @@ router.post('/verify', async (ctx: Context) => {
 });
 
 router.post('/create', async (ctx: Context) => {
-    const { uid, pasteId } = ctx.request.body as any;
-
-    if (!uid) {
-        ctx.fail(400, 'UID is required');
-        return;
-    }
-
-    if (!pasteId || pasteId.length !== 8) {
-        ctx.fail(400, 'Valid pasteId is required for verification');
-        return;
-    }
-
-    const isVerified = await VerificationService.verifyByLuogu(uid, pasteId);
-    if (!isVerified) {
-        ctx.fail(
-            400,
-            'Verification failed. Please ensure the paste exists and contains the correct verification code.'
-        );
-        return;
-    }
-
-    try {
-        const existing = await Token.findOne({ where: { uid } });
-        if (existing) {
-            ctx.fail(400, 'Token already exists for this UID');
-            return;
-        }
-
-        const id = crypto.randomBytes(16).toString('hex');
-        const token = new Token();
-        token.id = id;
-        token.uid = uid;
-        token.role = ROLE_DEFAULT;
-        await token.save();
-        ctx.success({ token: id, role: ROLE_DEFAULT });
-    } catch (error) {
-        ctx.fail(500, error instanceof Error ? error.message : 'Unknown error');
-    }
+    ctx.fail(410, 'Token creation has moved to CP OAuth login');
 });
 
 router.post('/permission', async (ctx: Context) => {
@@ -80,14 +43,13 @@ router.post('/permission', async (ctx: Context) => {
     }
 
     try {
-        const token = await Token.findOne({ where: { uid } });
-        if (!token) {
-            ctx.fail(404, 'Token not found for UID');
+        const registeredUser = await RegisteredUser.findOne({ where: { id: uid } });
+        if (!registeredUser) {
+            ctx.fail(404, 'Registered user not found');
             return;
         }
 
-        token.role = role;
-        await token.save();
+        await RegisteredUserService.updateRole(uid, role);
         ctx.success({ uid, role });
     } catch (error) {
         ctx.fail(500, error instanceof Error ? error.message : 'Unknown error');
@@ -96,12 +58,16 @@ router.post('/permission', async (ctx: Context) => {
 
 router.get('/inspect', requiresPermission(Permission.LOGIN), async (ctx: Context) => {
     try {
-        const token = await Token.findOne({ where: { uid: ctx.user.id } });
-        if (!token) {
-            ctx.fail(404, 'Token not found for your UID');
+        const registeredUser = await RegisteredUser.findOne({ where: { id: ctx.user.id } });
+        if (!registeredUser) {
+            ctx.fail(404, 'Registered user not found');
             return;
         }
-        ctx.success({ uid: token.uid, role: token.role, createdAt: token.createdAt });
+        ctx.success({
+            uid: registeredUser.id,
+            role: registeredUser.role,
+            createdAt: registeredUser.createdAt
+        });
     } catch (error) {
         ctx.fail(500, error instanceof Error ? error.message : 'Unknown error');
     }

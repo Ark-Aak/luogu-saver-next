@@ -3,10 +3,12 @@ import { Context, DefaultState } from 'koa';
 import { TaskService } from '@/services/task.service';
 import { logger } from '@/lib/logger';
 import { TaskType } from '@/shared/task';
+import { requiresPermission } from '@/middlewares/authorization';
+import { Permission } from '@/shared/permission';
 
 const router = new Router<DefaultState, Context>({ prefix: '/task' });
 
-router.post('/create', async (ctx: Context) => {
+router.post('/create', requiresPermission(Permission.CREATE_TASK), async (ctx: Context) => {
     const { type, payload } = ctx.request.body as {
         type?: TaskType;
         payload?: any;

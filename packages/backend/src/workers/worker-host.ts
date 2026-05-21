@@ -66,7 +66,11 @@ export class WorkerHost<T extends CommonTask> {
         this.worker.on('completed', async job => {
             logger.info({ jobId: job.id }, 'Job completed successfully.');
             if (this.shouldEmitTaskEvent(job)) {
-                emitToRoom(`task:${job.id}`, `task:${job.id}:completed`, { status: 'completed' });
+                const returnvalue = job.returnvalue as any;
+                emitToRoom(`task:${job.id}`, `task:${job.id}:completed`, {
+                    status: 'completed',
+                    result: returnvalue?.__result
+                });
             }
             await TaskService.updateTask(
                 job.id!,

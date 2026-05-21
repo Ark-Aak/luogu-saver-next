@@ -88,7 +88,7 @@ export function useContentSaver() {
 
     const setupTaskUpdateListener = (
         taskId: string,
-        onComplete: () => void,
+        onComplete: (data?: any) => void,
         onFail: (error: string) => void
     ) => {
         if (!taskId) return () => {};
@@ -114,9 +114,9 @@ export function useContentSaver() {
             cleanupCallbacks.delete(cleanup);
         }
 
-        function handleComplete() {
+        function handleComplete(data?: any) {
             stopSaving();
-            onComplete();
+            onComplete(data);
             cleanup();
         }
 

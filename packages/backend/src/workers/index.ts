@@ -1,7 +1,7 @@
 import { WorkerHost } from '@/workers/worker-host';
 import { TaskProcessor } from '@/workers/task-processor';
 import { PointGuard } from '@/lib/point-guard';
-import { SaveTask, TaskType, UpdateTask } from '@/shared/task';
+import { RagTask, ReadTask, SaveTask, SearchTask, TaskType, UpdateTask } from '@/shared/task';
 import { AiTask } from '@/shared/task';
 import { QUEUE_NAMES } from '@/shared/constants';
 import { logger } from '@/lib/logger';
@@ -14,8 +14,18 @@ import { EmbeddingHandler } from '@/workers/handlers/task/llm/embedding.handler'
 import { ChatHandler } from '@/workers/handlers/task/llm/chat.handler';
 import { CensorHandler } from '@/workers/handlers/task/llm/censor.handler';
 import { UpdateArticleSummaryHandler } from '@/workers/handlers/task/update/update-article-summary.handler';
+import { UpdateArticleSummaryRebuildHandler } from '@/workers/handlers/task/update/update-article-summary-rebuild.handler';
 import { UpdateArticleEmbeddingHandler } from '@/workers/handlers/task/update/update-article-embedding.handler';
 import { UpdateCensorResultHandler } from '@/workers/handlers/task/update/update-censor-result';
+import { UpdateSearchIndexHandler } from '@/workers/handlers/task/update/update-search-index.handler';
+import { UpdateSearchReindexHandler } from '@/workers/handlers/task/update/update-search-reindex.handler';
+import { ArticleSearchHandler } from '@/workers/handlers/task/search/article-search.handler';
+import { VectorSearchHandler } from '@/workers/handlers/task/search/vector-search.handler';
+import { ReadTextHandler } from '@/workers/handlers/task/read/read-text.handler';
+import { ReadArticleHandler } from '@/workers/handlers/task/read/read-article.handler';
+import { ReadPasteHandler } from '@/workers/handlers/task/read/read-paste.handler';
+import { RagContextHandler } from '@/workers/handlers/task/rag/rag-context.handler';
+import { RagAnswerHandler } from '@/workers/handlers/task/rag/rag-answer.handler';
 import { config } from '@/config';
 import { WorkerOptions } from 'bullmq';
 import { FlowManager } from './flow-manager';
@@ -34,6 +44,9 @@ export function bootstrap() {
     );
     const aiProcessor = new TaskProcessor<AiTask>();
     const updateProcessor = new TaskProcessor<UpdateTask>();
+    const searchProcessor = new TaskProcessor<SearchTask>();
+    const readProcessor = new TaskProcessor<ReadTask>();
+    const ragProcessor = new TaskProcessor<RagTask>();
 
     saveProcessor.registerHandler(new ArticleHandler());
     saveProcessor.registerHandler(new PasteHandler());
@@ -45,8 +58,21 @@ export function bootstrap() {
     aiProcessor.registerHandler(new CensorHandler());
 
     updateProcessor.registerHandler(new UpdateArticleSummaryHandler());
+    updateProcessor.registerHandler(new UpdateArticleSummaryRebuildHandler());
     updateProcessor.registerHandler(new UpdateArticleEmbeddingHandler());
     updateProcessor.registerHandler(new UpdateCensorResultHandler());
+    updateProcessor.registerHandler(new UpdateSearchIndexHandler());
+    updateProcessor.registerHandler(new UpdateSearchReindexHandler());
+
+    searchProcessor.registerHandler(new ArticleSearchHandler());
+    searchProcessor.registerHandler(new VectorSearchHandler());
+
+    readProcessor.registerHandler(new ReadTextHandler());
+    readProcessor.registerHandler(new ReadArticleHandler());
+    readProcessor.registerHandler(new ReadPasteHandler());
+
+    ragProcessor.registerHandler(new RagContextHandler());
+    ragProcessor.registerHandler(new RagAnswerHandler());
 
     const saveWorkerHost = new WorkerHost<SaveTask>(
         QUEUE_NAMES[TaskType.SAVE],
@@ -74,6 +100,25 @@ export function bootstrap() {
             concurrency: config.queue.update.concurrencyLimit
         } as WorkerOptions
     );
+    const searchWorkerHost = new WorkerHost<SearchTask>(
+        QUEUE_NAMES[TaskType.SEARCH],
+        searchProcessor,
+        null,
+        {
+            concurrency: config.queue.update.concurrencyLimit
+        } as WorkerOptions
+    );
+    const readWorkerHost = new WorkerHost<ReadTask>(
+        QUEUE_NAMES[TaskType.READ],
+        readProcessor,
+        null,
+        {
+            concurrency: config.queue.update.concurrencyLimit
+        } as WorkerOptions
+    );
+    const ragWorkerHost = new WorkerHost<RagTask>(QUEUE_NAMES[TaskType.RAG], ragProcessor, null, {
+        concurrency: config.queue.ai.concurrencyLimit
+    } as WorkerOptions);
 
     const closeWorkers = async () => {
         logger.info('Shutting down workers...');
@@ -81,6 +126,9 @@ export function bootstrap() {
             saveWorkerHost.close(),
             aiWorkerHost.close(),
             updateWorkerHost.close(),
+            searchWorkerHost.close(),
+            readWorkerHost.close(),
+            ragWorkerHost.close(),
             FlowManager.closeQueueEvents()
         ]);
     };

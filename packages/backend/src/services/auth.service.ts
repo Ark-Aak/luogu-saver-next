@@ -2,8 +2,6 @@ import axios from 'axios';
 import crypto from 'crypto';
 import { config } from '@/config';
 import { redisClient } from '@/lib/redis';
-import { Token } from '@/entities/token';
-import { ROLE_DEFAULT } from '@/shared/permission';
 import { RegisteredUserService } from '@/services/registered-user.service';
 
 type DiscoveryDocument = {
@@ -172,26 +170,6 @@ export class AuthService {
         return luoguAccount;
     }
 
-    private static async getOrCreateLocalToken(uid: number): Promise<Token> {
-        const existing = await Token.findOne({ where: { uid } });
-        if (existing) return existing;
-
-        const repository = Token.getRepository();
-        await repository
-            .createQueryBuilder()
-            .insert()
-            .into(Token)
-            .values({
-                id: crypto.randomBytes(16).toString('hex'),
-                uid,
-                role: ROLE_DEFAULT
-            })
-            .orIgnore()
-            .execute();
-
-        return repository.findOneByOrFail({ uid });
-    }
-
     static async completeCpOAuthLogin(code: string, state: string): Promise<LocalLoginResult> {
         const storedState = await this.consumeState(state);
         if (!storedState) throw new Error('Invalid or expired OAuth state');
@@ -218,11 +196,12 @@ export class AuthService {
             avatarUrl: userInfo.avatar_url
         });
 
-        const token = await this.getOrCreateLocalToken(registeredUser.id);
+        if (!registeredUser.token) throw new Error('Registered user token is missing');
+
         return {
-            token: token.id,
-            uid: token.uid,
-            role: token.role,
+            token: registeredUser.token,
+            uid: registeredUser.id,
+            role: registeredUser.role,
             redirect: storedState.redirect
         };
     }

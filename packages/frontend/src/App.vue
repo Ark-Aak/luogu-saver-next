@@ -202,18 +202,11 @@ import {
     HomeOutline,
     AppsOutline,
     SearchOutline,
-    BrushOutline,
-    ShareSocialOutline,
-    ListOutline,
-    AtOutline,
-    CloudCircleOutline,
-    CloudDownloadOutline,
-    ImageOutline,
-    KeyOutline,
     StatsChartOutline,
-    HammerOutline,
     GlobeOutline,
-    SettingsOutline
+    SettingsOutline,
+    ShieldCheckmarkOutline,
+    ChatbubbleEllipsesOutline
 } from '@vicons/ionicons5';
 
 import { Icon, IconConfigProvider } from '@vicons/utils';
@@ -238,6 +231,9 @@ import { renderIcon } from '@/utils/render';
 import { uiThemeKey, type UiThemeVars } from '@/styles/theme/themeKeys.ts';
 import { defaultTheme } from '@/styles/theme/default-theme.ts';
 import TrackingConsent from '@/components/TrackingConsent.vue';
+import { currentRole, isAuthenticated, setCurrentAuth } from '@/utils/auth.ts';
+import { hasAnyPermission, Permission } from '@/utils/permissions.ts';
+import { getCurrentUser } from '@/api/auth.ts';
 
 // import socket from '@/utils/websocket';
 
@@ -274,7 +270,11 @@ const handleManualExpand = () => {
     collapsed.value = false;
 };
 
-const menuOptions: MenuOption[] = [
+const canShowAdminMenu = computed(() =>
+    hasAnyPermission(currentRole.value, [Permission.MANAGE_USERS, Permission.MANAGE_SEARCH])
+);
+
+const menuOptions = computed<MenuOption[]>(() => [
     {
         label: '主页',
         key: 'home',
@@ -286,59 +286,64 @@ const menuOptions: MenuOption[] = [
         icon: renderIcon(SearchOutline)
     },
     {
-        label: '题目',
-        key: 'problem',
-        icon: renderIcon(ListOutline)
+        label: 'RAG 问答',
+        key: 'rag',
+        icon: renderIcon(ChatbubbleEllipsesOutline)
     },
+    // {
+    //     label: '题目',
+    //     key: 'problem',
+    //     icon: renderIcon(ListOutline)
+    // },
     {
         label: '文章广场',
         key: 'plaza',
         icon: renderIcon(GlobeOutline)
     },
-    {
-        label: '用户动态',
-        key: 'benben',
-        icon: renderIcon(ShareSocialOutline),
-        children: [
-            {
-                label: '被 at 查询',
-                key: 'benben/mentions',
-                icon: renderIcon(AtOutline)
-            },
-            {
-                label: '用户历史',
-                key: 'benben/history',
-                icon: renderIcon(CloudCircleOutline)
-            },
-            {
-                label: '用户抓取',
-                key: 'benben/crawl',
-                icon: renderIcon(CloudDownloadOutline)
-            }
-        ]
-    },
-    {
-        label: '冬日绘板',
-        key: 'paintboard',
-        icon: renderIcon(BrushOutline),
-        children: [
-            {
-                label: '查看绘板',
-                key: 'paintboard/view',
-                icon: renderIcon(ImageOutline)
-            },
-            {
-                label: '申请凭据',
-                key: 'paintboard/token',
-                icon: renderIcon(KeyOutline)
-            }
-        ]
-    },
-    {
-        label: '陶片放逐',
-        key: 'judgement',
-        icon: renderIcon(HammerOutline)
-    },
+    // {
+    //     label: '用户动态',
+    //     key: 'benben',
+    //     icon: renderIcon(ShareSocialOutline),
+    //     children: [
+    //         {
+    //             label: '被 at 查询',
+    //             key: 'benben/mentions',
+    //             icon: renderIcon(AtOutline)
+    //         },
+    //         {
+    //             label: '用户历史',
+    //             key: 'benben/history',
+    //             icon: renderIcon(CloudCircleOutline)
+    //         },
+    //         {
+    //             label: '用户抓取',
+    //             key: 'benben/crawl',
+    //             icon: renderIcon(CloudDownloadOutline)
+    //         }
+    //     ]
+    // },
+    // {
+    //     label: '冬日绘板',
+    //     key: 'paintboard',
+    //     icon: renderIcon(BrushOutline),
+    //     children: [
+    //         {
+    //             label: '查看绘板',
+    //             key: 'paintboard/view',
+    //             icon: renderIcon(ImageOutline)
+    //         },
+    //         {
+    //             label: '申请凭据',
+    //             key: 'paintboard/token',
+    //             icon: renderIcon(KeyOutline)
+    //         }
+    //     ]
+    // },
+    // {
+    //     label: '陶片放逐',
+    //     key: 'judgement',
+    //     icon: renderIcon(HammerOutline)
+    // },
     {
         label: '统计数据',
         key: 'statistic',
@@ -353,8 +358,17 @@ const menuOptions: MenuOption[] = [
         label: '设置',
         key: 'settings',
         icon: renderIcon(SettingsOutline)
-    }
-];
+    },
+    ...(canShowAdminMenu.value
+        ? [
+              {
+                  label: '后台',
+                  key: 'admin',
+                  icon: renderIcon(ShieldCheckmarkOutline)
+              }
+          ]
+        : [])
+]);
 
 import { THEME_STORAGE_KEY } from '@/utils/constants.ts';
 import { useLocalStorage } from '@/composables/useLocalStorage.ts';
@@ -362,6 +376,14 @@ const themeStorage = useLocalStorage(THEME_STORAGE_KEY, defaultTheme);
 const uiThemeVars = ref<UiThemeVars>(themeStorage.value);
 
 provide(uiThemeKey, uiThemeVars);
+
+if (isAuthenticated.value) {
+    getCurrentUser()
+        .then(response => {
+            if (response.code === 200) setCurrentAuth(response.data);
+        })
+        .catch(() => {});
+}
 
 watch(
     uiThemeVars,

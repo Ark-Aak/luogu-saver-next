@@ -1,7 +1,7 @@
 import { ChildrenValues, TaskHandler, TaskTextResult, WorkflowResult } from '@/workers/types';
 import { AiTask } from '@/shared/task';
 import { Job, UnrecoverableError } from 'bullmq';
-import { extractUpsteamData, getSourceTextById, shouldSkip } from '@/workers/helpers/common.helper';
+import { extractUpsteamData, shouldSkip } from '@/workers/helpers/common.helper';
 import { llm } from '@/lib/llm';
 
 export class ChatHandler implements TaskHandler<AiTask> {
@@ -24,20 +24,16 @@ export class ChatHandler implements TaskHandler<AiTask> {
         content = extractUpsteamData(childrenValues, data => typeof data.text === 'string')?.text;
 
         if (!content) {
-            if (task.payload.sourceId) {
-                content = await getSourceTextById(task.payload.sourceId, job.id);
-            } else {
-                throw new UnrecoverableError(
-                    `No upstream text data found for chat task in job ${job.id}`
-                );
-            }
+            throw new UnrecoverableError(
+                `No upstream text data found for chat task in job ${job.id}`
+            );
         }
 
         const prompt = `
 <prompt>
 Now you are a professional conversational assistant.
 Please engage in a conversation based on the text in \`<content>\`.
-Always respond in Chinese.
+Infer the response language based on the language in \`<content>\`.
 </prompt>
 <content>
 ${content!}

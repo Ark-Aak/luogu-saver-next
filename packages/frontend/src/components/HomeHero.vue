@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { inject, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { NIcon, NInput, NButton } from 'naive-ui';
 import { Search, ArrowForward } from '@vicons/ionicons5';
 import { uiThemeKey } from '@/styles/theme/themeKeys.ts';
@@ -7,21 +8,19 @@ import LuoguLogo from '@/components/icons/LuoguLogo.vue';
 
 const themeVars = inject(uiThemeKey)!;
 const searchText = ref('');
+const router = useRouter();
 
 const handleSearch = () => {
     const query = searchText.value.trim();
     if (!query) return;
 
-    if (query.match(/^https?:\/\//) || query.includes('luogu')) {
-        // Link handling
-        console.log('Link detected:', query);
-    } else if (/^\d+$/.test(query)) {
-        // UID handling
-        console.log('UID detected:', query);
-    } else {
-        // Keyword handling
-        console.log('Keyword detected:', query);
+    const articleMatch = query.match(/luogu\.com(?:\.cn)?\/article\/([A-Za-z0-9]+)/);
+    if (articleMatch?.[1]) {
+        router.push(`/article/${articleMatch[1]}`);
+        return;
     }
+
+    router.push({ path: '/search', query: { q: query } });
 };
 </script>
 

@@ -2,7 +2,7 @@ import { ChildrenValues, TaskEmbeddingResult, TaskHandler, WorkflowResult } from
 import { AiTask } from '@/shared/task';
 import { UnrecoverableError, Job } from 'bullmq';
 import { llm } from '@/lib/llm';
-import { extractUpsteamData, getSourceTextById, shouldSkip } from '@/workers/helpers/common.helper';
+import { extractUpsteamData, shouldSkip } from '@/workers/helpers/common.helper';
 
 export class EmbeddingHandler implements TaskHandler<AiTask> {
     public taskType = 'llm:embedding';
@@ -31,13 +31,9 @@ export class EmbeddingHandler implements TaskHandler<AiTask> {
         )?.text;
 
         if (!content) {
-            if (task.payload.sourceId) {
-                content = await getSourceTextById(task.payload.sourceId, job.id);
-            } else {
-                throw new UnrecoverableError(
-                    `No upstream text data found for embedding task in job ${job.id}`
-                );
-            }
+            throw new UnrecoverableError(
+                `No upstream text data found for embedding task in job ${job.id}`
+            );
         }
 
         const textToEmbed = content;

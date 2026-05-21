@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { NAlert, NButton, NCard, NGi, NGrid, NSpace, NSpin, NTag } from 'naive-ui';
-import { clearAuthToken, isAuthenticated, startCpOAuthLogin } from '@/utils/auth.ts';
+import {
+    clearAuthToken,
+    isAuthenticated,
+    setCurrentAuth,
+    startCpOAuthLogin
+} from '@/utils/auth.ts';
 import { getCurrentUser, type AuthMeResponse } from '@/api/auth.ts';
 
 const loading = ref(false);
@@ -17,6 +22,7 @@ async function loadCurrentUser() {
         const response = await getCurrentUser();
         if (response.code === 200) {
             currentUser.value = response.data;
+            setCurrentAuth(response.data);
         } else {
             errorMessage.value = response.message;
         }

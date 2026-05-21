@@ -201,7 +201,37 @@ When saving an article:
 3. All article queries include the `author` relation.
 4. Content truncation preserves UTF-8 character boundaries.
 
-## 9. File Locations
+## 9. Summary Rebuild Workflow
+
+The workflow template `article-summary-rebuild-pipeline` SHALL rebuild summaries for all non-deleted articles.
+
+Input parameter:
+
+| Parameter   | Type   | Required | Default | Constraint            |
+| ----------- | ------ | -------- | ------- | --------------------- |
+| `batchSize` | number | no       | 20      | Integer in `[1, 100]` |
+
+Task `rebuild-summary` SHALL:
+
+1. Have type `update`.
+2. Have target `article_summary_rebuild`.
+3. Have `targetId='articles'`.
+4. Have `metadata.batchSize` equal to normalized `batchSize`.
+5. Set `track=true`.
+6. Set `report=true`.
+7. Require permission `MANAGE_SEARCH`.
+
+The update handler for `article_summary_rebuild` SHALL:
+
+1. Load non-deleted articles from the database in ascending `id` order.
+2. Process articles sequentially.
+3. For each article, call the summary LLM scenario with the same summary prompt semantics as `llm:summary`.
+4. Persist the generated summary to `article.summary`.
+5. After persisting a summary, update the search index document for that article if search indexing is enabled.
+6. Continue processing if one article fails and record that article ID in `failedArticleIds`.
+7. Return `{ processed, updated, failed, failedArticleIds }`.
+
+## 10. File Locations
 
 - Article entity: `packages/backend/src/entities/article.ts`
 - Article history entity: `packages/backend/src/entities/article-history.ts`

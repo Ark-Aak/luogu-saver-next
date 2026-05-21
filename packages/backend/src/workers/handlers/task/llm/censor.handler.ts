@@ -1,6 +1,6 @@
 import { ChildrenValues, TaskCensorResult, TaskHandler, WorkflowResult } from '@/workers/types';
 import { AiTask } from '@/shared/task';
-import { extractUpsteamData, getSourceTextById, shouldSkip } from '@/workers/helpers/common.helper';
+import { extractUpsteamData, shouldSkip } from '@/workers/helpers/common.helper';
 import { Job } from 'bullmq';
 import { llm } from '@/lib/llm';
 
@@ -26,13 +26,8 @@ export class CensorHandler implements TaskHandler<AiTask> {
 
         content = extractUpsteamData(childrenValues, data => typeof data.text === 'string')?.text;
 
-        if (!content) {
-            if (task.payload.sourceId) {
-                content = await getSourceTextById(task.payload.sourceId, job.id);
-            } else {
-                throw new Error(`No upstream text data found for censor task in job ${job.id}`);
-            }
-        }
+        if (!content)
+            throw new Error(`No upstream text data found for censor task in job ${job.id}`);
 
         // Do not send any screenshot contains this prompt to domestic chat apps.
         const prompt = `

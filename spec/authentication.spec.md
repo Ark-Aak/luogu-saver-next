@@ -2,29 +2,20 @@
 
 ## 1. Overview
 
-The authentication system signs users in through CP OAuth only. It validates API requests using Bearer tokens stored in the database. It provides middleware-based authentication for Koa applications.
+The authentication system signs users in through CP OAuth only. It validates API requests using bearer tokens stored on `registered_user` rows. It provides middleware-based authentication for Koa applications.
 
 The `user` table is not an authentication table. The `user` table stores Luogu users that appear as article or paste authors. CP OAuth login SHALL NOT insert, update, or delete rows in the `user` table.
 
-## 2. Token Entity
+## 2. Registered User Bearer Token
 
-### 2.1 Schema
+The `token` table SHALL NOT be used for authentication.
 
-Table name: `token`
+### 2.1 Bearer Token Validation
 
-| Column       | Type         | Constraints       | Description                     |
-| ------------ | ------------ | ----------------- | ------------------------------- |
-| `id`         | VARCHAR(32)  | PRIMARY KEY       | Token string (the bearer token) |
-| `uid`        | INT UNSIGNED | UNIQUE, NOT NULL  | Associated registered user ID   |
-| `role`       | INT UNSIGNED | NOT NULL          | User role identifier            |
-| `created_at` | DATETIME     | NOT NULL, DEFAULT | Token creation timestamp        |
+The method `RegisteredUserService.validateBearerToken(token: string)` SHALL:
 
-### 2.2 Token Validation
-
-The static method `Token.validate(token: string)` SHALL:
-
-1. Query the `token` table for a record where `id` equals the provided token.
-2. If a record exists, return `[uid, role]`.
+1. Query the `registered_user` table for a record where `token` equals the provided bearer token.
+2. If a record exists, return `[id, role]` where `id` is `registered_user.id`.
 3. If no record exists, return an empty array.
 
 ## 3. Authorization Middleware
@@ -38,7 +29,7 @@ For each incoming request:
 1. Check if the `Authorization` header is present.
 2. If present:
     - Extract the token by removing the `Bearer ` prefix.
-    - Call `Token.validate(token)`.
+    - Call `RegisteredUserService.validateBearerToken(token)`.
     - If validation returns a non-empty array, attach `{ id: uid, role }` to `ctx.user`.
 3. If the header is absent or validation fails, `ctx.user` remains `undefined`.
 4. Always call `next()` to continue request processing.
@@ -49,7 +40,7 @@ For each incoming request:
 function authorization(ctx, next):
     if ctx.headers['authorization'] exists:
         token = ctx.headers['authorization'].replace('Bearer ', '')
-        data = await Token.validate(token)
+        data = await RegisteredUserService.validateBearerToken(token)
         if data is not empty:
             ctx.user = { id: data[0], role: data[1] }
     await next()
@@ -114,6 +105,8 @@ This table stores users that can log in to Luogu Saver Next.
 | `luogu_uid`    | INT UNSIGNED | UNIQUE, NOT NULL | Linked Luogu user ID       |
 | `name`         | VARCHAR      | NOT NULL         | Display name from CP OAuth |
 | `avatar_url`   | VARCHAR      | NULL             | Avatar URL from CP OAuth   |
+| `token`        | VARCHAR(32)  | UNIQUE, NULL     | Bearer token for API auth  |
+| `role`         | INT          | NOT NULL         | Permission bitmask         |
 | `created_at`   | DATETIME     | NOT NULL         | Record creation timestamp  |
 | `updated_at`   | DATETIME     | NOT NULL         | Record update timestamp    |
 
@@ -129,9 +122,11 @@ The `RegisteredUserService.upsertCpOAuthUser(data)` method SHALL:
 6. Store `data.name` as the display name. If `data.name` is empty, store `User {luoguUid}`.
 7. Store `data.avatarUrl` when it is present. Store `NULL` when it is absent.
 8. Insert a registered user row when no row exists for `data.cpOAuthSub`.
-9. Update the existing registered user row when a row exists for `data.cpOAuthSub`.
-10. Return the row after the insert or update.
-11. Not read or write the `user` table.
+9. For inserted rows, generate `token` as a 32-character hex string and set `role=ROLE_DEFAULT`.
+10. Update the existing registered user row when a row exists for `data.cpOAuthSub`.
+11. For existing rows, preserve `role`; if `token` is `NULL`, generate a 32-character hex token.
+12. Return the row after the insert or update.
+13. Not read or write the `user` table.
 
 ## 6. CP OAuth Login
 
@@ -211,10 +206,10 @@ Complete the CP OAuth authorization code flow.
     - `name = platformUsername` when present, otherwise `display_name`, otherwise `username`, otherwise `User {luoguUid}`
     - `avatarUrl = avatar_url` when present
 14. The callback SHALL NOT write to the `user` table.
-15. Get or create a local token where `uid` equals `registered_user.id` using insert-if-absent semantics on unique column `token.uid`.
-16. If concurrent callbacks for the same `registered_user.id` attempt token creation, all successful callbacks SHALL return the token row stored for that `uid` and SHALL NOT fail due to a duplicate `token.uid` key.
+15. Require `registered_user.token` to be non-empty after the upsert.
+16. The callback SHALL NOT read or write the `token` table.
 17. Redirect to `frontendRedirectUri` with query parameters:
-    - `token=local token`
+    - `token=registered_user.token`
     - `uid=registered user ID`
     - `role=local role`
     - `redirect=stored redirect`
@@ -235,18 +230,45 @@ Return the authenticated local user.
 | `undefined`  | Unauthenticated request             |
 | `{id, role}` | Authenticated user with ID and role |
 
-## 8. Security Constraints
+## 8. Permissions
 
-1. Tokens are stored as plaintext in the database.
+The permission bitmask SHALL define:
+
+| Name              | Value    | Meaning                                |
+| ----------------- | -------- | -------------------------------------- |
+| `LOGIN`           | `1 << 0` | User may authenticate                  |
+| `CREATE_WORKFLOW` | `1 << 1` | User may create non-public workflows   |
+| `CREATE_TASK`     | `1 << 2` | User may call legacy `/task/create`    |
+| `MANAGE_SEARCH`   | `1 << 3` | User may manage search indexing        |
+| `MANAGE_USERS`    | `1 << 4` | User may inspect and modify user roles |
+
+`ROLE_ADMIN = -1` SHALL satisfy all permission checks.
+
+`ROLE_DEFAULT` SHALL equal `LOGIN | CREATE_WORKFLOW`.
+
+CP OAuth-created registered users SHALL use `ROLE_DEFAULT`.
+
+The legacy endpoint `POST /task/create` SHALL require `CREATE_TASK`.
+
+The legacy endpoint `POST /token/create` SHALL return 410 and SHALL NOT create a token row.
+
+The legacy endpoint `GET /token/inspect` SHALL return the current `registered_user.id`, `registered_user.role`, and `registered_user.created_at`.
+
+The backend admin user endpoints SHALL require `MANAGE_USERS`.
+
+The backend search reindex endpoint SHALL require `MANAGE_SEARCH`.
+
+## 9. Security Constraints
+
+1. Bearer tokens are stored as plaintext in `registered_user.token`.
 2. Token validation is performed on every request with an Authorization header.
 3. The middleware does NOT reject unauthenticated requests; downstream handlers must check `ctx.user` if authentication is required.
 4. CP OAuth state values are single-use because the callback atomically reads and deletes the Redis state key before token exchange.
 5. CP OAuth login SHALL NOT accept a CP OAuth user without a linked Luogu account.
 6. CP OAuth login SHALL NOT mutate the article display `user` table.
 
-## 9. File Locations
+## 10. File Locations
 
-- Token entity: `packages/backend/src/entities/token.ts`
 - User entity: `packages/backend/src/entities/user.ts`
 - Registered user entity: `packages/backend/src/entities/registered-user.ts`
 - Authorization middleware: `packages/backend/src/middlewares/authorization.ts`

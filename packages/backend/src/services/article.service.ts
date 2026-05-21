@@ -35,6 +35,14 @@ export class ArticleService {
         return await this.getArticleById(id, Article.getRepository().manager);
     }
 
+    static async getArticleByIdWithAuthorWithoutCache(id: string): Promise<Article | null> {
+        return await findOneServiceEntity<Article>(
+            Article,
+            { where: { id }, relations: ['author'] },
+            Article.getRepository().manager
+        );
+    }
+
     /*
      * Get recent articles ordered by priority and updatedAt.
      *
@@ -124,6 +132,40 @@ export class ArticleService {
             .orderBy('article.updatedAt', 'DESC')
             .limit(count)
             .getMany();
+    }
+
+    static async getArticlesForSearchReindex(
+        skip: number,
+        take: number,
+        manager?: EntityManager
+    ): Promise<Article[]> {
+        return await getServiceRepository<Article>(Article, manager)
+            .createQueryBuilder('article')
+            .leftJoinAndSelect('article.author', 'author')
+            .where('article.deleted = :deleted', { deleted: false })
+            .orderBy('article.updatedAt', 'ASC')
+            .skip(skip)
+            .take(take)
+            .getMany();
+    }
+
+    static async getArticlesForSummaryRebuild(
+        afterId: string | null,
+        take: number,
+        manager?: EntityManager
+    ): Promise<Article[]> {
+        const query = getServiceRepository<Article>(Article, manager)
+            .createQueryBuilder('article')
+            .leftJoinAndSelect('article.author', 'author')
+            .where('article.deleted = :deleted', { deleted: false })
+            .orderBy('article.id', 'ASC')
+            .take(take);
+
+        if (afterId) {
+            query.andWhere('article.id > :afterId', { afterId });
+        }
+
+        return await query.getMany();
     }
 
     /*

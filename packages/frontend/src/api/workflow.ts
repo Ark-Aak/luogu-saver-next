@@ -14,3 +14,11 @@ export async function createWorkflowFromTemplate(name: string, params: Record<st
         data: params
     })) as ApiResponse<CreateWorkflowTemplateResponse>;
 }
+
+export async function getWorkflowById(id: string) {
+    return (await apiFetch(`/workflow/query/${id}`)) as ApiResponse<{
+        id: string;
+        status: string;
+        result: Record<string, { result: { data: any }; name: string }> | null;
+    }>;
+}

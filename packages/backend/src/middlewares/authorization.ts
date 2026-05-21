@@ -1,14 +1,14 @@
 import { Context, Next } from 'koa';
-import { Token } from '@/entities/token';
 import { logger } from '@/lib/logger';
 import { Permission } from '@/shared/permission';
 import { WORKFLOW_TEMPLATES_PERMISSION } from '@/lib/workflow-templates';
+import { RegisteredUserService } from '@/services/registered-user.service';
 
 export const authorization = async (ctx: Context, next: Next) => {
     if (ctx.headers['authorization']) {
         try {
             const token = ctx.headers['authorization'].replace('Bearer ', '') as string;
-            const data = await Token.validate(token);
+            const data = await RegisteredUserService.validateBearerToken(token);
             if (data && data.length) {
                 ctx.user = {
                     id: data[0],

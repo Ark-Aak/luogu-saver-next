@@ -1,5 +1,7 @@
 import { RegisteredUser } from '@/entities/registered-user';
 import { Not } from 'typeorm';
+import crypto from 'crypto';
+import { ROLE_DEFAULT } from '@/shared/permission';
 
 type CpOAuthRegisteredUserData = {
     cpOAuthSub: string;
@@ -36,11 +38,15 @@ export class RegisteredUserService {
             throw new Error('Luogu account is already bound to another CP OAuth account');
         }
 
+        const existing = await repository.findOne({ where: { cpOAuthSub: data.cpOAuthSub } });
         const registeredUser = repository.create({
+            id: existing?.id,
             cpOAuthSub: data.cpOAuthSub,
             luoguUid: data.luoguUid,
             name: data.name || `User ${data.luoguUid}`,
-            avatarUrl: data.avatarUrl || null
+            avatarUrl: data.avatarUrl || null,
+            token: existing?.token || crypto.randomBytes(16).toString('hex'),
+            role: existing?.role ?? ROLE_DEFAULT
         });
 
         try {
@@ -58,5 +64,17 @@ export class RegisteredUserService {
 
     static async getById(id: number): Promise<RegisteredUser | null> {
         return RegisteredUser.findOne({ where: { id } });
+    }
+
+    static async validateBearerToken(token: string): Promise<number[]> {
+        const registeredUser = await RegisteredUser.findOne({ where: { token } });
+        return registeredUser ? [registeredUser.id, registeredUser.role] : [];
+    }
+
+    static async updateRole(id: number, role: number): Promise<RegisteredUser | null> {
+        const registeredUser = await RegisteredUser.findOne({ where: { id } });
+        if (!registeredUser) return null;
+        registeredUser.role = role;
+        return registeredUser.save();
     }
 }

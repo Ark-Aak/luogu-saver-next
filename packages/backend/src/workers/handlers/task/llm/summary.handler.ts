@@ -2,7 +2,31 @@ import { ChildrenValues, TaskHandler, TaskTextResult, WorkflowResult } from '@/w
 import { AiTask } from '@/shared/task';
 import { UnrecoverableError, Job } from 'bullmq';
 import { llm } from '@/lib/llm';
-import { extractUpsteamData, getSourceTextById, shouldSkip } from '@/workers/helpers/common.helper';
+import { extractUpsteamData, shouldSkip } from '@/workers/helpers/common.helper';
+
+export async function generateArticleSummary(content: string): Promise<string> {
+    const prompt = `
+<prompt>
+Please provide a concise summary for the text in \`<content>\`.
+The summary should always be in Chinese.
+</prompt>
+<content>
+${content}
+</content>
+        `;
+
+    const result = await llm.chat(
+        [
+            {
+                role: 'user',
+                content: prompt
+            }
+        ],
+        'summary'
+    );
+
+    return result.content || '';
+}
 
 export class SummaryHandler implements TaskHandler<AiTask> {
     public taskType = 'llm:summary';
@@ -28,39 +52,17 @@ export class SummaryHandler implements TaskHandler<AiTask> {
         )?.text;
 
         if (!content) {
-            if (task.payload.sourceId) {
-                content = await getSourceTextById(task.payload.sourceId, job.id);
-            } else {
-                throw new UnrecoverableError(
-                    `No upstream text data found for summary task in job ${job.id}`
-                );
-            }
+            throw new UnrecoverableError(
+                `No upstream text data found for summary task in job ${job.id}`
+            );
         }
 
-        const prompt = `
-<prompt>
-Please provide a concise summary for the text in \`<content>\`.
-The summary should always be in Chinese.
-</prompt>
-<content>
-${content!}
-</content>
-        `;
-
-        const result = await llm.chat(
-            [
-                {
-                    role: 'user',
-                    content: prompt
-                }
-            ],
-            'summary'
-        );
+        const result = await generateArticleSummary(content);
 
         return {
             skipNextStep: false,
             data: {
-                text: result.content || ''
+                text: result
             }
         };
     }

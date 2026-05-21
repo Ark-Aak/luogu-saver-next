@@ -8,6 +8,9 @@ import censorshipRouter from './censorship.router';
 import tokenRouter from './token.router';
 import authRouter from './auth.router';
 import userRouter from './user.router';
+import searchRouter from './search.router';
+import adminRouter from './admin.router';
+import markdownRouter from './markdown.router';
 import { DefaultState, Context } from 'koa';
 
 const router = new Router<DefaultState, Context>();
@@ -21,5 +24,8 @@ router.use(censorshipRouter.routes(), censorshipRouter.allowedMethods());
 router.use(tokenRouter.routes(), tokenRouter.allowedMethods());
 router.use(authRouter.routes(), authRouter.allowedMethods());
 router.use(userRouter.routes(), userRouter.allowedMethods());
+router.use(searchRouter.routes(), searchRouter.allowedMethods());
+router.use(adminRouter.routes(), adminRouter.allowedMethods());
+router.use(markdownRouter.routes(), markdownRouter.allowedMethods());
 
 export default router;

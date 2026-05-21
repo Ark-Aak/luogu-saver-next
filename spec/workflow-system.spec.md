@@ -145,8 +145,11 @@ Task graph by logical dependency:
 5. `update-embedding` depends on `embedding`
 6. `update-summary` depends on `summary`
 7. `update-censor` depends on `censor`
+8. `update-search-index` depends on `update-summary`
 
 Permission: public (`null` permission mapping).
+
+Task `update-search-index` has `track=true` and `report=true` so clients can observe final search indexing success or failure.
 
 ### 5.2 `article-censor-pipeline`
 
@@ -159,16 +162,67 @@ Task graph:
 
 Permission: `CREATE_WORKFLOW`.
 
+### 5.3 `search-reindex-pipeline`
+
+Input parameter:
+
+| Parameter   | Type   | Required | Default | Constraint            |
+| ----------- | ------ | -------- | ------- | --------------------- |
+| `batchSize` | number | no       | 100     | Integer in `[1, 500]` |
+
+Task graph:
+
+1. `reindex-search` (tracked, reported)
+
+Task `reindex-search` has type `update`, target `search_reindex`, targetId `articles`, and metadata field `batchSize` equal to the normalized input value.
+
+Permission: `MANAGE_SEARCH`.
+
+### 5.4 `article-summary-rebuild-pipeline`
+
+Input parameter:
+
+| Parameter   | Type   | Required | Default | Constraint            |
+| ----------- | ------ | -------- | ------- | --------------------- |
+| `batchSize` | number | no       | 20      | Integer in `[1, 100]` |
+
+Task graph:
+
+1. `rebuild-summary` (tracked, reported)
+
+Task `rebuild-summary` has type `update`, target `article_summary_rebuild`, targetId `articles`, and metadata field `batchSize` equal to the normalized input value.
+
+Permission: `MANAGE_SEARCH`.
+
+### 5.5 `rag-search-pipeline`
+
+Task graph:
+
+1. `read-query` (read text from workflow parameters)
+2. `keyword-search` depends on `read-query`
+3. `query-embedding` depends on `read-query`
+4. `vector-search` depends on `query-embedding`
+5. `build-context` depends on `read-query`, `keyword-search`, and `vector-search`
+6. `answer` depends on `build-context` (tracked, reported)
+
+Permission: `CREATE_WORKFLOW`.
+
+LLM task handlers SHALL consume upstream `data.text` only. LLM task handlers SHALL NOT read external source objects by `sourceId`.
+
+Read task handlers SHALL be the only task handlers that load article or paste content from persistent storage for workflow data flow.
+
 ## 6. Status, Result, and Report Synchronization
 
 1. Each workflow node updates the `task` row whose `id` equals the BullMQ job ID.
 2. Only report tasks emit websocket events `task:{taskId}:completed` and `task:{taskId}:failed`.
-3. Non-report workflow tasks do not emit `task:{taskId}` websocket events.
-4. Legacy non-workflow tasks emit websocket task events for every completed or failed task.
-5. Workflow completion status is set to `completed` only when the root job completes successfully.
-6. Workflow failure status is set to `failed` when any workflow node reaches final failure.
-7. For tracked tasks (`track = true`), when a job includes `workflowId` and `taskName`, its return payload is merged into `workflow.result[taskName]`.
-8. Result payload is normalized as:
+3. A report task completed event payload SHALL contain `status='completed'` and `result=returnvalue.__result`.
+4. A report task failed event payload SHALL contain `status='failed'` and `error`.
+5. Non-report workflow tasks do not emit `task:{taskId}` websocket events.
+6. Legacy non-workflow tasks emit websocket task events for every completed or failed task.
+7. Workflow completion status is set to `completed` only when the root job completes successfully.
+8. Workflow failure status is set to `failed` when any workflow node reaches final failure.
+9. For tracked tasks (`track = true`), when a job includes `workflowId` and `taskName`, its return payload is merged into `workflow.result[taskName]`.
+10. Result payload is normalized as:
 
 ```json
 {
@@ -177,9 +231,9 @@ Permission: `CREATE_WORKFLOW`.
 }
 ```
 
-9. Status writes are monotonic with respect to terminal states.
-10. If current `workflow.status` is `completed`, `failed`, or `expired`, later queue status reads or queue events MUST NOT replace it.
-11. If current `workflow.status` is not terminal, a queue status read or queue event MAY replace it with the observed BullMQ state.
+11. Status writes are monotonic with respect to terminal states.
+12. If current `workflow.status` is `completed`, `failed`, or `expired`, later queue status reads or queue events MUST NOT replace it.
+13. If current `workflow.status` is not terminal, a queue status read or queue event MAY replace it with the observed BullMQ state.
 
 ## 7. Invariants
 

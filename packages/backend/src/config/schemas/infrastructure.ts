@@ -22,3 +22,10 @@ export const ChromaSchema = z.object({
     port: z.number().default(8000),
     collectionName: z.string().default('lgs_articles')
 });
+
+export const MeilisearchSchema = z.object({
+    enable: z.boolean().default(false),
+    host: z.string().default('http://127.0.0.1:7700'),
+    apiKey: z.string().default(''),
+    articleIndexName: z.string().default('lgs_articles')
+});
