@@ -11,7 +11,7 @@ export function CacheEvict(keyGenerator: (...args: any[]) => string | string[]):
                 const keysToDelete = Array.isArray(rawKeys) ? rawKeys : [rawKeys];
                 if (keysToDelete.length > 0) {
                     await redisClient.del(...keysToDelete);
-                    logger.info({ keys: keysToDelete }, 'Cache evicted successfully');
+                    logger.debug({ keys: keysToDelete }, 'Cache evicted successfully');
                 }
             } catch (err) {
                 logger.error({ err }, 'Error evicting Redis cache');
