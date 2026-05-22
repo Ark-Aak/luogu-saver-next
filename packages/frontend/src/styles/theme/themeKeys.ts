@@ -9,6 +9,7 @@ export interface UiThemeVars {
     cardColor: string;
     cardTitleColor: string;
     cardShadow: string;
+    cardRadius: string;
     iconColor: string;
 }
 

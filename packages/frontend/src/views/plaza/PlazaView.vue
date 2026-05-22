@@ -96,7 +96,7 @@ const goToDetail = (id: string) => {
 
 <template>
     <div class="plaza-page">
-        <CardTitle title="文章广场" :icon="GlobeOutline" class="feed-header">
+        <CardTitle title="文章广场" :icon="GlobeOutline" class="feed-header" chip="PLAZA">
             ARTICLE PLAZA!
         </CardTitle>
 

@@ -399,6 +399,7 @@ const themeOverrides = computed<GlobalThemeOverrides>(() => {
         common: {
             fontFamily: "'Lato', sans-serif",
             fontFamilyMono: "'Fira Code', monospace",
+            borderRadius: uiThemeVars.value.cardRadius,
             bodyColor: uiThemeVars.value.bodyColor,
             primaryColor: uiThemeVars.value.primaryColor,
             primaryColorHover: uiThemeVars.value.primaryColorHover,
@@ -416,7 +417,7 @@ const themeOverrides = computed<GlobalThemeOverrides>(() => {
             itemColorActive: 'rgba(22, 119, 255, 0.1)',
             itemColorActiveHover: 'rgba(22, 119, 255, 0.14)',
             itemColorHover: 'rgba(22, 119, 255, 0.08)',
-            borderRadius: '12px'
+            borderRadius: uiThemeVars.value.cardRadius
         }
     };
 });
@@ -465,7 +466,7 @@ setInterval(() => {
 .app-footer {
     margin-top: 28px;
     padding: 14px 40px;
-    border-radius: 18px 18px 0 0;
+    border-radius: 6px 6px 0 0;
     background: rgba(255, 255, 255, 0.72);
     backdrop-filter: blur(16px);
 }

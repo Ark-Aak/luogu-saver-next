@@ -91,7 +91,7 @@ const effectiveIconColor = computed(() => {
     position: relative;
     overflow: hidden;
     padding: 24px 30px;
-    border-radius: 14px;
+    border-radius: 6px;
     box-shadow: 0 12px 26px rgba(47, 109, 181, 0.08);
     border: 1px solid rgba(47, 109, 181, 0.1);
 }
@@ -114,7 +114,7 @@ const effectiveIconColor = computed(() => {
 .icon-frame {
     width: 48px;
     height: 48px;
-    border-radius: 10px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -140,7 +140,7 @@ const effectiveIconColor = computed(() => {
 
 .banner-chip {
     padding: 8px 12px;
-    border-radius: 8px;
+    border-radius: 6px;
     color: #2f6db5;
     border: 1px solid rgba(47, 109, 181, 0.14);
     background: rgba(47, 109, 181, 0.07);
@@ -152,7 +152,7 @@ const effectiveIconColor = computed(() => {
 @media (max-width: 720px) {
     .title-banner {
         padding: 22px;
-        border-radius: 12px;
+        border-radius: 6px;
     }
 
     .banner-content {

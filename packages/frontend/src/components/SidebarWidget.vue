@@ -12,10 +12,11 @@ defineProps<{
 
 const titleColor = computed(() => themeVars.value.cardTitleColor);
 const iconColor = computed(() => themeVars.value.primaryColor);
+const radius = computed(() => themeVars.value.cardRadius);
 </script>
 
 <template>
-    <div class="sidebar-widget">
+    <div class="sidebar-widget" :style="{ borderRadius: radius }">
         <div v-if="title" class="widget-header">
             <NIcon v-if="icon" :component="icon" :color="iconColor" class="widget-icon" />
             <span class="widget-title" :style="{ color: titleColor }">{{ title }}</span>
@@ -30,7 +31,6 @@ const iconColor = computed(() => themeVars.value.primaryColor);
 .sidebar-widget {
     margin-bottom: 24px;
     padding: 16px;
-    border-radius: 18px;
     background: rgba(255, 255, 255, 0.72);
     border: 1px solid rgba(22, 119, 255, 0.1);
     box-shadow: 0 14px 32px rgba(22, 119, 255, 0.08);

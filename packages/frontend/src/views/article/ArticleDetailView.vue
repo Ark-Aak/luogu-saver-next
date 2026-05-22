@@ -8,8 +8,6 @@ import {
     NIcon,
     NTag,
     NDivider,
-    NGrid,
-    NGi,
     NSkeleton,
     NAnchor,
     NAnchorLink,
@@ -246,7 +244,7 @@ onMounted(() => {
             class="article-layout"
             :class="{
                 'has-toc': tocItems.length > 0,
-                'has-history': versionHistory.length > 0
+                'has-history': loading || versionHistory.length > 0
             }"
         >
             <aside class="sidebar-left">
@@ -283,40 +281,36 @@ onMounted(() => {
                                     />
                                 </div>
                                 <n-divider style="margin: 12px 0" />
-                                <n-grid x-gap="12" cols="1 s:2">
-                                    <n-gi>
-                                        <div class="info-item">
-                                            <span class="label">作者</span>
-                                            <div
-                                                style="
-                                                    display: flex;
-                                                    align-items: center;
-                                                    gap: 8px;
-                                                    margin-top: 4px;
-                                                "
-                                            >
-                                                <n-skeleton circle size="small" />
-                                                <n-skeleton text style="width: 80px" />
-                                            </div>
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <span class="label">作者</span>
+                                        <div
+                                            style="
+                                                display: flex;
+                                                align-items: center;
+                                                gap: 8px;
+                                                margin-top: 4px;
+                                            "
+                                        >
+                                            <n-skeleton circle size="small" />
+                                            <n-skeleton text style="width: 80px" />
                                         </div>
-                                    </n-gi>
-                                    <n-gi>
-                                        <div class="info-item">
-                                            <span class="label">分类</span>
-                                            <div
-                                                style="
-                                                    display: flex;
-                                                    align-items: center;
-                                                    gap: 8px;
-                                                    margin-top: 4px;
-                                                "
-                                            >
-                                                <n-skeleton width="18px" height="18px" />
-                                                <n-skeleton text style="width: 60px" />
-                                            </div>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="label">分类</span>
+                                        <div
+                                            style="
+                                                display: flex;
+                                                align-items: center;
+                                                gap: 8px;
+                                                margin-top: 4px;
+                                            "
+                                        >
+                                            <n-skeleton width="18px" height="18px" />
+                                            <n-skeleton text style="width: 60px" />
                                         </div>
-                                    </n-gi>
-                                </n-grid>
+                                    </div>
+                                </div>
                             </Card>
                         </template>
 
@@ -333,31 +327,27 @@ onMounted(() => {
 
                                 <n-divider style="margin: 12px 0" />
 
-                                <n-grid x-gap="12" cols="1 s:2">
-                                    <n-gi>
-                                        <div class="info-item">
-                                            <span class="label">作者</span>
-                                            <UserLink :user="article.author" show-avatar />
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <span class="label">作者</span>
+                                        <UserLink :user="article.author" show-avatar />
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="label">分类</span>
+                                        <div class="category-link">
+                                            <NIcon
+                                                :component="currentCategory.icon"
+                                                :color="currentCategory.color"
+                                            />
+                                            <span
+                                                :style="{
+                                                    color: currentCategory.color
+                                                }"
+                                                >{{ currentCategory.label }}</span
+                                            >
                                         </div>
-                                    </n-gi>
-                                    <n-gi>
-                                        <div class="info-item">
-                                            <span class="label">分类</span>
-                                            <div class="category-link">
-                                                <NIcon
-                                                    :component="currentCategory.icon"
-                                                    :color="currentCategory.color"
-                                                />
-                                                <span
-                                                    :style="{
-                                                        color: currentCategory.color
-                                                    }"
-                                                    >{{ currentCategory.label }}</span
-                                                >
-                                            </div>
-                                        </div>
-                                    </n-gi>
-                                </n-grid>
+                                    </div>
+                                </div>
 
                                 <n-divider style="margin: 12px 0" />
 
@@ -440,8 +430,8 @@ onMounted(() => {
                                 </Card>
                             </template>
 
-                            <Card v-if="recommended.length" title="相关推荐">
-                                <div class="article-list">
+                            <Card title="相关推荐">
+                                <div v-if="recommended.length" class="article-list">
                                     <div
                                         v-for="it in recommended"
                                         :key="it.id"
@@ -526,15 +516,26 @@ onMounted(() => {
                                         </Card>
                                     </div>
                                 </div>
+                                <div v-else class="empty-recommendation">暂无相关推荐</div>
                             </Card>
                         </LoadingSkeleton>
                     </div>
                 </main>
             </div>
 
-            <aside v-if="versionHistory.length > 0" class="sidebar-right">
-                <SidebarWidget title="历史版本" :icon="TimeOutline" class="version-card">
-                    <n-timeline>
+            <aside class="sidebar-right">
+                <SidebarWidget
+                    v-if="loading || versionHistory.length > 0"
+                    title="历史版本"
+                    :icon="TimeOutline"
+                    class="version-card"
+                >
+                    <div v-if="loading" class="version-skeleton">
+                        <n-skeleton text style="width: 80%" />
+                        <n-skeleton text style="width: 60%" />
+                        <n-skeleton text style="width: 70%" />
+                    </div>
+                    <n-timeline v-else>
                         <n-timeline-item
                             v-for="ver in versionHistory"
                             :key="ver.version"
@@ -645,11 +646,17 @@ onMounted(() => {
 .info-item {
     background: linear-gradient(180deg, #f8fbff, #f3f8ff);
     padding: 10px 12px;
-    border-radius: 12px;
+    border-radius: 6px;
     border: 1px solid rgba(22, 119, 255, 0.08);
     display: flex;
     flex-direction: column;
     gap: 4px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
 }
 
 .label {
@@ -681,6 +688,24 @@ onMounted(() => {
     line-height: 1.6;
     margin-bottom: 8px;
 }
+
+.empty-recommendation {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.version-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+@media (max-width: 640px) {
+    .info-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
 .article-meta {
     display: flex;
     justify-content: space-between;

@@ -9,5 +9,6 @@ export const defaultTheme: UiThemeVars = {
     cardColor: '#ffffff',
     cardTitleColor: '#10233f',
     cardShadow: '0 14px 36px rgba(47, 109, 181, 0.08)',
+    cardRadius: '6px',
     iconColor: '#2f6db5'
 };

@@ -48,7 +48,8 @@ const effectiveBackgroundColor = computed(() => {
 const cardStyle = computed(
     (): CSSProperties => ({
         backgroundColor: effectiveBackgroundColor.value,
-        boxShadow: themeVars.value.cardShadow
+        boxShadow: themeVars.value.cardShadow,
+        borderRadius: themeVars.value.cardRadius
     })
 );
 
@@ -101,7 +102,6 @@ const showHeader = computed(() => {
 <style scoped>
 .saver-card {
     padding: 20px;
-    border-radius: 12px;
     border: 1px solid rgba(47, 109, 181, 0.08);
     transition:
         transform 0.3s ease,
@@ -136,7 +136,7 @@ const showHeader = computed(() => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
+    border-radius: 6px;
     background: rgba(47, 109, 181, 0.08);
 }
 

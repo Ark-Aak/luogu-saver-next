@@ -72,7 +72,7 @@ const handleReject = () => {
 
 .consent-card {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-    border-radius: 12px;
+    border-radius: 6px;
     background-color: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(0, 0, 0, 0.05);
@@ -109,11 +109,11 @@ const handleReject = () => {
         left: 0;
         width: 100%;
         transform: none;
-        border-radius: 12px 12px 0 0;
+        border-radius: 6px 6px 0 0;
     }
 
     .consent-card {
-        border-radius: 12px 12px 0 0;
+        border-radius: 6px 6px 0 0;
     }
 
     .content-wrapper {

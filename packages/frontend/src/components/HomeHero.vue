@@ -95,7 +95,7 @@ const handleSearch = () => {
     padding: 48px;
     position: relative;
     overflow: hidden;
-    border-radius: 16px;
+    border-radius: 6px;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(240, 246, 252, 0.92));
     border: 1px solid rgba(47, 109, 181, 0.1);
     box-shadow: 0 14px 32px rgba(47, 109, 181, 0.07);
@@ -119,7 +119,7 @@ const handleSearch = () => {
     display: inline-flex;
     padding: 7px 12px;
     margin-bottom: 18px;
-    border-radius: 8px;
+    border-radius: 6px;
     color: #2f6db5;
     background: rgba(47, 109, 181, 0.08);
     border: 1px solid rgba(47, 109, 181, 0.12);
@@ -141,7 +141,7 @@ const handleSearch = () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 14px;
+    border-radius: 6px;
     background: rgba(255, 255, 255, 0.86);
     box-shadow: none;
     border: 1px solid rgba(47, 109, 181, 0.1);
@@ -184,7 +184,7 @@ const handleSearch = () => {
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(22, 119, 255, 0.14) !important;
-    border-radius: 14px !important;
+    border-radius: 6px !important;
     box-shadow: 0 10px 24px rgba(47, 109, 181, 0.08);
     height: 58px;
     font-size: 18px;
@@ -224,7 +224,7 @@ const handleSearch = () => {
 
 .panel-card {
     padding: 16px;
-    border-radius: 12px;
+    border-radius: 6px;
     background: rgba(255, 255, 255, 0.72);
     border: 1px solid rgba(47, 109, 181, 0.1);
 }
@@ -260,7 +260,7 @@ const handleSearch = () => {
 @media (max-width: 640px) {
     .hero-section {
         padding: 30px 18px;
-        border-radius: 14px;
+        border-radius: 6px;
     }
 
     .brand-header {
