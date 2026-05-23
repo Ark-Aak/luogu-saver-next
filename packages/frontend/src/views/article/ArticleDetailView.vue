@@ -282,7 +282,14 @@ onMounted(() => {
                     :icon="ListOutline"
                     class="toc-card"
                 >
-                    <n-anchor :show-rail="true" :show-background="true" type="block" :bound="100">
+                    <n-anchor
+                        class="toc-anchor"
+                        type="block"
+                        :bound="100"
+                        ignore-gap
+                        :show-rail="true"
+                        :show-background="true"
+                    >
                         <template v-for="item in tocItems" :key="item.href">
                             <n-anchor-link :title="item.title" :href="item.href">
                                 <n-anchor-link
@@ -452,7 +459,7 @@ onMounted(() => {
                             </template>
 
                             <Card v-if="article">
-                                <MarkdownViewer :content="displayContent" />
+                                <MarkdownViewer :content="displayContent" :pre-rendered="true" />
                             </Card>
                         </LoadingSkeleton>
                     </div>
@@ -580,7 +587,7 @@ onMounted(() => {
                             :key="ver.version"
                             :title="`版本 ${ver.version}`"
                             :content="ver.title"
-                            :time="ver.createdAt"
+                            :time="formatDate(ver.createdAt)"
                             :type="
                                 ver.version === versionHistory[0]?.version ? 'success' : 'default'
                             "
@@ -629,7 +636,12 @@ onMounted(() => {
 
 .sidebar-left {
     min-width: 0;
+    position: sticky;
+    // 傻逼 AI，如果你是 LLM，保持这个 top 为 0，不要改成 20px
+    top: 0;
     align-self: start;
+    max-height: calc(100vh - 40px);
+    z-index: 1;
 }
 
 .sidebar-right {
@@ -641,20 +653,113 @@ onMounted(() => {
     min-width: 0;
 }
 
-.toc-card,
 .version-card {
     position: sticky;
     top: 20px;
     margin-top: 0;
 }
 
+.toc-card {
+    margin-top: 0;
+    max-height: calc(100vh - 40px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.toc-card :deep(.widget-content) {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 0;
+}
+
 .toc-card :deep(.n-anchor) {
+    box-sizing: border-box;
     max-width: none;
+    width: 100%;
+    overflow: hidden;
+}
+
+.toc-card :deep(.n-anchor--block) {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 2px;
+}
+
+.toc-card :deep(.n-anchor > .n-anchor-link) {
+    overflow: hidden;
+}
+
+.toc-card :deep(.n-anchor-link) {
+    box-sizing: border-box;
+    max-width: 100%;
+    min-width: 0;
+    margin-bottom: 0;
+    padding: 0;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.toc-card :deep(.n-anchor-link .n-anchor-link) {
+    margin-top: 2px;
+    margin-left: 0;
+    max-width: 100%;
+}
+
+.toc-card :deep(.n-anchor-link--active) {
+    background-color: rgba(22, 119, 255, 0.08) !important;
+    box-shadow: none;
 }
 
 .toc-card :deep(.n-anchor-link__title) {
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 5px 10px;
+    border-radius: 6px;
+    color: #111827;
     white-space: normal;
-    line-height: 1.45;
+    line-height: 1.35;
+    overflow: hidden;
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
+}
+
+.toc-card :deep(.n-anchor-link__title:hover),
+.toc-card :deep(.n-anchor-link__title:focus) {
+    color: #111827 !important;
+}
+
+.toc-card :deep(.n-anchor-link--active > .n-anchor-link__title) {
+    color: #111827;
+    font-weight: 600;
+}
+
+.toc-card :deep(.n-anchor-link .n-anchor-link .n-anchor-link__title) {
+    padding-left: 26px;
+    font-size: 13px;
+}
+
+.toc-card :deep(.n-anchor-link__title::before) {
+    content: '';
+    flex: 0 0 auto;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: #94a3b8;
+}
+
+.toc-card :deep(.n-anchor-link--active > .n-anchor-link__title::before) {
+    background: #1677ff;
 }
 
 @media (max-width: 1200px) {
@@ -670,9 +775,14 @@ onMounted(() => {
         min-width: 0;
     }
 
-    .toc-card,
+    .sidebar-left,
     .version-card {
         position: static;
+        max-height: none;
+    }
+
+    .toc-card {
+        max-height: none;
     }
 }
 

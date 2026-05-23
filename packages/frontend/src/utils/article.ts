@@ -17,6 +17,8 @@ export const getCategoryIcon = (id?: number) => {
 };
 
 export const generateTocAndProcessHtml = (html: string) => {
+    if (!html.trim()) return { html, toc: [] };
+
     const div = document.createElement('div');
     div.innerHTML = html;
 
@@ -26,12 +28,13 @@ export const generateTocAndProcessHtml = (html: string) => {
 
     headers.forEach((header, index) => {
         const level = parseInt(header.tagName.substring(1));
-        const title = header.textContent || '';
-        let id = header.id;
+        const title = header.textContent?.trim() || '';
+
+        let id = header.getAttribute('id');
 
         if (!id) {
-            id = `heading-${index}`;
-            header.id = id;
+            id = `toc-heading-${index}`;
+            header.setAttribute('id', id);
         }
 
         const item: TocItem = { title, href: `#${id}`, children: [] };

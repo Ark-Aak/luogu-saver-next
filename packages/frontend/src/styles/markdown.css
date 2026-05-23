@@ -139,6 +139,38 @@
     overflow-wrap: break-word;
 }
 
+.md-body :is(h1, h2, h3, h4, h5, h6) {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #111827;
+}
+
+.heading-anchor {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    color: #1677ff;
+    text-decoration: none;
+    transition:
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.heading-anchor:hover {
+    color: #0958d9 !important;
+    transform: translateY(-1px);
+}
+
+.heading-pin-icon {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2;
+}
+
 .md-body blockquote {
     margin: 12px 0;
     padding: 2px 0 2px 14px;

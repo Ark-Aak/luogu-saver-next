@@ -10,8 +10,43 @@ import { visit } from 'unist-util-visit';
 import rehypeSanitize, { defaultSchema, type Options } from 'rehype-sanitize';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
-import type { Root } from 'hast';
+import type { ElementContent, Root } from 'hast';
 import type { VFile } from 'vfile';
+
+const headingAnchorIcon: ElementContent = {
+    type: 'element',
+    tagName: 'svg',
+    properties: {
+        className: ['heading-pin-icon', 'lucide', 'lucide-pin'],
+        xmlns: 'http://www.w3.org/2000/svg',
+        width: 24,
+        height: 24,
+        viewBox: '0 0 24 24',
+        fill: 'none',
+        stroke: 'currentColor',
+        strokeWidth: 2,
+        strokeLinecap: 'round',
+        strokeLinejoin: 'round',
+        ariaHidden: 'true',
+        focusable: 'false'
+    },
+    children: [
+        {
+            type: 'element',
+            tagName: 'path',
+            properties: { d: 'M12 17v5' },
+            children: []
+        },
+        {
+            type: 'element',
+            tagName: 'path',
+            properties: {
+                d: 'M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z'
+            },
+            children: []
+        }
+    ]
+};
 
 let processorPromise: Promise<any> | null = null;
 
@@ -30,7 +65,15 @@ async function getProcessor() {
     if (processorPromise) return processorPromise;
 
     processorPromise = (async () => {
-        const { default: rehypeShiki } = await import('@shikijs/rehype');
+        const [rehypeShikiModule, rehypeSlugModule, rehypeAutolinkHeadingsModule] =
+            await Promise.all([
+                import('@shikijs/rehype'),
+                import('rehype-slug'),
+                import('rehype-autolink-headings')
+            ]);
+        const rehypeShiki = rehypeShikiModule.default;
+        const rehypeSlug = rehypeSlugModule.default;
+        const rehypeAutolinkHeadings = rehypeAutolinkHeadingsModule.default;
         const schema: Options = {
             ...defaultSchema,
             attributes: {
@@ -257,6 +300,16 @@ async function getProcessor() {
             .use(remarkRehype, { allowDangerousHtml: true })
             .use(rehypeRaw)
             .use(rehypeSanitize, schema)
+            .use(rehypeSlug)
+            .use(rehypeAutolinkHeadings, {
+                behavior: 'prepend',
+                content: headingAnchorIcon,
+                properties: {
+                    className: ['heading-anchor'],
+                    ariaHidden: 'true',
+                    tabIndex: -1
+                }
+            })
             .use(rehypeCustomContainers)
             .use(rehypeSafeKatex)
             .use(rehypeShiki, {

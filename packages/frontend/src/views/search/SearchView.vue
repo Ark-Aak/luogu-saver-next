@@ -20,7 +20,7 @@ import CardTitle from '@/components/CardTitle.vue';
 import Card from '@/components/Card.vue';
 import { searchArticles, type ArticleSearchHit } from '@/api/search.ts';
 import { ARTICLE_CATEGORIES, UNKNOWN_CATEGORY } from '@/utils/constants.ts';
-import { renderSafeMarkedHtml } from '@/utils/render.ts';
+import { formatDate, renderSafeMarkedHtml } from '@/utils/render.ts';
 
 const route = useRoute();
 const router = useRouter();
@@ -183,7 +183,7 @@ onMounted(loadSearch);
                         </n-space>
                         <span class="meta-item">
                             <n-icon :component="CalendarOutline" />
-                            {{ new Date(item.updatedAt).toLocaleDateString() }}
+                            {{ formatDate(item.updatedAt) }}
                         </span>
                     </n-space>
                 </Card>

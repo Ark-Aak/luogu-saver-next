@@ -47,10 +47,9 @@
                         <n-layout class="app-main" :native-scrollbar="false">
                             <n-layout-content content-style="padding: 28px;">
                                 <div class="router-view">
-                                    <n-back-top :right="50" />
+                                    <n-back-top :right="50" :bottom="200" />
                                     <router-view />
                                 </div>
-
                                 <IconConfigProvider size="14">
                                     <n-layout-footer bordered class="app-footer">
                                         <n-grid cols="2">
@@ -464,9 +463,8 @@ setInterval(() => {
 }
 
 .app-footer {
-    margin-top: 28px;
+    margin: 28px -28px -28px -28px;
     padding: 14px 40px;
-    border-radius: 6px 6px 0 0;
     background: rgba(255, 255, 255, 0.72);
     backdrop-filter: blur(16px);
 }
@@ -487,14 +485,11 @@ setInterval(() => {
 .footer-link {
     display: flex;
     align-items: center;
-    color: #000;
+    color: var(--n-text-color);
     transition: color 0.2s;
-    text-decoration: none;
 }
 .footer-link:hover {
     color: #337ab7 !important;
-    text-decoration-color: #000;
-    text-underline-position: under;
 }
 .footer-link:not(:first-child) {
     margin-left: 16px;
