@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, h, onMounted, onUnmounted, ref } from 'vue';
-import { NButton, NDataTable, NIcon, NSpace, NSpin, NTag, useMessage } from 'naive-ui';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { NButton, NIcon, NSpin, NTag, useMessage } from 'naive-ui';
 import {
     CheckmarkCircleOutline,
     PulseOutline,
@@ -9,7 +9,6 @@ import {
     TimeOutline,
     WarningOutline
 } from '@vicons/ionicons5';
-import type { DataTableColumns } from 'naive-ui';
 import Card from '@/components/Card.vue';
 import CardTitle from '@/components/CardTitle.vue';
 import { getQueueStats, type QueueStatsItem, type QueueStatsResponse } from '@/api/statistic.ts';
@@ -73,28 +72,6 @@ async function refreshQueueStats() {
 function handleQueueStatsUpdate(payload: QueueStatsResponse) {
     stats.value = payload;
 }
-
-const columns: DataTableColumns<QueueStatsItem> = [
-    {
-        title: '队列',
-        key: 'label',
-        render: row => `${row.label} (${row.name})`
-    },
-    { title: '并发', key: 'concurrency' },
-    { title: '等待', key: 'counts.waiting', render: row => row.counts.waiting },
-    { title: '运行', key: 'counts.active', render: row => row.counts.active },
-    { title: '延迟', key: 'counts.delayed', render: row => row.counts.delayed },
-    { title: '失败', key: 'counts.failed', render: row => row.counts.failed },
-    { title: '完成', key: 'counts.completed', render: row => row.counts.completed },
-    {
-        title: '状态',
-        key: 'status',
-        render: row => {
-            const status = queueStatus(row);
-            return h(NTag, { type: status.type, size: 'small' }, { default: () => status.label });
-        }
-    }
-];
 
 onMounted(async () => {
     socket.on(QUEUE_STATS_EVENT, handleQueueStatsUpdate);
@@ -211,24 +188,6 @@ onUnmounted(() => {
                 </div>
             </Card>
         </div>
-
-        <Card title="队列明细" class="detail-card">
-            <n-data-table
-                :columns="columns"
-                :data="stats?.queues || []"
-                :bordered="false"
-                size="small"
-                :pagination="false"
-            />
-        </Card>
-
-        <Card title="阅读提示" class="tips-card">
-            <n-space vertical>
-                <div>AI 队列堆积通常表示 summary、embedding 或 RAG 生成速度不足。</div>
-                <div>更新队列堆积通常表示索引、摘要重建或内容更新任务较多。</div>
-                <div>搜索队列堆积通常表示 RAG 多 query 检索正在集中执行。</div>
-            </n-space>
-        </Card>
     </div>
 </template>
 
