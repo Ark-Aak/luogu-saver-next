@@ -44,6 +44,13 @@ export async function rebuildArticleSummaries(batchSize: number = 20, concurrenc
     })) as ApiResponse<CreateWorkflowTemplateResponse>;
 }
 
+export async function rebuildArticleEmbeddings(batchSize: number = 20, concurrency: number = 5) {
+    return (await apiFetch('/admin/articles/embedding/rebuild', {
+        method: 'POST',
+        data: { batchSize, concurrency }
+    })) as ApiResponse<CreateWorkflowTemplateResponse>;
+}
+
 export async function getAdminAnnouncement() {
     return (await apiFetch('/admin/announcement')) as ApiResponse<Announcement>;
 }

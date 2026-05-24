@@ -111,6 +111,7 @@ export enum UpdateTarget {
     ARTICLE_SUMMARY = 'article_summary',
     ARTICLE_SUMMARY_REBUILD = 'article_summary_rebuild',
     ARTICLE_EMBEDDING = 'article_embedding',
+    ARTICLE_EMBEDDING_REBUILD = 'article_embedding_rebuild',
     CENSOR = 'censor',
     SEARCH_INDEX = 'search_index',
     SEARCH_REINDEX = 'search_reindex'

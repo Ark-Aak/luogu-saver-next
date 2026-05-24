@@ -21,6 +21,7 @@ import { getCurrentUser } from '@/api/auth.ts';
 import {
     getAdminUsers,
     getAdminAnnouncement,
+    rebuildArticleEmbeddings,
     rebuildArticleSummaries,
     reindexSearch,
     updateAdminAnnouncement,
@@ -39,11 +40,14 @@ const users = ref<AdminUser[]>([]);
 const loading = ref(false);
 const reindexing = ref(false);
 const rebuildingSummaries = ref(false);
+const rebuildingEmbeddings = ref(false);
 const loadingAnnouncement = ref(false);
 const savingAnnouncement = ref(false);
 const batchSize = ref(100);
 const summaryBatchSize = ref(20);
 const summaryConcurrency = ref(5);
+const embeddingBatchSize = ref(20);
+const embeddingConcurrency = ref(5);
 const announcementForm = ref({
     title: '公告',
     content: '',
@@ -190,6 +194,40 @@ async function handleSummaryRebuild() {
     message.success('摘要重建任务已提交');
 }
 
+async function handleEmbeddingRebuild() {
+    rebuildingEmbeddings.value = true;
+    const response = await rebuildArticleEmbeddings(
+        embeddingBatchSize.value,
+        embeddingConcurrency.value
+    );
+    if (response.code !== 200) {
+        message.error(response.message);
+        rebuildingEmbeddings.value = false;
+        return;
+    }
+
+    const taskId = response.data.reportTaskIds['rebuild-embedding'];
+    setupTaskUpdateListener(
+        taskId,
+        data => {
+            rebuildingEmbeddings.value = false;
+            const result = data?.result?.data;
+            if (result) {
+                message.success(
+                    `Embedding 重建完成：更新 ${result.updated} 篇，失败 ${result.failed} 篇`
+                );
+                return;
+            }
+            message.success('Embedding 重建完成');
+        },
+        error => {
+            rebuildingEmbeddings.value = false;
+            message.error(error || 'Embedding 重建失败');
+        }
+    );
+    message.success('Embedding 重建任务已提交');
+}
+
 const columns = [
     { title: 'ID', key: 'id', width: 80 },
     { title: '名称', key: 'name' },
@@ -322,6 +360,51 @@ onMounted(async () => {
                                 @click="handleSummaryRebuild"
                             >
                                 重建摘要
+                            </n-button>
+                        </n-space>
+                        <n-tag v-if="!canManageSearch" type="warning">缺少 MANAGE_SEARCH</n-tag>
+                    </n-space>
+                </Card>
+
+                <Card title="文章 Embedding">
+                    <n-space vertical>
+                        <div class="muted">
+                            通过 workflow 为所有未删除文章重新生成 Chroma 向量。
+                        </div>
+                        <n-space align="center">
+                            <n-form-item
+                                label="每批文章数"
+                                label-placement="left"
+                                :show-feedback="false"
+                                class="batch-size-field"
+                            >
+                                <n-input-number
+                                    v-model:value="embeddingBatchSize"
+                                    :min="1"
+                                    :max="100"
+                                    placeholder="默认 20，范围 1-100"
+                                />
+                            </n-form-item>
+                            <n-form-item
+                                label="并发数"
+                                label-placement="left"
+                                :show-feedback="false"
+                                class="batch-size-field"
+                            >
+                                <n-input-number
+                                    v-model:value="embeddingConcurrency"
+                                    :min="1"
+                                    :max="20"
+                                    placeholder="默认 5，范围 1-20"
+                                />
+                            </n-form-item>
+                            <n-button
+                                type="primary"
+                                :disabled="!canManageSearch"
+                                :loading="rebuildingEmbeddings"
+                                @click="handleEmbeddingRebuild"
+                            >
+                                重建 Embedding
                             </n-button>
                         </n-space>
                         <n-tag v-if="!canManageSearch" type="warning">缺少 MANAGE_SEARCH</n-tag>

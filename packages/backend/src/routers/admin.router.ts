@@ -94,6 +94,25 @@ router.post(
     }
 );
 
+router.post(
+    '/articles/embedding/rebuild',
+    requiresPermission(Permission.MANAGE_SEARCH),
+    async (ctx: Context) => {
+        const { batchSize, concurrency } = ctx.request.body as {
+            batchSize?: number;
+            concurrency?: number;
+        };
+        const result = await WorkflowService.createWorkflowFromTemplate(
+            'article-embedding-rebuild-pipeline',
+            {
+                batchSize: batchSize || 20,
+                concurrency: concurrency || 5
+            }
+        );
+        ctx.success(result);
+    }
+);
+
 router.get(
     '/announcement',
     requiresPermission(Permission.MANAGE_ANNOUNCEMENTS),

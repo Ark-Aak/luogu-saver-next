@@ -23,6 +23,21 @@ The `EmbeddingService` interfaces with ChromaDB for vector-based similarity sear
 3. Query Chroma for n nearest neighbors.
 4. Return IDs and distances.
 
+#### upsertVector(id, metadata, document, embedding)
+
+1. If Chroma is disabled, perform no write.
+2. If Chroma is enabled, upsert one vector with the provided `id`, `metadata`, `document`, and `embedding`.
+
+#### rebuildArticleEmbeddings(batchSize = 20, concurrency = 5)
+
+1. Load non-deleted articles in ascending article ID order in batches of `batchSize`.
+2. For each article, use `article.summary` if it is non-empty after trimming; otherwise use `article.content`.
+3. Generate an embedding by calling the embedding LLM scenario with the chosen text.
+4. Upsert the vector into Chroma with article metadata `{ title, authorId, category, tags }`.
+5. Process at most `concurrency` articles at the same time inside each batch.
+6. Continue after per-article failures.
+7. Return `{ processed, updated, failed, failedArticleIds }`.
+
 ### 2.2 Recommendation Service
 
 The `RecommendationService` provides recommendation algorithms.

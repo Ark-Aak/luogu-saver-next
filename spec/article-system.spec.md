@@ -233,7 +233,38 @@ The update handler for `article_summary_rebuild` SHALL:
 6. Continue processing if one article fails and record that article ID in `failedArticleIds`.
 7. Return `{ processed, updated, failed, failedArticleIds }`.
 
-## 10. File Locations
+## 10. Embedding Rebuild Workflow
+
+The workflow template `article-embedding-rebuild-pipeline` SHALL rebuild Chroma embeddings for all non-deleted articles.
+
+Input parameters:
+
+| Parameter     | Type   | Required | Default | Constraint            |
+| ------------- | ------ | -------- | ------- | --------------------- |
+| `batchSize`   | number | no       | 20      | Integer in `[1, 100]` |
+| `concurrency` | number | no       | 5       | Integer in `[1, 20]`  |
+
+Task `rebuild-embedding` SHALL:
+
+1. Have type `update`.
+2. Have target `article_embedding_rebuild`.
+3. Have `targetId='articles'`.
+4. Have `metadata.batchSize` equal to normalized `batchSize`.
+5. Have `metadata.concurrency` equal to normalized `concurrency`.
+6. Set `track=true`.
+7. Set `report=true`.
+8. Require permission `MANAGE_SEARCH`.
+
+The update handler for `article_embedding_rebuild` SHALL:
+
+1. Load non-deleted articles from the database in ascending `id` order.
+2. Process each loaded batch with at most `metadata.concurrency` articles running at the same time.
+3. For each article, call the embedding LLM scenario with `article.summary` when it is a non-empty string, otherwise with `article.content`.
+4. Upsert the generated vector into Chroma using article ID, metadata `{ title, authorId, category, tags }`, and the same document text used for the embedding input.
+5. Continue processing if one article fails and record that article ID in `failedArticleIds`.
+6. Return `{ processed, updated, failed, failedArticleIds }`.
+
+## 11. File Locations
 
 - Article entity: `packages/backend/src/entities/article.ts`
 - Article history entity: `packages/backend/src/entities/article-history.ts`

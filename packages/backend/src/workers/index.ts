@@ -16,6 +16,7 @@ import { CensorHandler } from '@/workers/handlers/task/llm/censor.handler';
 import { UpdateArticleSummaryHandler } from '@/workers/handlers/task/update/update-article-summary.handler';
 import { UpdateArticleSummaryRebuildHandler } from '@/workers/handlers/task/update/update-article-summary-rebuild.handler';
 import { UpdateArticleEmbeddingHandler } from '@/workers/handlers/task/update/update-article-embedding.handler';
+import { UpdateArticleEmbeddingRebuildHandler } from '@/workers/handlers/task/update/update-article-embedding-rebuild.handler';
 import { UpdateCensorResultHandler } from '@/workers/handlers/task/update/update-censor-result';
 import { UpdateSearchIndexHandler } from '@/workers/handlers/task/update/update-search-index.handler';
 import { UpdateSearchReindexHandler } from '@/workers/handlers/task/update/update-search-reindex.handler';
@@ -62,6 +63,7 @@ export function bootstrap() {
     updateProcessor.registerHandler(new UpdateArticleSummaryHandler());
     updateProcessor.registerHandler(new UpdateArticleSummaryRebuildHandler());
     updateProcessor.registerHandler(new UpdateArticleEmbeddingHandler());
+    updateProcessor.registerHandler(new UpdateArticleEmbeddingRebuildHandler());
     updateProcessor.registerHandler(new UpdateCensorResultHandler());
     updateProcessor.registerHandler(new UpdateSearchIndexHandler());
     updateProcessor.registerHandler(new UpdateSearchReindexHandler());

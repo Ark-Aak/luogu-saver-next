@@ -168,6 +168,14 @@ export class ArticleService {
         return await query.getMany();
     }
 
+    static async getArticlesForEmbeddingRebuild(
+        afterId: string | null,
+        take: number,
+        manager?: EntityManager
+    ): Promise<Article[]> {
+        return await this.getArticlesForSummaryRebuild(afterId, take, manager);
+    }
+
     /*
      * Get random articles from recent articles
      *

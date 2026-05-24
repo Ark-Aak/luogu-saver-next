@@ -215,7 +215,24 @@ Task `rebuild-summary` has type `update`, target `article_summary_rebuild`, targ
 
 Permission: `MANAGE_SEARCH`.
 
-### 5.6 `rag-search-pipeline`
+### 5.6 `article-embedding-rebuild-pipeline`
+
+Input parameters:
+
+| Parameter     | Type   | Required | Default | Constraint            |
+| ------------- | ------ | -------- | ------- | --------------------- |
+| `batchSize`   | number | no       | 20      | Integer in `[1, 100]` |
+| `concurrency` | number | no       | 5       | Integer in `[1, 20]`  |
+
+Task graph:
+
+1. `rebuild-embedding` (tracked, reported)
+
+Task `rebuild-embedding` has type `update`, target `article_embedding_rebuild`, targetId `articles`, metadata field `batchSize` equal to the normalized `batchSize`, and metadata field `concurrency` equal to the normalized `concurrency`.
+
+Permission: `MANAGE_SEARCH`.
+
+### 5.7 `rag-search-pipeline`
 
 Input parameters:
 

@@ -2,6 +2,16 @@ import { ChromaDataSource } from '@/data-source';
 import type { Collection, Metadata } from 'chromadb';
 import { config } from '@/config';
 import { logger } from '@/lib/logger';
+import { ArticleService } from '@/services/article.service';
+import { runWithConcurrency } from '@/utils/concurrency';
+import { llm } from '@/lib/llm';
+
+export type ArticleEmbeddingRebuildResult = {
+    processed: number;
+    updated: number;
+    failed: number;
+    failedArticleIds: string[];
+};
 
 export class EmbeddingService {
     private static _collection: Collection | null = null;
@@ -90,5 +100,57 @@ export class EmbeddingService {
             logger.error({ error, id }, 'Failed to upsert vector');
             throw error;
         }
+    }
+
+    static async rebuildArticleEmbeddings(
+        batchSize: number = 20,
+        concurrency: number = 5
+    ): Promise<ArticleEmbeddingRebuildResult> {
+        const failedArticleIds: string[] = [];
+        let processed = 0;
+        let updated = 0;
+        let afterId: string | null = null;
+
+        while (true) {
+            const articles = await ArticleService.getArticlesForEmbeddingRebuild(
+                afterId,
+                batchSize
+            );
+            if (articles.length === 0) break;
+            afterId = articles[articles.length - 1].id;
+
+            await runWithConcurrency(articles, concurrency, async article => {
+                processed += 1;
+                try {
+                    const document = article.summary?.trim() || article.content;
+                    const { embedding } = await llm.embedding(document);
+                    await this.upsertVector(
+                        article.id,
+                        {
+                            title: article.title,
+                            authorId: article.authorId,
+                            category: article.category,
+                            tags: article.tags.join(',')
+                        },
+                        document,
+                        embedding
+                    );
+                    updated += 1;
+                } catch (error) {
+                    failedArticleIds.push(article.id);
+                    logger.error(
+                        { error, articleId: article.id },
+                        'Failed to rebuild article embedding'
+                    );
+                }
+            });
+        }
+
+        return {
+            processed,
+            updated,
+            failed: failedArticleIds.length,
+            failedArticleIds
+        };
     }
 }

@@ -16,6 +16,14 @@ const normalizeSummaryRebuildConcurrency = (value: any) => {
     return clampInt(value, 5, 1, 20);
 };
 
+const normalizeEmbeddingRebuildBatchSize = (value: any) => {
+    return clampInt(value, 20, 1, 100);
+};
+
+const normalizeEmbeddingRebuildConcurrency = (value: any) => {
+    return clampInt(value, 5, 1, 20);
+};
+
 const normalizeRagArticleIds = (value: any) => {
     if (!Array.isArray(value)) return [];
 
@@ -37,6 +45,7 @@ export const WORKFLOW_TEMPLATES_PERMISSION: { [key: string]: Permission | null }
     'article-censor-pipeline': Permission.CREATE_WORKFLOW,
     'search-reindex-pipeline': Permission.MANAGE_SEARCH,
     'article-summary-rebuild-pipeline': Permission.MANAGE_SEARCH,
+    'article-embedding-rebuild-pipeline': Permission.MANAGE_SEARCH,
     'rag-search-pipeline': Permission.CREATE_WORKFLOW
 };
 
@@ -388,6 +397,27 @@ export const WORKFLOW_TEMPLATES: Record<string, WorkflowTemplateBuilder> = {
                     type: 'update',
                     payload: {
                         target: 'article_summary_rebuild',
+                        targetId: 'articles',
+                        metadata: { batchSize, concurrency }
+                    }
+                }
+            }
+        ];
+
+        return { tasks };
+    },
+    'article-embedding-rebuild-pipeline': (params: any) => {
+        const batchSize = normalizeEmbeddingRebuildBatchSize(params?.batchSize);
+        const concurrency = normalizeEmbeddingRebuildConcurrency(params?.concurrency);
+        const tasks: TaskDefinition[] = [
+            {
+                name: 'rebuild-embedding',
+                track: true,
+                report: true,
+                data: {
+                    type: 'update',
+                    payload: {
+                        target: 'article_embedding_rebuild',
                         targetId: 'articles',
                         metadata: { batchSize, concurrency }
                     }
