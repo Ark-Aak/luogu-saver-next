@@ -20,6 +20,19 @@ const CARET_RIGHT_SVG = `
 <path d="M441.3 299.8C451.5 312.4 450.8 330.9 439.1 342.6L311.1 470.6C301.9 479.8 288.2 482.5 276.2 477.5C264.2 472.5 256.5 460.9 256.5 448L256.5 192C256.5 179.1 264.3 167.4 276.3 162.4C288.3 157.4 302 160.2 311.2 169.3L439.2 297.3L441.4 299.7z"/></svg>
 `;
 
+const COPY_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+</svg>
+`;
+
+const CHECK_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <polyline points="20 6 9 17 4 12"></polyline>
+</svg>
+`;
+    
 const renderMath = () => {
     if (contentRef.value) {
         renderMathInElement(contentRef.value, {
@@ -66,6 +79,49 @@ const initMarkdownBlocks = () => {
     });
 };
 
+const addCopyButtons = () => {
+    if (!contentRef.value) return;
+
+    // 移除可能残留的复制按钮
+    const existingButtons = contentRef.value.querySelectorAll('.copy-code-btn');
+    existingButtons.forEach(btn => btn.remove());
+
+    const codeBlocks = contentRef.value.querySelectorAll('pre');
+    codeBlocks.forEach(pre => {
+        // 确保 pre 是相对定位容器
+        if (getComputedStyle(pre).position !== 'relative') {
+            pre.style.position = 'relative';
+        }
+
+        const button = document.createElement('button');
+        button.className = 'copy-code-btn';
+        button.innerHTML = COPY_SVG;
+        button.title = '复制代码';
+
+        button.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            // 获取代码文本：优先取 code 内的文本，否则取 pre 内的文本
+            const codeElement = pre.querySelector('code');
+            const codeText = codeElement ? codeElement.innerText : pre.innerText;
+
+            try {
+                await navigator.clipboard.writeText(codeText);
+                // 临时显示成功图标
+                const originalHTML = button.innerHTML;
+                button.innerHTML = CHECK_SVG;
+                setTimeout(() => {
+                    button.innerHTML = originalHTML;
+                }, 1500);
+            } catch (err) {
+                console.error('复制失败:', err);
+                // 可选：显示错误提示
+            }
+        });
+
+        pre.appendChild(button);
+    });
+};
+    
 const processContent = async () => {
     if (!props.content) {
         renderedContent.value = '';
@@ -82,6 +138,7 @@ const processContent = async () => {
     await nextTick();
     renderMath();
     initMarkdownBlocks();
+    addCopyButtons(); // 新增：添加复制按钮
 };
 
 watch(() => [props.content, props.preRendered], processContent);
@@ -98,4 +155,42 @@ onMounted(processContent);
     </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+/* 添加代码块复制按钮样式 */
+.md-body :deep(pre) {
+    position: relative;
+}
+
+.md-body :deep(.copy-code-btn) {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 6px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(4px);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease, background 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    z-index: 2;
+}
+
+.md-body :deep(pre:hover .copy-code-btn) {
+    opacity: 1;
+}
+
+.md-body :deep(.copy-code-btn:hover) {
+    background: rgba(255, 255, 255, 0.9);
+    color: #1677ff;
+}
+
+.md-body :deep(.copy-code-btn svg) {
+    display: block;
+}
+</style>
