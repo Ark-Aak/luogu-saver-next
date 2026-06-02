@@ -1,3 +1,5 @@
+/*fixed from https://cdn.luogu.com.cn/css/luogu3.css?ver=20190102 prefix: lg-fg-* */
+
 .user-Red {
     color: #e74c3c !important;
 }
@@ -5,19 +7,24 @@
     color: #e67e22 !important;
 }
 .user-Purple {
-    color: #9b59b6 !important;
+    color: #8e44ad !important;
 }
 .user-Green {
     color: #2ecc71 !important;
+    color: #5eb95e !important;
 }
 .user-Blue {
     color: #3498db !important;
+    color: #0e90d2 !important;
+	/*note: in luogu homepage, blue using "bluelight"*/
 }
 .user-Gray {
     color: #7f8c8d !important;
+    color: #bbb !important;
 }
 .user-Cheater {
     color: #ad8b00 !important;
+    color: #996600 !important;
 }
 
 :not(pre) > code {
