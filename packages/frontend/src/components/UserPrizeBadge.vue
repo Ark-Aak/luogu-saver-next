@@ -23,9 +23,9 @@ const props = withDefaults(
 //   level ≥ 8 → gold
 function levelColor(level: number): string | null {
     if (level < 3) return null;
-    if (level <= 5) return '#5eb95e';
-    if (level <= 7) return '#07a2f1';
-    return '#f1c40f';
+    if (level <= 5) return '#52c41a';
+    if (level <= 7) return '#3498db';
+    return '#ffc116';
 }
 
 const oi = computed(() => {
