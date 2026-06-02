@@ -76,7 +76,7 @@ export const WORKFLOW_TEMPLATES: Record<string, WorkflowTemplateBuilder> = {
                 data: {
                     type: 'save',
                     payload: {
-                        target: 'comment',
+                        target: 'comments',
                         targetId: targetId,
                         metadata: {}
                     }
