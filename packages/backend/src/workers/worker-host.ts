@@ -43,13 +43,19 @@ export class WorkerHost<T extends CommonTask> {
     }
 
     private handleJob = async (job: Job<T>) => {
-        if (this.pointGuard) {
-            const hasPoints = await this.pointGuard.consume(1);
-            if (!hasPoints) {
-                logger.warn({ jobId: job.id }, 'Rate limited by PointGuard, delaying job...');
-                throw new RateLimitError();
-            }
+        if (!this.pointGuard) {
+            logger.debug({ jobId: job.id }, 'PointGuard is NULL! Rate limiting is skipped!');
+            return await this.processor.process(job);
         }
+
+        const hasPoints = await this.pointGuard.consume(1);
+        logger.info({ jobId: job.id, hasPoints }, `PointGuard consume result: ${hasPoints}`);
+
+        if (!hasPoints) {
+            logger.warn({ jobId: job.id }, 'Rate limited by PointGuard, delaying job...');
+            throw new RateLimitError();
+        }
+
         return await this.processor.process(job);
     };
 

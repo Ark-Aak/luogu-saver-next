@@ -26,33 +26,37 @@ export class PointGuard {
      */
     async consume(cost: number = 1): Promise<boolean> {
         const script = `
-      local key = KEYS[1]
-      local capacity = tonumber(ARGV[1])
-      local rate = tonumber(ARGV[2])
-      local cost = tonumber(ARGV[3])
-      local now = tonumber(ARGV[4])
-
-      local data = redis.call("HMGET", key, "tokens", "last_updated")
-      local tokens = tonumber(data[1])
-      local last_updated = tonumber(data[2])
-
-      if tokens == nil then
-        tokens = capacity
-        last_updated = now
-      end
-
-      local delta = math.max(0, now - last_updated)
-      local refill = (delta / 1000) * rate
-      
-      tokens = math.min(capacity, tokens + refill)
-
-      if tokens >= cost then
-        tokens = tokens - cost
-        redis.call("HMSET", key, "tokens", tokens, "last_updated", now)
-        return 1
-      else
-        return 0
-      end
+        local key = KEYS[1]
+        local capacity = tonumber(ARGV[1])
+        local rate = tonumber(ARGV[2])
+        local cost = tonumber(ARGV[3])
+        local now = tonumber(ARGV[4])
+        
+        local data = redis.call("HMGET", key, "tokens", "last_updated")
+        local tokens = tonumber(data[1])
+        local last_updated = tonumber(data[2])
+        
+        if tokens == nil then
+          tokens = capacity
+          last_updated = now
+        end
+        
+        local delta = math.max(0, now - last_updated)
+        
+        local refill = math.floor((delta / 1000) * rate)
+        
+        if refill > 0 then
+          tokens = math.min(capacity, tokens + refill)
+          last_updated = now
+        end
+        
+        if tokens >= cost then
+          tokens = tokens - cost
+          redis.call("HSET", key, "tokens", tokens, "last_updated", last_updated)
+          return 1
+        else
+          return 0
+        end
     `;
 
         const result = await this.redis.eval(
