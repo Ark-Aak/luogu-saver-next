@@ -73,6 +73,7 @@ export const WORKFLOW_TEMPLATES: Record<string, WorkflowTemplateBuilder> = {
             },
             {
                 name: 'save-comment',
+                fathers: ['save'],
                 data: {
                     type: 'save',
                     payload: {

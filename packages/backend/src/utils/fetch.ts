@@ -154,6 +154,12 @@ export async function fetch(
             "Can't fetch the page. Is the cookie expired? Received 401 Unauthorized."
         );
         throw new UnrecoverableError('Unauthorized fetch');
+    } else if (resp.status === 429 || resp.status === 403) {
+        logger.warn(
+            { url, status: resp.status },
+            `Access to the page is blocked. Received ${resp.status} status.`
+        );
+        throw new UnrecoverableError(`Access blocked with code ${resp.status}`);
     }
     const data = resp.data;
     try {
