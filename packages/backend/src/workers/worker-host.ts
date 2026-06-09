@@ -50,7 +50,7 @@ export class WorkerHost<T extends CommonTask> {
         }
 
         const hasPoints = await this.pointGuard.consume(1);
-        logger.info({ jobId: job.id, hasPoints }, `PointGuard consume result: ${hasPoints}`);
+        logger.debug({ jobId: job.id, hasPoints }, `PointGuard consume result: ${hasPoints}`);
 
         if (!hasPoints) {
             logger.warn({ jobId: job.id }, 'Rate limited by PointGuard, delaying job...');
