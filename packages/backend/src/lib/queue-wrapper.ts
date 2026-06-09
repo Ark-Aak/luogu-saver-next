@@ -47,7 +47,14 @@ export class TypedQueue<T> {
 
     async wouldExceedMaxLength(jobsToAdd: number): Promise<boolean> {
         const counts = await this.queue.getJobCounts('waiting', 'delayed', 'waiting-children');
+        const waitingCounts = await this.queue.getJobCounts('waiting');
+        const delayedCounts = await this.queue.getJobCounts('delayed');
+        const waitingChildrenCounts = await this.queue.getJobCounts('waiting-children');
         const pendingCount = counts.waiting + counts.delayed + (counts['waiting-children'] || 0);
+        logger.debug(
+            { waitingCounts, waitingChildrenCounts, delayedCounts, pendingCount, jobsToAdd },
+            'Current queue counts'
+        );
         return pendingCount + jobsToAdd > this.maxQueueLength;
     }
 
