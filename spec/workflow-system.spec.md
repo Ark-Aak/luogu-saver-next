@@ -84,7 +84,9 @@ Postconditions:
 4. Each task ID in `taskIds` is a 16-character random string.
 5. `workflow.root_job_id` equals the BullMQ root job ID and equals one value in `taskIds`.
 6. The submitted BullMQ Flow contains every task in `tasks` exactly once.
-7. If workflow creation fails before the API response is sent, no `workflow` row with `id = workflowId` remains in the database.
+7. Each submitted BullMQ job SHALL set `failParentOnFailure = true`.
+8. If a workflow node reaches final failure, each parent waiting on that node SHALL fail instead of remaining in `waiting-children` indefinitely.
+9. If workflow creation fails before the API response is sent, no `workflow` row with `id = workflowId` remains in the database.
 
 ### 4.2 POST `/workflow/create/template/:name`
 

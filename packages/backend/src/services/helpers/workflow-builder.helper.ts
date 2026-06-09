@@ -35,7 +35,8 @@ export class WorkflowBuilder {
                 name: task.name,
                 queueName: queueName,
                 opts: {
-                    jobId: options.taskIds[task.name]
+                    jobId: options.taskIds[task.name],
+                    failParentOnFailure: true
                 },
                 data: {
                     ...task.data,

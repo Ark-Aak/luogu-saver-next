@@ -197,16 +197,17 @@ The `getQueueByName(queueName)` function:
 
 `TypedQueue.add(name, data, options)` SHALL:
 
-1. Read BullMQ counts for `waiting`, `delayed`, and `waiting-children`.
-2. Compute `pendingCount = waiting + delayed + waitingChildren`.
+1. Read BullMQ counts for `waiting`, `paused`, `delayed`, `prioritized`, and `waiting-children`.
+2. Compute `pendingCount = waiting + paused + delayed + prioritized + waitingChildren`.
 3. If `pendingCount >= maxQueueLength`, throw `Queue is full. Please try again later.` without adding a job.
 4. If `pendingCount < maxQueueLength`, add the job using BullMQ.
+5. The `active`, `completed`, and `failed` states SHALL NOT count toward `maxQueueLength`.
 
 `WorkflowService.createWorkflow(definition)` SHALL:
 
 1. Compute every BullMQ queue used by the workflow before calling `FlowProducer.add`.
 2. For each used queue, compute the number of jobs the workflow would add to that queue.
-3. For each used queue, read BullMQ counts for `waiting`, `delayed`, and `waiting-children`.
+3. For each used queue, read BullMQ counts for `waiting`, `paused`, `delayed`, `prioritized`, and `waiting-children`.
 4. If `currentPendingCount + workflowJobsForQueue > maxQueueLength` for any used queue, throw `Queue is full. Please try again later.` before inserting workflow rows or task rows.
 5. If all used queues have capacity, continue workflow creation.
 
