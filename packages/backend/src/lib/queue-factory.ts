@@ -2,12 +2,33 @@ import { TypedQueue } from './queue-wrapper';
 import { TaskType, TaskDefinition } from '@/shared/task';
 import { QUEUE_NAMES } from '@/shared/constants';
 import { logger } from '@/lib/logger';
+import { config } from '@/config';
 
 const queuePool = new Map<string, TypedQueue<any>>();
+const TASK_TYPE_BY_QUEUE_NAME = Object.fromEntries(
+    Object.entries(QUEUE_NAMES).map(([taskType, queueName]) => [queueName, taskType as TaskType])
+) as Record<string, TaskType>;
 
-function getOrCreateQueue<T>(queueName: string): TypedQueue<T> {
+function getQueueConfig(type: TaskType) {
+    switch (type) {
+        case TaskType.SAVE:
+            return config.queue.save;
+        case TaskType.LLM:
+            return config.queue.ai;
+        case TaskType.UPDATE:
+            return config.queue.update;
+        case TaskType.SEARCH:
+            return config.queue.search;
+        case TaskType.READ:
+            return config.queue.read;
+        case TaskType.RAG:
+            return config.queue.rag;
+    }
+}
+
+function getOrCreateQueue<T>(queueName: string, type: TaskType): TypedQueue<T> {
     if (!queuePool.has(queueName)) {
-        queuePool.set(queueName, new TypedQueue<T>(queueName));
+        queuePool.set(queueName, new TypedQueue<T>(queueName, getQueueConfig(type).maxQueueLength));
     }
 
     return queuePool.get(queueName) as TypedQueue<T>;
@@ -20,11 +41,16 @@ export function getQueueByType<T extends TaskType>(type: T): TypedQueue<TaskDefi
         throw new Error(`No queue name defined for task type: ${type}`);
     }
 
-    return getOrCreateQueue<TaskDefinition[T]>(queueName);
+    return getOrCreateQueue<TaskDefinition[T]>(queueName, type);
 }
 
 export function getQueueByName(queueName: string): TypedQueue<any> {
-    return getOrCreateQueue<any>(queueName);
+    const type = TASK_TYPE_BY_QUEUE_NAME[queueName];
+    if (!type) {
+        throw new Error(`No task type defined for queue name: ${queueName}`);
+    }
+
+    return getOrCreateQueue<any>(queueName, type);
 }
 
 export function getQueuePoolSize(): number {

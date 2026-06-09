@@ -113,7 +113,7 @@ export function bootstrap() {
         searchProcessor,
         null,
         {
-            concurrency: config.queue.update.concurrencyLimit
+            concurrency: config.queue.search.concurrencyLimit
         } as WorkerOptions
     );
     const readWorkerHost = new WorkerHost<ReadTask>(
@@ -121,11 +121,11 @@ export function bootstrap() {
         readProcessor,
         null,
         {
-            concurrency: config.queue.update.concurrencyLimit
+            concurrency: config.queue.read.concurrencyLimit
         } as WorkerOptions
     );
     const ragWorkerHost = new WorkerHost<RagTask>(QUEUE_NAMES[TaskType.RAG], ragProcessor, null, {
-        concurrency: config.queue.ai.concurrencyLimit
+        concurrency: config.queue.rag.concurrencyLimit
     } as WorkerOptions);
 
     const closeWorkers = async () => {

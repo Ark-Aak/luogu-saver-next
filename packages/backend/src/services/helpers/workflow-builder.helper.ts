@@ -14,14 +14,21 @@ type WorkflowBuildOptions = {
 };
 
 export class WorkflowBuilder {
+    static resolveQueueName(task: FlowTask): string {
+        const queueName = task.queueName || QUEUE_NAMES[task.data?.type as TaskType];
+        if (!queueName) {
+            throw new Error(`No queue name defined for workflow task: ${task.name}`);
+        }
+        return queueName;
+    }
+
     static buildLinearFlow(tasks: FlowTask[], options: WorkflowBuildOptions): FlowJob {
         const sortedTasks = this.topologicalSort(tasks);
 
         let childNode: FlowJob | undefined = undefined;
 
         for (const [index, task] of sortedTasks.entries()) {
-            const queueName =
-                task.queueName || QUEUE_NAMES[task.data?.type as TaskType] || 'default';
+            const queueName = this.resolveQueueName(task);
 
             const isRoot = index === sortedTasks.length - 1;
             childNode = {

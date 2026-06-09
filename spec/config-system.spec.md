@@ -97,16 +97,40 @@ The configuration is validated using Zod schemas. All fields have default values
 
 ### 3.7 Queue Configuration (`queue`)
 
-| Field                  | Type   | Default | Description                             |
-| ---------------------- | ------ | ------- | --------------------------------------- |
-| `concurrencyLimit`     | number | 5       | Maximum concurrent jobs per worker      |
-| `maxRequestToken`      | number | 20      | Token bucket capacity for rate limiting |
-| `regenerationSpeed`    | number | 1       | Tokens regenerated per interval         |
-| `regenerationInterval` | number | 1000    | Token regeneration interval in ms       |
-| `maxQueueLength`       | number | 1000    | Maximum pending jobs in queue           |
-| `processInterval`      | number | 100     | Job processing interval in ms           |
+`queue` SHALL contain these queue sections: `save`, `ai`, `update`, `search`, `read`, and `rag`.
 
-### 3.8 LLM Rerank Scenario
+Each queue section SHALL have these fields:
+
+| Field                  | Type   | Description                             |
+| ---------------------- | ------ | --------------------------------------- |
+| `concurrencyLimit`     | number | Maximum concurrent jobs per worker      |
+| `maxRequestToken`      | number | Token bucket capacity for rate limiting |
+| `regenerationSpeed`    | number | Tokens regenerated per interval         |
+| `regenerationInterval` | number | Token regeneration interval in ms       |
+| `maxQueueLength`       | number | Maximum pending jobs in queue           |
+
+Default queue section values SHALL be:
+
+| Section  | `concurrencyLimit` | `maxRequestToken` | `regenerationSpeed` | `regenerationInterval` | `maxQueueLength` |
+| -------- | ------------------ | ----------------- | ------------------- | ---------------------- | ---------------- |
+| `save`   | 2                  | 20                | 1                   | 1000                   | 1000             |
+| `ai`     | 10                 | 50                | 1                   | 1000                   | 2000             |
+| `update` | 2                  | 20                | 1                   | 1000                   | 1000             |
+| `search` | 2                  | 20                | 1                   | 1000                   | 1000             |
+| `read`   | 2                  | 20                | 1                   | 1000                   | 1000             |
+| `rag`    | 10                 | 50                | 1                   | 1000                   | 2000             |
+
+### 3.8 API Rate Limit Configuration (`apiRateLimit`)
+
+| Field           | Type    | Default          | Description                                    |
+| --------------- | ------- | ---------------- | ---------------------------------------------- |
+| `enabled`       | boolean | true             | Enable Redis-backed HTTP API rate limiting     |
+| `points`        | number  | 300              | Maximum requests per key per duration window   |
+| `duration`      | number  | 60               | Rate limit window length in seconds            |
+| `blockDuration` | number  | 60               | Block length in seconds after limit exhaustion |
+| `keyPrefix`     | string  | `api_rate_limit` | Redis key prefix for API rate limit counters   |
+
+### 3.9 LLM Rerank Scenario
 
 `llm.scenarios.rerank.use` is optional.
 
@@ -114,7 +138,7 @@ If absent or empty, RAG candidate reranking SHALL be skipped.
 
 If present, the configured provider/model SHALL be called with the standard rerank API shape.
 
-### 3.9 LLM Scenario Parameters
+### 3.10 LLM Scenario Parameters
 
 | Scenario  | Field         | Default    | Description                         |
 | --------- | ------------- | ---------- | ----------------------------------- |

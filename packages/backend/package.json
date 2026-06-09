@@ -34,6 +34,7 @@
         "openai": "^6.16.0",
         "pino": "^10.1.0",
         "pino-pretty": "^13.1.2",
+        "rate-limiter-flexible": "^11.2.0",
         "reflect-metadata": "^0.2.2",
         "rehype-autolink-headings": "^7.1.0",
         "rehype-katex": "^7.0.1",

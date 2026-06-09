@@ -10,6 +10,8 @@ import { logger } from './lib/logger';
 import { authorization } from '@/middlewares/authorization';
 import { tracking } from './middlewares/tracking';
 import { responseHelper } from './middlewares/response';
+import { accessLog } from '@/middlewares/access-log';
+import { apiRateLimit } from '@/middlewares/api-rate-limit';
 import * as worker from '@/workers';
 import { initSocket } from './lib/socket';
 import http from 'http';
@@ -19,10 +21,12 @@ const app = new Koa();
 const server = http.createServer(app.callback());
 initSocket(server, socketJoinHandler);
 
-app.use(bodyParser());
-app.use(authorization);
-app.use(tracking);
+app.use(accessLog);
 app.use(responseHelper);
+app.use(authorization);
+app.use(apiRateLimit);
+app.use(bodyParser());
+app.use(tracking);
 app.use(router.routes()).use(router.allowedMethods());
 
 AppDataSource.initialize().then(() => {

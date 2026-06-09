@@ -36,9 +36,9 @@ const QUEUE_CONCURRENCY: Record<TaskType, number> = {
     [TaskType.SAVE]: config.queue.save.concurrencyLimit,
     [TaskType.LLM]: config.queue.ai.concurrencyLimit,
     [TaskType.UPDATE]: config.queue.update.concurrencyLimit,
-    [TaskType.SEARCH]: config.queue.update.concurrencyLimit,
-    [TaskType.READ]: config.queue.update.concurrencyLimit,
-    [TaskType.RAG]: config.queue.ai.concurrencyLimit
+    [TaskType.SEARCH]: config.queue.search.concurrencyLimit,
+    [TaskType.READ]: config.queue.read.concurrencyLimit,
+    [TaskType.RAG]: config.queue.rag.concurrencyLimit
 };
 
 export class QueueStatsService {

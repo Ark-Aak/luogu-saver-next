@@ -10,23 +10,34 @@ export const RecommendationSchema = z.object({
     relevantThreshold: z.number().default(0.75)
 });
 
+const QueueSectionSchema = z.object({
+    concurrencyLimit: z.number().default(2),
+    maxRequestToken: z.number().default(20),
+    regenerationSpeed: z.number().default(1),
+    regenerationInterval: z.number().default(1000),
+    maxQueueLength: z.number().default(1000)
+});
+const DefaultQueueSectionSchema = z.preprocess(value => value ?? {}, QueueSectionSchema);
+const AiQueueSectionSchema = QueueSectionSchema.extend({
+    concurrencyLimit: z.number().default(10),
+    maxRequestToken: z.number().default(50),
+    maxQueueLength: z.number().default(2000)
+});
+const DefaultAiQueueSectionSchema = z.preprocess(value => value ?? {}, AiQueueSectionSchema);
+
 export const QueueSchema = z.object({
-    save: z.object({
-        concurrencyLimit: z.number().default(2),
-        maxRequestToken: z.number().default(20),
-        regenerationInterval: z.number().default(1000),
-        maxQueueLength: z.number().default(1000)
-    }),
-    ai: z.object({
-        concurrencyLimit: z.number().default(10),
-        maxRequestToken: z.number().default(50),
-        regenerationInterval: z.number().default(1000),
-        maxQueueLength: z.number().default(2000)
-    }),
-    update: z.object({
-        concurrencyLimit: z.number().default(2),
-        maxRequestToken: z.number().default(20),
-        regenerationInterval: z.number().default(1000),
-        maxQueueLength: z.number().default(1000)
-    })
+    save: DefaultQueueSectionSchema,
+    ai: DefaultAiQueueSectionSchema,
+    update: DefaultQueueSectionSchema,
+    search: DefaultQueueSectionSchema,
+    read: DefaultQueueSectionSchema,
+    rag: DefaultAiQueueSectionSchema
+});
+
+export const ApiRateLimitSchema = z.object({
+    enabled: z.boolean().default(true),
+    points: z.number().default(300),
+    duration: z.number().default(60),
+    blockDuration: z.number().default(60),
+    keyPrefix: z.string().default('api_rate_limit')
 });

@@ -36,6 +36,7 @@ export class WorkflowService {
 
     static async createWorkflow(definition: WorkflowDefinition) {
         validateFlowStructure(definition);
+        await this.ensureWorkflowQueueCapacity(definition);
 
         const workflowId = randomUUID();
         const taskIds = this.createTaskIds(definition);
@@ -172,6 +173,22 @@ export class WorkflowService {
         );
 
         await getServiceRepository<Task>(Task).save(tasks);
+    }
+
+    private static async ensureWorkflowQueueCapacity(definition: WorkflowDefinition) {
+        const jobsByQueue = new Map<string, number>();
+
+        for (const task of definition.tasks) {
+            const queueName = WorkflowBuilder.resolveQueueName(task);
+            jobsByQueue.set(queueName, (jobsByQueue.get(queueName) || 0) + 1);
+        }
+
+        for (const [queueName, jobsToAdd] of jobsByQueue) {
+            const queueWrapper = getQueueByName(queueName);
+            if (await queueWrapper.wouldExceedMaxLength(jobsToAdd)) {
+                throw new Error('Queue is full. Please try again later.');
+            }
+        }
     }
 
     private static async transformFlowTree(flowNode: JobNode): Promise<any[]> {

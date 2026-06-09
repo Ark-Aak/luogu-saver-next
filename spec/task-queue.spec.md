@@ -181,8 +181,38 @@ Query task status.
 The `getQueueByType(type: TaskType)` function:
 
 1. Map `TaskType` to a queue name using `QUEUE_NAMES` constant.
-2. If the queue is not in the pool, create a new `TypedQueue` instance.
-3. Return the queue from the pool.
+2. Map `TaskType` to the matching `config.queue` section.
+3. If the queue is not in the pool, create a new `TypedQueue` instance with that section's `maxQueueLength`.
+4. Return the queue from the pool.
+
+The `getQueueByName(queueName)` function:
+
+1. Map `queueName` back to a `TaskType` using `QUEUE_NAMES`.
+2. Map that `TaskType` to the matching `config.queue` section.
+3. If `queueName` is not present in `QUEUE_NAMES`, throw an error.
+4. If the queue is not in the pool, create a new `TypedQueue` instance with that section's `maxQueueLength`.
+5. Return the queue from the pool.
+
+`TypedQueue` construction SHALL receive `maxQueueLength` as an explicit constructor argument.
+
+`TypedQueue.add(name, data, options)` SHALL:
+
+1. Read BullMQ counts for `waiting`, `delayed`, and `waiting-children`.
+2. Compute `pendingCount = waiting + delayed + waitingChildren`.
+3. If `pendingCount >= maxQueueLength`, throw `Queue is full. Please try again later.` without adding a job.
+4. If `pendingCount < maxQueueLength`, add the job using BullMQ.
+
+`WorkflowService.createWorkflow(definition)` SHALL:
+
+1. Compute every BullMQ queue used by the workflow before calling `FlowProducer.add`.
+2. For each used queue, compute the number of jobs the workflow would add to that queue.
+3. For each used queue, read BullMQ counts for `waiting`, `delayed`, and `waiting-children`.
+4. If `currentPendingCount + workflowJobsForQueue > maxQueueLength` for any used queue, throw `Queue is full. Please try again later.` before inserting workflow rows or task rows.
+5. If all used queues have capacity, continue workflow creation.
+
+`maxQueueLength` is a per-queue limit. The save queue limit SHALL NOT be used for other queues.
+
+Queue length checks are admission checks. They SHALL prevent a single producer from admitting work when the observed pending count already reaches the configured limit. They are not a cross-producer atomic reservation.
 
 Queue instances are cached in a global pool to prevent multiple connections.
 
@@ -234,7 +264,16 @@ Queue behavior is controlled by `config.queue`:
 | `regenerationSpeed`    | Tokens regenerated per interval         |
 | `regenerationInterval` | Token regeneration interval in ms       |
 | `maxQueueLength`       | Maximum pending jobs in queue           |
-| `processInterval`      | Job processing interval in ms           |
+
+`config.queue` SHALL contain separate sections for `save`, `ai`, `update`, `search`, `read`, and `rag`.
+
+The `search` worker SHALL use `config.queue.search.concurrencyLimit`.
+
+The `read` worker SHALL use `config.queue.read.concurrencyLimit`.
+
+The `rag` worker SHALL use `config.queue.rag.concurrencyLimit`.
+
+Queue statistics SHALL report concurrency from the same queue section used by the worker.
 
 ## 9. Public Queue Statistics
 
