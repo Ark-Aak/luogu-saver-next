@@ -11,9 +11,13 @@ function getAuthPayload() {
     return authToken.value ? { token: authToken.value } : {};
 }
 
+function provideAuth(callback: (data: object) => void) {
+    callback(getAuthPayload());
+}
+
 const socket: Socket = io(URL, {
     path,
-    auth: getAuthPayload,
+    auth: provideAuth,
     transports: ['websocket', 'polling'],
     reconnection: true,
     reconnectionAttempts: Infinity,
@@ -63,16 +67,17 @@ socket.io.on('reconnect_failed', () => {
 socket.on('connect_error', error => {
     socketLastError.value = error.message;
     if (error.message === 'Unauthorized' && authToken.value) {
+        socket.disconnect();
         clearAuthToken();
         activeAuthToken = authToken.value;
-        socket.auth = getAuthPayload();
+        socket.auth = provideAuth;
         socket.connect();
     }
 });
 
 export const refreshSocketAuth = () => {
     const nextAuthToken = authToken.value;
-    socket.auth = getAuthPayload();
+    socket.auth = provideAuth;
     if (nextAuthToken === activeAuthToken) return;
 
     activeAuthToken = nextAuthToken;
