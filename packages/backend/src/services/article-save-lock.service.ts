@@ -27,12 +27,12 @@ export class ArticleSaveLockService {
         return token;
     }
 
-    static async release(articleId: string, token?: string | null) {
+static async release(articleId: string, token?: string | null) {
         if (!token) return false;
         const key = this.key(articleId);
-        const current = await redisClient.get(key);
-        if (current !== token) return false;
-        await redisClient.del(key);
-        return true;
+        const script =
+            'if redis.call("GET", KEYS[1]) == ARGV[1] then return redis.call("DEL", KEYS[1]) else return 0 end';
+        const deleted = (await redisClient.eval(script, 1, key, token)) as number;
+        return deleted === 1;
     }
 }

@@ -48,6 +48,11 @@ router.post(
     '/runs/:id/stop',
     requiresPermission(Permission.MANAGE_DISCOVERY),
     async (ctx: Context) => {
+        const run = await DiscoveryService.getRunById(ctx.params.id);
+        if (!run) {
+            ctx.fail(404, 'Discovery run not found');
+            return;
+        }
         await DiscoveryService.stopRun(ctx.params.id);
         ctx.success({ runId: ctx.params.id });
     }

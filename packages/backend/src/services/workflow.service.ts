@@ -97,8 +97,14 @@ export class WorkflowService {
     }
 
     static async createWorkflowFromTemplate(templateName: string, params: any) {
+        const hasTemplate = Object.prototype.hasOwnProperty.call(WORKFLOW_TEMPLATES, templateName);
+        if (!hasTemplate) throw new Error(`Template ${templateName} not found`);
+
         const builder = WORKFLOW_TEMPLATES[templateName];
-        if (!builder) throw new Error(`Template ${templateName} not found`);
+        if (typeof builder !== 'function') {
+            throw new Error(`Template ${templateName} is invalid`);
+        }
+
         if (templateName !== 'article-save-pipeline') {
             return this.createWorkflow(builder(params));
         }

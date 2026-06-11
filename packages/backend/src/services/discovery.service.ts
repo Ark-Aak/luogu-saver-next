@@ -131,7 +131,7 @@ export class DiscoveryService {
     static async stopRun(runId: string) {
         await getServiceRepository<DiscoveryRun>(DiscoveryRun).update(
             { id: runId },
-            { status: DiscoveryRunStatus.STOPPED, finishedAt: new Date() }
+            { status: DiscoveryRunStatus.STOPPED, finishedAt: new Date(), pendingPages: 0 }
         );
     }
 
