@@ -17,9 +17,6 @@ export interface DiscoveryRun {
     seedUrl: string;
     status: string;
     maxPages: number;
-    maxDepth: number;
-    maxChildrenPerArticle: number;
-    recursive: boolean;
     forceUpdate: boolean;
     visitedPages: number;
     failedPages: number;
@@ -88,9 +85,6 @@ export async function updateAdminAnnouncement(data: {
 
 export async function startArticlePlazaDiscovery(data: {
     maxPages: number;
-    maxDepth: number;
-    maxChildrenPerArticle: number;
-    recursive: boolean;
     forceUpdate: boolean;
     includeCategories: boolean;
 }) {

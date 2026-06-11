@@ -30,15 +30,6 @@ export class DiscoveryRun extends BaseEntity {
     @Column({ name: 'max_pages', default: 50 })
     maxPages: number;
 
-    @Column({ name: 'max_depth', default: 2 })
-    maxDepth: number;
-
-    @Column({ name: 'max_children_per_article', default: 20 })
-    maxChildrenPerArticle: number;
-
-    @Column({ type: 'tinyint', default: 1 })
-    recursive: boolean;
-
     @Column({ name: 'force_update', type: 'tinyint', default: 0 })
     forceUpdate: boolean;
 

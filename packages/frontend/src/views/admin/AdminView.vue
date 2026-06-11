@@ -51,9 +51,6 @@ const batchSize = ref(100);
 const embeddingBatchSize = ref(20);
 const embeddingConcurrency = ref(5);
 const discoveryMaxPages = ref(50);
-const discoveryMaxDepth = ref(2);
-const discoveryMaxChildrenPerArticle = ref(20);
-const discoveryRecursive = ref(true);
 const discoveryForceUpdate = ref(false);
 const discoveryIncludeCategories = ref(true);
 const discoveryRuns = ref<DiscoveryRun[]>([]);
@@ -225,9 +222,6 @@ async function handleStartDiscovery() {
     try {
         const response = await startArticlePlazaDiscovery({
             maxPages: discoveryMaxPages.value,
-            maxDepth: discoveryMaxDepth.value,
-            maxChildrenPerArticle: discoveryMaxChildrenPerArticle.value,
-            recursive: discoveryRecursive.value,
             forceUpdate: discoveryForceUpdate.value,
             includeCategories: discoveryIncludeCategories.value
         });
@@ -436,7 +430,8 @@ onMounted(async () => {
                 <Card title="文章发现">
                     <n-space vertical>
                         <div class="muted">
-                            扫描洛谷文章广场作为种子；递归只沿已保存文章正文中的文章链接继续。
+                            扫描洛谷文章广场并为发现的文章创建保存
+                            workflow；服务端每小时会自动扫描一次。
                         </div>
                         <n-space align="center">
                             <n-form-item
@@ -451,40 +446,8 @@ onMounted(async () => {
                                     :max="1000"
                                 />
                             </n-form-item>
-                            <n-form-item
-                                label="递归深度"
-                                label-placement="left"
-                                :show-feedback="false"
-                                class="batch-size-field"
-                            >
-                                <n-input-number
-                                    v-model:value="discoveryMaxDepth"
-                                    :min="0"
-                                    :max="10"
-                                />
-                            </n-form-item>
-                            <n-form-item
-                                label="每篇子链接"
-                                label-placement="left"
-                                :show-feedback="false"
-                                class="batch-size-field"
-                            >
-                                <n-input-number
-                                    v-model:value="discoveryMaxChildrenPerArticle"
-                                    :min="0"
-                                    :max="200"
-                                />
-                            </n-form-item>
                         </n-space>
                         <n-space align="center">
-                            <n-form-item
-                                label="递归"
-                                label-placement="left"
-                                :show-feedback="false"
-                                class="batch-size-field"
-                            >
-                                <n-switch v-model:value="discoveryRecursive" />
-                            </n-form-item>
                             <n-form-item
                                 label="分类页"
                                 label-placement="left"

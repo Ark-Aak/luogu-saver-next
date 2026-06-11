@@ -1,15 +1,12 @@
-import { In } from 'typeorm';
 import {
     DiscoveredArticle,
     DiscoveredArticleSource,
     DiscoveredArticleStatus
 } from '@/entities/discovered-article';
-import { DiscoveredArticleEdge } from '@/entities/discovered-article-edge';
 import { DiscoveryRun, DiscoveryRunStatus } from '@/entities/discovery-run';
-import { Article } from '@/entities/article';
 import { WorkflowService } from '@/services/workflow.service';
 import { TaskService } from '@/services/task.service';
-import { DiscoverTarget, TaskType, type CrawlMetadata } from '@/shared/task';
+import { DiscoverTarget, TaskType } from '@/shared/task';
 import { isDuplicateKeyError } from '@/utils/db-errors';
 import {
     findOneServiceEntity,
@@ -17,13 +14,9 @@ import {
     saveServiceEntity
 } from '@/services/helpers/repository.helper';
 import { logger } from '@/lib/logger';
-import { ArticleCrawlSaveRecentlyQueuedError } from '@/services/article-crawl-save-dedupe.service';
 
 export type StartArticlePlazaDiscoveryInput = {
     maxPages?: number;
-    maxDepth?: number;
-    maxChildrenPerArticle?: number;
-    recursive?: boolean;
     forceUpdate?: boolean;
     includeCategories?: boolean;
 };
@@ -32,18 +25,11 @@ export type ArticleDiscoveryInput = {
     runId: string;
     articleId: string;
     source: DiscoveredArticleSource;
-    sourceArticleId?: string | null;
-    depth: number;
-    maxDepth: number;
-    maxChildrenPerArticle: number;
-    recursive: boolean;
     forceUpdate: boolean;
 };
 
 const ARTICLE_ID_PATTERN = /^[A-Za-z0-9]{1,8}$/;
 const DEFAULT_MAX_PAGES = 50;
-const DEFAULT_MAX_DEPTH = 2;
-const DEFAULT_MAX_CHILDREN_PER_ARTICLE = 20;
 const ARTICLE_CATEGORIES = [1, 2, 3, 4, 5, 6, 7, 8];
 
 function clampInt(value: unknown, fallback: number, min: number, max: number) {
@@ -59,14 +45,6 @@ function normalizeBool(value: unknown, fallback: boolean) {
 export class DiscoveryService {
     static async startArticlePlazaDiscovery(input: StartArticlePlazaDiscoveryInput = {}) {
         const maxPages = clampInt(input.maxPages, DEFAULT_MAX_PAGES, 1, 1000);
-        const maxDepth = clampInt(input.maxDepth, DEFAULT_MAX_DEPTH, 0, 10);
-        const maxChildrenPerArticle = clampInt(
-            input.maxChildrenPerArticle,
-            DEFAULT_MAX_CHILDREN_PER_ARTICLE,
-            0,
-            200
-        );
-        const recursive = normalizeBool(input.recursive, true);
         const forceUpdate = normalizeBool(input.forceUpdate, false);
         const includeCategories = normalizeBool(input.includeCategories, true);
         const seeds: Array<number | null> = includeCategories
@@ -79,9 +57,6 @@ export class DiscoveryService {
                 seedUrl: 'https://www.luogu.com.cn/article',
                 status: DiscoveryRunStatus.ACTIVE,
                 maxPages,
-                maxDepth,
-                maxChildrenPerArticle,
-                recursive,
                 forceUpdate,
                 visitedPages: 0,
                 failedPages: 0,
@@ -104,9 +79,6 @@ export class DiscoveryService {
                     page: 1,
                     category,
                     maxPages,
-                    maxDepth,
-                    maxChildrenPerArticle,
-                    recursive,
                     forceUpdate
                 }
             });
@@ -133,6 +105,17 @@ export class DiscoveryService {
             { id: runId },
             { status: DiscoveryRunStatus.STOPPED, finishedAt: new Date(), pendingPages: 0 }
         );
+    }
+
+    static async hasActiveArticlePlazaRun() {
+        const activeRun = await findOneServiceEntity<DiscoveryRun>(DiscoveryRun, {
+            where: {
+                seedUrl: 'https://www.luogu.com.cn/article',
+                status: DiscoveryRunStatus.ACTIVE
+            },
+            select: ['id']
+        });
+        return Boolean(activeRun);
     }
 
     static async claimPage(runId: string, consumeBudget = true): Promise<boolean> {
@@ -186,42 +169,6 @@ export class DiscoveryService {
         );
     }
 
-    static async claimArticleEdge(
-        runId: string,
-        sourceArticleId: string,
-        targetArticleId: string,
-        depth: number
-    ) {
-        if (
-            !ARTICLE_ID_PATTERN.test(sourceArticleId) ||
-            !ARTICLE_ID_PATTERN.test(targetArticleId) ||
-            sourceArticleId === targetArticleId
-        ) {
-            return false;
-        }
-
-        try {
-            await saveServiceEntity<DiscoveredArticleEdge>(
-                DiscoveredArticleEdge,
-                DiscoveredArticleEdge.create({
-                    runId,
-                    sourceArticleId,
-                    targetArticleId,
-                    depth,
-                    lastSeenAt: new Date()
-                })
-            );
-            return true;
-        } catch (error) {
-            if (!isDuplicateKeyError(error)) throw error;
-            await getServiceRepository<DiscoveredArticleEdge>(DiscoveredArticleEdge).update(
-                { runId, sourceArticleId, targetArticleId },
-                { lastSeenAt: new Date() }
-            );
-            return false;
-        }
-    }
-
     static async discoverArticle(input: ArticleDiscoveryInput) {
         if (!ARTICLE_ID_PATTERN.test(input.articleId)) {
             return { created: false, reason: 'invalid_article_id' };
@@ -240,8 +187,6 @@ export class DiscoveryService {
                     runId: input.runId,
                     articleId: input.articleId,
                     source: input.source,
-                    sourceArticleId: input.sourceArticleId ?? null,
-                    depth: input.depth,
                     status: DiscoveredArticleStatus.DISCOVERED,
                     workflowId: null,
                     reason: null,
@@ -267,16 +212,7 @@ export class DiscoveryService {
                 'article-save-pipeline',
                 {
                     targetId: input.articleId,
-                    forceUpdate: input.forceUpdate,
-                    crawl: {
-                        enabled: input.recursive,
-                        runId: input.runId,
-                        depth: input.depth,
-                        maxDepth: input.maxDepth,
-                        maxChildrenPerArticle: input.maxChildrenPerArticle,
-                        sourceArticleId: input.sourceArticleId ?? null,
-                        forceUpdate: input.forceUpdate
-                    } satisfies CrawlMetadata
+                    forceUpdate: input.forceUpdate
                 }
             );
             await getServiceRepository<DiscoveredArticle>(DiscoveredArticle).update(row.id, {
@@ -291,32 +227,13 @@ export class DiscoveryService {
             );
             return { created: true, workflowId: workflow.workflowId };
         } catch (error) {
-            const isCrawlDedupe = error instanceof ArticleCrawlSaveRecentlyQueuedError;
-            const message = isCrawlDedupe
-                ? 'crawl_save_deduped'
-                : error instanceof Error
-                  ? error.message
-                  : String(error);
-            const status = isCrawlDedupe
-                ? DiscoveredArticleStatus.SKIPPED
-                : DiscoveredArticleStatus.FAILED;
+            const message = error instanceof Error ? error.message : String(error);
             await getServiceRepository<DiscoveredArticle>(DiscoveredArticle).update(row.id, {
-                status,
+                status: DiscoveredArticleStatus.FAILED,
                 reason: message.slice(0, 4000)
             });
-            if (status === DiscoveredArticleStatus.FAILED) {
-                logger.error({ error, input }, 'Failed to create workflow for discovered article');
-            }
+            logger.error({ error, input }, 'Failed to create workflow for discovered article');
             return { created: false, reason: message };
         }
-    }
-
-    static async findArticleIds(ids: string[]) {
-        if (ids.length === 0) return new Set<string>();
-        const articles = await getServiceRepository<Article>(Article).find({
-            where: { id: In(ids) },
-            select: ['id']
-        });
-        return new Set(articles.map(article => article.id));
     }
 }

@@ -16,10 +16,6 @@ import {
 } from '@/services/helpers/repository.helper';
 import { TaskStatus } from '@/shared/task';
 import { getRandomString } from '@/utils/string';
-import {
-    ArticleCrawlSaveDedupeService,
-    ArticleCrawlSaveRecentlyQueuedError
-} from '@/services/article-crawl-save-dedupe.service';
 
 export class WorkflowService {
     private static _flowProducer: FlowProducer;
@@ -109,21 +105,7 @@ export class WorkflowService {
             return this.createWorkflow(builder(params));
         }
 
-        const shouldDedupeCrawlSave = params?.crawl?.enabled === true;
-        if (!shouldDedupeCrawlSave) {
-            return this.createWorkflow(builder(params));
-        }
-
-        const targetId = String(params?.targetId || '').trim();
-        const dedupeToken = await ArticleCrawlSaveDedupeService.acquire(targetId);
-        if (!dedupeToken) throw new ArticleCrawlSaveRecentlyQueuedError(targetId);
-
-        try {
-            return await this.createWorkflow(builder(params));
-        } catch (error) {
-            await ArticleCrawlSaveDedupeService.clear(targetId, dedupeToken);
-            throw error;
-        }
+        return this.createWorkflow(builder(params));
     }
 
     static async getWorkflowById(id: string) {

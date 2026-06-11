@@ -80,11 +80,6 @@ export class ArticlePlazaDiscoveryHandler implements TaskHandler<DiscoverTask> {
                     runId,
                     articleId,
                     source: DiscoveredArticleSource.PLAZA,
-                    sourceArticleId: null,
-                    depth: 0,
-                    maxDepth: metadata.maxDepth ?? 2,
-                    maxChildrenPerArticle: metadata.maxChildrenPerArticle ?? 20,
-                    recursive: metadata.recursive !== false,
                     forceUpdate: metadata.forceUpdate === true
                 });
             }

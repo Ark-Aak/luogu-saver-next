@@ -16,8 +16,7 @@ export enum DiscoveredArticleStatus {
 }
 
 export enum DiscoveredArticleSource {
-    PLAZA = 'plaza',
-    ARTICLE_LINK = 'article_link'
+    PLAZA = 'plaza'
 }
 
 @Entity({ name: 'discovered_article' })
@@ -35,12 +34,6 @@ export class DiscoveredArticle extends BaseEntity {
 
     @Column()
     source: DiscoveredArticleSource;
-
-    @Column({ name: 'source_article_id', type: 'varchar', length: 8, nullable: true })
-    sourceArticleId: string | null;
-
-    @Column({ default: 0 })
-    depth: number;
 
     @Column({ default: DiscoveredArticleStatus.DISCOVERED })
     status: DiscoveredArticleStatus;

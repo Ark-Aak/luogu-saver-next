@@ -21,7 +21,6 @@ export interface SaveTask extends CommonTask {
         targetId: string;
         metadata: {
             forceUpdate?: boolean;
-            crawl?: CrawlMetadata;
         };
     };
 }
@@ -93,24 +92,11 @@ export interface DiscoverTask extends CommonTask {
     };
 }
 
-export interface CrawlMetadata {
-    enabled?: boolean;
-    runId?: string;
-    depth?: number;
-    maxDepth?: number;
-    maxChildrenPerArticle?: number;
-    sourceArticleId?: string | null;
-    forceUpdate?: boolean;
-}
-
 export interface DiscoverPlazaMetadata {
     runId: string;
     page?: number;
     category?: number | null;
     maxPages?: number;
-    maxDepth?: number;
-    maxChildrenPerArticle?: number;
-    recursive?: boolean;
     forceUpdate?: boolean;
 }
 
@@ -153,7 +139,6 @@ export enum UpdateTarget {
 
 export enum SaveTarget {
     ARTICLE = 'article',
-    ARTICLE_LINKS = 'article_links',
     PASTE = 'paste',
     BENBEN = 'benben',
     JUDGEMENT = 'judgement',

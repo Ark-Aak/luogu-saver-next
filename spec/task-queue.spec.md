@@ -35,6 +35,7 @@ Table name: `task`
 | ------------ | --------------------------- |
 | `save`       | Save content from Luogu     |
 | `ai_process` | AI-based content processing |
+| `discover`   | Discovery producer tasks    |
 
 ### 2.4 SaveTarget Enum
 
@@ -248,11 +249,12 @@ interface TaskHandler<T extends CommonTask> {
 
 ### 7.3 Registered Handlers
 
-| Handler Key    | Handler Class  | Description                       |
-| -------------- | -------------- | --------------------------------- |
-| `save:article` | ArticleHandler | Fetch and save Luogu article      |
-| `save:paste`   | PasteHandler   | Fetch and save Luogu paste        |
-| `save:profile` | ProfileHandler | Fetch and save Luogu user profile |
+| Handler Key              | Handler Class                | Description                       |
+| ------------------------ | ---------------------------- | --------------------------------- |
+| `save:article`           | ArticleHandler               | Fetch and save Luogu article      |
+| `save:paste`             | PasteHandler                 | Fetch and save Luogu paste        |
+| `save:profile`           | ProfileHandler               | Fetch and save Luogu user profile |
+| `discover:article_plaza` | ArticlePlazaDiscoveryHandler | Fetch Luogu article plaza pages   |
 
 ## 8. Configuration
 

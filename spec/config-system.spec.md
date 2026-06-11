@@ -31,6 +31,7 @@ The configuration is validated using Zod schemas. All fields have default values
 
 | Field                                | Type    | Default                             | Description                                                |
 | ------------------------------------ | ------- | ----------------------------------- | ---------------------------------------------------------- |
+| `host`                               | string  | "0.0.0.0"                           | HTTP server listening host                                 |
 | `port`                               | number  | 3000                                | HTTP server listening port                                 |
 | `env`                                | string  | "development"                       | Environment name                                           |
 | `network.timeout`                    | number  | 30000                               | Network request timeout in ms                              |
@@ -106,7 +107,7 @@ The configuration is validated using Zod schemas. All fields have default values
 
 ### 3.7 Queue Configuration (`queue`)
 
-`queue` SHALL contain these queue sections: `save`, `ai`, `update`, `search`, `read`, and `rag`.
+`queue` SHALL contain these queue sections: `save`, `ai`, `update`, `search`, `read`, `rag`, and `discover`.
 
 Each queue section SHALL have these fields:
 
@@ -120,14 +121,25 @@ Each queue section SHALL have these fields:
 
 Default queue section values SHALL be:
 
-| Section  | `concurrencyLimit` | `maxRequestToken` | `regenerationSpeed` | `regenerationInterval` | `maxQueueLength` |
-| -------- | ------------------ | ----------------- | ------------------- | ---------------------- | ---------------- |
-| `save`   | 2                  | 20                | 1                   | 1000                   | 1000             |
-| `ai`     | 10                 | 50                | 1                   | 1000                   | 2000             |
-| `update` | 2                  | 20                | 1                   | 1000                   | 1000             |
-| `search` | 2                  | 20                | 1                   | 1000                   | 1000             |
-| `read`   | 2                  | 20                | 1                   | 1000                   | 1000             |
-| `rag`    | 10                 | 50                | 1                   | 1000                   | 2000             |
+| Section    | `concurrencyLimit` | `maxRequestToken` | `regenerationSpeed` | `regenerationInterval` | `maxQueueLength` |
+| ---------- | ------------------ | ----------------- | ------------------- | ---------------------- | ---------------- |
+| `save`     | 2                  | 20                | 1                   | 1000                   | 1000             |
+| `ai`       | 10                 | 50                | 1                   | 1000                   | 2000             |
+| `update`   | 2                  | 20                | 1                   | 1000                   | 1000             |
+| `search`   | 2                  | 20                | 1                   | 1000                   | 1000             |
+| `read`     | 2                  | 20                | 1                   | 1000                   | 1000             |
+| `rag`      | 10                 | 50                | 1                   | 1000                   | 2000             |
+| `discover` | 2                  | 20                | 1                   | 1000                   | 1000             |
+
+### 3.7.1 Discovery Configuration (`discovery.articlePlaza`)
+
+| Field               | Type    | Default | Description                                   |
+| ------------------- | ------- | ------- | --------------------------------------------- |
+| `enabled`           | boolean | true    | Enable the scheduled article plaza scanner    |
+| `intervalMs`        | number  | 3600000 | Delay between scheduled scanner checks        |
+| `maxPages`          | number  | 50      | Maximum article plaza pages per scheduled run |
+| `includeCategories` | boolean | true    | Scan category pages during scheduled runs     |
+| `forceUpdate`       | boolean | false   | Force article refresh during scheduled runs   |
 
 ### 3.8 API Rate Limit Configuration (`apiRateLimit`)
 
