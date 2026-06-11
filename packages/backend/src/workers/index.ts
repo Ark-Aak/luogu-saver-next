@@ -16,7 +16,6 @@ import { logger } from '@/lib/logger';
 
 import { ArticleHandler } from '@/workers/handlers/task/save/article.handler';
 import { ArticleLinksHandler } from '@/workers/handlers/task/save/article-links.handler';
-import { ArticleUnlockHandler } from '@/workers/handlers/task/save/article-unlock.handler';
 import { PasteHandler } from '@/workers/handlers/task/save/paste.handler';
 import { CommentsHandler } from '@/workers/handlers/task/save/comments.handler';
 import { ProfileHandler } from '@/workers/handlers/task/save/profile.handler';
@@ -66,7 +65,6 @@ export function bootstrap() {
 
     saveProcessor.registerHandler(new ArticleHandler());
     saveProcessor.registerHandler(new ArticleLinksHandler());
-    saveProcessor.registerHandler(new ArticleUnlockHandler());
     saveProcessor.registerHandler(new PasteHandler());
     saveProcessor.registerHandler(new CommentsHandler());
     saveProcessor.registerHandler(new ProfileHandler());

@@ -22,7 +22,6 @@ export interface SaveTask extends CommonTask {
         metadata: {
             forceUpdate?: boolean;
             crawl?: CrawlMetadata;
-            saveLockToken?: string;
         };
     };
 }
@@ -155,7 +154,6 @@ export enum UpdateTarget {
 export enum SaveTarget {
     ARTICLE = 'article',
     ARTICLE_LINKS = 'article_links',
-    ARTICLE_UNLOCK = 'article_unlock',
     PASTE = 'paste',
     BENBEN = 'benben',
     JUDGEMENT = 'judgement',

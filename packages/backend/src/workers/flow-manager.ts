@@ -5,7 +5,6 @@ import { Job, QueueEvents } from 'bullmq';
 import { getQueueByName } from '@/lib/queue-factory';
 import { config } from '@/config';
 import { WorkflowStatusStore } from '@/services/helpers/workflow-status-store.helper';
-import { ArticleSaveLockService } from '@/services/article-save-lock.service';
 
 export class FlowManager {
     private static queueEvents: Map<string, QueueEvents> = new Map();
@@ -79,7 +78,6 @@ export class FlowManager {
 
                     if (job?.data?.workflowId && this.isRootWorkflowJob(job)) {
                         await this.updateWorkflowStatus(job.data.workflowId, 'completed');
-                        await this.releaseArticleSaveLockForWorkflow(job.data.workflowId);
                     }
                 }
             });
@@ -91,7 +89,6 @@ export class FlowManager {
                 const job = await Job.fromId(queueWrapper.queue, jobId);
                 if (job?.data?.workflowId) {
                     await this.updateWorkflowStatus(job.data.workflowId, 'failed', failedReason);
-                    await this.releaseArticleSaveLockForWorkflow(job.data.workflowId);
                 }
             });
 
@@ -107,26 +104,5 @@ export class FlowManager {
 
     private static isRootWorkflowJob(job: Job<any>): boolean {
         return job.data.__isRoot === true;
-    }
-
-    private static async releaseArticleSaveLockForWorkflow(workflowId: string) {
-        try {
-            const workflow = await Workflow.findOne({
-                where: { id: workflowId },
-                select: ['id', 'definition']
-            });
-            const tasks = workflow?.definition?.tasks;
-            if (!Array.isArray(tasks)) return;
-
-            const unlockTask = tasks.find(task => task?.data?.payload?.target === 'article_unlock');
-            const articleId = unlockTask?.data?.payload?.targetId;
-            const token = unlockTask?.data?.payload?.metadata?.saveLockToken;
-            if (typeof articleId !== 'string' || typeof token !== 'string') return;
-
-            const released = await ArticleSaveLockService.release(articleId, token);
-            logger.debug({ workflowId, articleId, released }, 'Article save lock terminal release');
-        } catch (err) {
-            logger.warn({ err, workflowId }, 'Failed to release article save lock');
-        }
     }
 }

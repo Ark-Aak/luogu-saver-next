@@ -1,17 +1,17 @@
 import { randomUUID } from 'node:crypto';
 import { redisClient } from '@/lib/redis';
 
-const LOCK_TTL_SECONDS = 24 * 60 * 60;
+const CRAWL_SAVE_DEDUPE_TTL_SECONDS = 6 * 60 * 60;
 
-export class ArticleSaveAlreadyInProgressError extends Error {
+export class ArticleCrawlSaveRecentlyQueuedError extends Error {
     constructor(articleId: string) {
-        super(`Article save already in progress: ${articleId}`);
+        super(`Article crawl save recently queued: ${articleId}`);
     }
 }
 
-export class ArticleSaveLockService {
+export class ArticleCrawlSaveDedupeService {
     private static key(articleId: string) {
-        return `article:save:inflight:${articleId}`;
+        return `article:crawl-save:dedupe:${articleId}`;
     }
 
     static async acquire(articleId: string) {
@@ -20,14 +20,14 @@ export class ArticleSaveLockService {
             this.key(articleId),
             token,
             'EX',
-            LOCK_TTL_SECONDS,
+            CRAWL_SAVE_DEDUPE_TTL_SECONDS,
             'NX'
         );
         if (result !== 'OK') return null;
         return token;
     }
 
-    static async release(articleId: string, token?: string | null) {
+    static async clear(articleId: string, token?: string | null) {
         if (!token) return false;
         const key = this.key(articleId);
         const script =

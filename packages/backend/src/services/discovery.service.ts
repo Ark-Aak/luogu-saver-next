@@ -17,7 +17,7 @@ import {
     saveServiceEntity
 } from '@/services/helpers/repository.helper';
 import { logger } from '@/lib/logger';
-import { ArticleSaveAlreadyInProgressError } from '@/services/article-save-lock.service';
+import { ArticleCrawlSaveRecentlyQueuedError } from '@/services/article-crawl-save-dedupe.service';
 
 export type StartArticlePlazaDiscoveryInput = {
     maxPages?: number;
@@ -291,11 +291,15 @@ export class DiscoveryService {
             );
             return { created: true, workflowId: workflow.workflowId };
         } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            const status =
-                error instanceof ArticleSaveAlreadyInProgressError
-                    ? DiscoveredArticleStatus.SKIPPED
-                    : DiscoveredArticleStatus.FAILED;
+            const isCrawlDedupe = error instanceof ArticleCrawlSaveRecentlyQueuedError;
+            const message = isCrawlDedupe
+                ? 'crawl_save_deduped'
+                : error instanceof Error
+                  ? error.message
+                  : String(error);
+            const status = isCrawlDedupe
+                ? DiscoveredArticleStatus.SKIPPED
+                : DiscoveredArticleStatus.FAILED;
             await getServiceRepository<DiscoveredArticle>(DiscoveredArticle).update(row.id, {
                 status,
                 reason: message.slice(0, 4000)

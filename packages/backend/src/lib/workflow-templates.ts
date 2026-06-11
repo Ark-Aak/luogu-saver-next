@@ -58,7 +58,6 @@ export const WORKFLOW_TEMPLATES: Record<string, WorkflowTemplateBuilder> = {
         }
         const crawl = params?.crawl;
         const forceUpdate = params?.forceUpdate === true || crawl?.forceUpdate === true;
-        const saveLockToken = params?.saveLockToken;
 
         const tasks: TaskDefinition[] = [
             {
@@ -84,18 +83,6 @@ export const WORKFLOW_TEMPLATES: Record<string, WorkflowTemplateBuilder> = {
                         target: 'article_links',
                         targetId: targetId,
                         metadata: { crawl }
-                    }
-                }
-            },
-            {
-                name: 'release-save-lock',
-                fathers: ['update-search-index'],
-                data: {
-                    type: 'save',
-                    payload: {
-                        target: 'article_unlock',
-                        targetId: targetId,
-                        metadata: { saveLockToken }
                     }
                 }
             },
