@@ -9,10 +9,14 @@ During the development process, you must strictly adhere to the rules in this do
 
 - You are an automated coding / tooling agent working inside this repository.
 - You must **not** modify files outside the project root.
+- Before changing backend code, backend configuration, backend behavior, or backend data shape,
+  you **must first read** the relevant specification file under `spec/`.
 - Whenever you change observable behavior of the system, you **must**:
-    1. Update the corresponding specification file under `spec/`.
-    2. Update the implementation.
-    3. Keep the spec and code exactly aligned.
+    1. Read the relevant specification file under `spec/` before making the implementation change.
+    2. Update or create the corresponding specification file under `spec/` after deciding the
+       intended behavior.
+    3. Update the implementation.
+    4. Keep the spec and code exactly aligned before finishing the task.
 
 If any rule in this document conflicts with ad-hoc instructions, this document takes precedence.
 
@@ -61,8 +65,11 @@ When implementing a new feature:
 
 1. Translate the user’s vague requirement into spec language as defined above.
 2. Update or create the corresponding `*.spec.md` under `spec/`.
-3. Only after the spec is updated and logically sound, implement or modify the code.
-4. In the same change / PR, ensure the implementation matches the spec exactly.
+3. Read the updated spec back before touching backend implementation files.
+4. Only after the spec is updated and logically sound, implement or modify the code.
+5. After the code change, compare the implementation against the spec and update the spec again
+   if the finalized behavior differs from the initial spec text.
+6. In the same change / PR, ensure the implementation matches the spec exactly.
 
 If you are missing information (e.g. sync frequency, limits, edge cases), you must
 ask for clarification **before** finalizing the spec and implementation.
