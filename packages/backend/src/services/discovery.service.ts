@@ -6,6 +6,7 @@ import {
 import { DiscoveryRun, DiscoveryRunStatus } from '@/entities/discovery-run';
 import { WorkflowService } from '@/services/workflow.service';
 import { TaskService } from '@/services/task.service';
+import { ArticleDiscoveryBroadcaster } from '@/services/article-discovery-broadcaster.service';
 import { DiscoverTarget, TaskType } from '@/shared/task';
 import { isDuplicateKeyError } from '@/utils/db-errors';
 import {
@@ -86,6 +87,7 @@ export class DiscoveryService {
             taskIds.push(task.id);
         }
 
+        ArticleDiscoveryBroadcaster.scheduleRunsUpdate(run.id);
         return { run, taskIds };
     }
 
@@ -105,6 +107,7 @@ export class DiscoveryService {
             { id: runId },
             { status: DiscoveryRunStatus.STOPPED, finishedAt: new Date(), pendingPages: 0 }
         );
+        ArticleDiscoveryBroadcaster.scheduleRunsUpdate(runId);
     }
 
     static async hasActiveArticlePlazaRun() {
@@ -119,7 +122,7 @@ export class DiscoveryService {
     }
 
     static async claimPage(runId: string, consumeBudget = true): Promise<boolean> {
-        return DiscoveryRun.transaction(async manager => {
+        const claimed = await DiscoveryRun.transaction(async manager => {
             const repo = manager.getRepository(DiscoveryRun);
             const run = await repo.findOne({
                 where: { id: runId },
@@ -134,18 +137,20 @@ export class DiscoveryService {
             await repo.save(run);
             return true;
         });
+        if (claimed && consumeBudget) ArticleDiscoveryBroadcaster.scheduleRunsUpdate(runId);
+        return claimed;
     }
 
     static async finishPage(runId: string, hasContinuation: boolean) {
         if (hasContinuation) return;
 
-        await DiscoveryRun.transaction(async manager => {
+        const changed = await DiscoveryRun.transaction(async manager => {
             const repo = manager.getRepository(DiscoveryRun);
             const run = await repo.findOne({
                 where: { id: runId },
                 lock: { mode: 'pessimistic_write' }
             });
-            if (!run || run.status !== DiscoveryRunStatus.ACTIVE) return;
+            if (!run || run.status !== DiscoveryRunStatus.ACTIVE) return false;
 
             run.pendingPages = Math.max(0, run.pendingPages - 1);
             if (run.pendingPages === 0) {
@@ -153,7 +158,9 @@ export class DiscoveryService {
                 run.finishedAt = new Date();
             }
             await repo.save(run);
+            return true;
         });
+        if (changed) ArticleDiscoveryBroadcaster.scheduleRunsUpdate(runId);
     }
 
     static async markPageFailed(runId: string, error: unknown) {
@@ -167,6 +174,7 @@ export class DiscoveryService {
             { id: runId },
             { lastError: message.slice(0, 4000) }
         );
+        ArticleDiscoveryBroadcaster.scheduleRunsUpdate(runId);
     }
 
     static async discoverArticle(input: ArticleDiscoveryInput) {
@@ -198,12 +206,14 @@ export class DiscoveryService {
                 'discoveredArticles',
                 1
             );
+            ArticleDiscoveryBroadcaster.scheduleRunsUpdate(input.runId);
         } catch (error) {
             if (!isDuplicateKeyError(error)) throw error;
             await getServiceRepository<DiscoveredArticle>(DiscoveredArticle).update(
                 { runId: input.runId, articleId: input.articleId },
                 { lastSeenAt: new Date() }
             );
+            ArticleDiscoveryBroadcaster.scheduleRunsUpdate(input.runId);
             return { created: false, reason: 'duplicate' };
         }
 
@@ -225,6 +235,7 @@ export class DiscoveryService {
                 'createdWorkflows',
                 1
             );
+            ArticleDiscoveryBroadcaster.scheduleRunsUpdate(input.runId);
             return { created: true, workflowId: workflow.workflowId };
         } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
@@ -232,6 +243,7 @@ export class DiscoveryService {
                 status: DiscoveredArticleStatus.FAILED,
                 reason: message.slice(0, 4000)
             });
+            ArticleDiscoveryBroadcaster.scheduleRunsUpdate(input.runId);
             logger.error({ error, input }, 'Failed to create workflow for discovered article');
             return { created: false, reason: message };
         }

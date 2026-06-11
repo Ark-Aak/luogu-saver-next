@@ -121,3 +121,33 @@ The scheduler SHALL:
 3. If an active article plaza run exists, skip that tick.
 4. Otherwise start one article plaza discovery run using the configured values.
 5. Log scheduler failures and keep the process running.
+
+## 7. WebSocket Updates
+
+Room `discovery:runs` SHALL publish event `discovery:runs:update`.
+
+The event payload SHALL be:
+
+```ts
+{
+    runIds: string[];
+}
+```
+
+`runIds` SHALL contain discovery run IDs that changed since the last emitted update. Clients SHALL
+treat an empty or unknown list as a signal to refresh the discovery run list through the HTTP admin
+API.
+
+The backend SHALL emit `discovery:runs:update` after observable discovery run state changes,
+including:
+
+1. Creating an article plaza discovery run.
+2. Stopping a discovery run.
+3. Updating page counters, pending page count, completion state, or failure state.
+4. Inserting or updating discovered article rows when the run counters or workflow status can change.
+
+The websocket payload SHALL NOT include the full discovery run list, discovered article rows, article
+IDs, workflow IDs, Luogu cookies, or error stack traces.
+
+To avoid flooding admin clients while one page discovers many articles, the backend SHOULD batch
+rapid updates and emit at most one `discovery:runs:update` event per short debounce window.

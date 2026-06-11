@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, h, nextTick, onMounted, ref } from 'vue';
+import { computed, h, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import {
     NAlert,
@@ -35,9 +35,14 @@ import { currentAuth, isAuthenticated, setCurrentAuth, startCpOAuthLogin } from 
 import { hasAnyPermission, hasPermission, Permission } from '@/utils/permissions.ts';
 import { useContentSaver } from '@/composables/useContentSaver.ts';
 import HtmlCodeEditor from '@/components/HtmlCodeEditor.vue';
+import websocket, { joinRoom, leaveRoom } from '@/utils/websocket.ts';
+
+const DISCOVERY_RUNS_ROOM = 'discovery:runs';
+const DISCOVERY_RUNS_EVENT = 'discovery:runs:update';
 
 const message = useMessage();
 const route = useRoute();
+const socket = websocket.getInstance();
 const announcementSectionRef = ref<InstanceType<typeof Card> | null>(null);
 const users = ref<AdminUser[]>([]);
 const loading = ref(false);
@@ -60,6 +65,8 @@ const announcementForm = ref({
     enabled: true
 });
 const { setupTaskUpdateListener } = useContentSaver();
+let discoverySocketAttached = false;
+let discoveryRefreshTimer: ReturnType<typeof setTimeout> | null = null;
 
 const canManageUsers = computed(() =>
     hasPermission(currentAuth.value?.role, Permission.MANAGE_USERS)
@@ -129,6 +136,32 @@ async function loadDiscoveryRuns() {
     } finally {
         loadingDiscoveryRuns.value = false;
     }
+}
+
+function scheduleDiscoveryRunsRefresh() {
+    if (!canManageDiscovery.value || discoveryRefreshTimer) return;
+    discoveryRefreshTimer = setTimeout(async () => {
+        discoveryRefreshTimer = null;
+        await loadDiscoveryRuns();
+    }, 500);
+}
+
+function handleDiscoveryRunsUpdate() {
+    scheduleDiscoveryRunsRefresh();
+}
+
+function attachDiscoverySocket() {
+    if (discoverySocketAttached || !canManageDiscovery.value) return;
+    socket.on(DISCOVERY_RUNS_EVENT, handleDiscoveryRunsUpdate);
+    joinRoom(DISCOVERY_RUNS_ROOM);
+    discoverySocketAttached = true;
+}
+
+function detachDiscoverySocket() {
+    if (!discoverySocketAttached) return;
+    socket.off(DISCOVERY_RUNS_EVENT, handleDiscoveryRunsUpdate);
+    leaveRoom(DISCOVERY_RUNS_ROOM);
+    discoverySocketAttached = false;
 }
 
 async function handleAnnouncementSave() {
@@ -312,11 +345,17 @@ const discoveryColumns = [
 
 onMounted(async () => {
     await loadCurrentAuth();
+    attachDiscoverySocket();
     await Promise.all([loadUsers(), loadAnnouncement(), loadDiscoveryRuns()]);
     if (route.query.section === 'announcement') {
         await nextTick();
         announcementSectionRef.value?.$el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+});
+
+onBeforeUnmount(() => {
+    detachDiscoverySocket();
+    if (discoveryRefreshTimer) clearTimeout(discoveryRefreshTimer);
 });
 </script>
 
