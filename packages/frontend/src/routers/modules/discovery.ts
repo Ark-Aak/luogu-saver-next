@@ -7,7 +7,8 @@ export default [
         component: () => import('@/views/discovery/UserArticleDiscoveryView.vue'),
         meta: {
             activeMenu: 'user-article-discovery',
-            title: '用户文章爬取'
+            title: '用户文章爬取',
+            requiresAdmin: true
         }
     }
 ] as RouteRecordRaw[];

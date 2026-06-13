@@ -101,13 +101,15 @@ If fetching or parsing fails:
 5. Create and dispatch one `discover:user_articles` task with page `1`, `uid`, `maxPages`, and `forceUpdate`.
 6. Return the created run and dispatched task ID.
 
-`POST /discover/user/:uid/articles/start` SHALL be a public HTTP API endpoint. It SHALL NOT require Socket.IO authentication or `MANAGE_DISCOVERY` permission when `forceUpdate` is not `true`. It SHALL start one user article discovery run for path parameter `uid`.
+`POST /discover/user/:uid/articles/start` SHALL require an authenticated admin user. It SHALL start one user article discovery run for path parameter `uid`.
 
-If request body field `forceUpdate` is `true`, the endpoint SHALL require the authenticated user to be admin or to have `MANAGE_DISCOVERY` permission.
+If the requester is not authenticated, the endpoint SHALL return 401.
+
+If the requester is authenticated but is not admin, the endpoint SHALL return 403.
 
 The frontend SHALL provide a dedicated page with a UID input for starting this endpoint. The frontend SHALL NOT place this start form on the home page.
 
-The frontend SHALL show the `forceUpdate` control only when the current authenticated user is admin or has `MANAGE_DISCOVERY` permission.
+The frontend SHALL show the dedicated user article discovery page and sidebar menu item only when the current authenticated user is admin.
 
 ## 4.2 User Article Page Task
 

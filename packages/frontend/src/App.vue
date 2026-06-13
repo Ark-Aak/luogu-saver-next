@@ -227,7 +227,7 @@ import { defaultTheme } from '@/styles/theme/default-theme.ts';
 import TrackingConsent from '@/components/TrackingConsent.vue';
 import LuoguLogo from '@/components/icons/LuoguLogo.vue';
 import { currentRole, isAuthenticated, setCurrentAuth } from '@/utils/auth.ts';
-import { hasAnyPermission, Permission } from '@/utils/permissions.ts';
+import { hasAnyPermission, Permission, ROLE_ADMIN } from '@/utils/permissions.ts';
 import { getCurrentUser } from '@/api/auth.ts';
 
 // import socket from '@/utils/websocket';
@@ -269,9 +269,12 @@ const canShowAdminMenu = computed(() =>
     hasAnyPermission(currentRole.value, [
         Permission.MANAGE_USERS,
         Permission.MANAGE_SEARCH,
-        Permission.MANAGE_ANNOUNCEMENTS
+        Permission.MANAGE_ANNOUNCEMENTS,
+        Permission.MANAGE_DISCOVERY
     ])
 );
+
+const canShowDiscoveryMenu = computed(() => currentRole.value === ROLE_ADMIN);
 
 const menuOptions = computed<MenuOption[]>(() => [
     {
@@ -299,11 +302,15 @@ const menuOptions = computed<MenuOption[]>(() => [
         key: 'plaza',
         icon: renderIcon(GlobeOutline)
     },
-    {
-        label: '用户文章爬取',
-        key: 'discovery/user-articles',
-        icon: renderIcon(CloudDownloadOutline)
-    },
+    ...(canShowDiscoveryMenu.value
+        ? [
+              {
+                  label: '用户文章爬取',
+                  key: 'discovery/user-articles',
+                  icon: renderIcon(CloudDownloadOutline)
+              }
+          ]
+        : []),
     // {
     //     label: '用户动态',
     //     key: 'benben',

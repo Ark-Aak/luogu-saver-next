@@ -1,29 +1,16 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { NAlert, NButton, NInputNumber, NSpace, NSwitch, useMessage } from 'naive-ui';
 import { CloudDownloadOutline } from '@vicons/ionicons5';
 import Card from '@/components/Card.vue';
 import CardTitle from '@/components/CardTitle.vue';
 import { startUserArticleDiscovery } from '@/api/discovery.ts';
-import { getCurrentUser } from '@/api/auth.ts';
-import { currentAuth, isAuthenticated, setCurrentAuth } from '@/utils/auth.ts';
-import { hasPermission, Permission } from '@/utils/permissions.ts';
 
 const message = useMessage();
 const uid = ref<number | null>(null);
 const maxPages = ref(500);
 const forceUpdate = ref(false);
 const starting = ref(false);
-
-const canForceUpdate = computed(() =>
-    hasPermission(currentAuth.value?.role, Permission.MANAGE_DISCOVERY)
-);
-
-onMounted(async () => {
-    if (!isAuthenticated.value || currentAuth.value) return;
-    const response = await getCurrentUser();
-    if (response.code === 200) setCurrentAuth(response.data);
-});
 
 async function handleStart() {
     if (!uid.value || uid.value <= 0 || starting.value) return;
@@ -32,7 +19,7 @@ async function handleStart() {
         const response = await startUserArticleDiscovery({
             uid: uid.value,
             maxPages: maxPages.value,
-            forceUpdate: canForceUpdate.value && forceUpdate.value
+            forceUpdate: forceUpdate.value
         });
         if (response.code === 200) {
             message.success(`用户文章爬取已启动：${response.data.runId}`);
@@ -75,10 +62,8 @@ async function handleStart() {
                         placeholder="最大页数"
                         class="page-input"
                     />
-                    <template v-if="canForceUpdate">
-                        <span class="muted">强制更新</span>
-                        <n-switch v-model:value="forceUpdate" />
-                    </template>
+                    <span class="muted">强制更新</span>
+                    <n-switch v-model:value="forceUpdate" />
                     <n-button
                         type="primary"
                         :loading="starting"
@@ -88,10 +73,6 @@ async function handleStart() {
                         开始爬取
                     </n-button>
                 </n-space>
-
-                <div v-if="!canForceUpdate" class="muted">
-                    强制更新仅管理员或拥有 MANAGE_DISCOVERY 权限的用户可用。
-                </div>
             </n-space>
         </Card>
     </div>

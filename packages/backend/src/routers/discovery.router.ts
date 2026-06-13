@@ -7,6 +7,18 @@ import { logger } from '@/lib/logger';
 
 const router = new Router<DefaultState, Context>({ prefix: '/discover' });
 
+const requiresAdmin = async (ctx: Context, next: () => Promise<void>) => {
+    if (!ctx.user || ctx.user.id === undefined) {
+        ctx.fail(401, 'Unauthorized');
+        return;
+    }
+    if (ctx.user.role !== ROLE_ADMIN) {
+        ctx.fail(403, 'Permission denied');
+        return;
+    }
+    await next();
+};
+
 router.post(
     '/article-plaza/start',
     requiresPermission(Permission.MANAGE_DISCOVERY),
@@ -30,21 +42,9 @@ router.post(
     }
 );
 
-router.post('/user/:uid/articles/start', async (ctx: Context) => {
+router.post('/user/:uid/articles/start', requiresAdmin, async (ctx: Context) => {
     try {
         const body = (ctx.request.body || {}) as { forceUpdate?: boolean; maxPages?: number };
-        if (body.forceUpdate === true) {
-            const role = ctx.user?.role;
-            const canForceUpdate =
-                role === ROLE_ADMIN ||
-                (role !== undefined &&
-                    (role & Permission.MANAGE_DISCOVERY) === Permission.MANAGE_DISCOVERY);
-            if (!canForceUpdate) {
-                ctx.fail(403, 'Permission denied');
-                return;
-            }
-        }
-
         const result = await DiscoveryService.startUserArticleDiscovery({
             ...body,
             uid: ctx.params.uid
