@@ -18,18 +18,8 @@
                         @mouseleave="handleMouseLeave"
                     >
                         <div class="brand-shell">
-                            <img
-                                v-if="!collapsed"
-                                src="/logo-text.png"
-                                alt="洛谷保存站"
-                                style="height: 32px"
-                            />
-                            <img
-                                v-else
-                                src="/logo-icon.png"
-                                alt="洛谷保存站"
-                                style="height: 32px"
-                            />
+                            <n-icon class="brand-logo" :component="LuoguLogo" />
+                            <span v-if="!collapsed" class="brand-text">洛谷保存站</span>
                         </div>
 
                         <n-menu
@@ -197,7 +187,8 @@ import {
     type MenuOption,
     NMessageProvider,
     NBackTop,
-    NDialogProvider
+    NDialogProvider,
+    NIcon
 } from 'naive-ui';
 
 import {
@@ -233,6 +224,7 @@ import { renderIcon } from '@/utils/render';
 import { uiThemeKey, type UiThemeVars } from '@/styles/theme/themeKeys.ts';
 import { defaultTheme } from '@/styles/theme/default-theme.ts';
 import TrackingConsent from '@/components/TrackingConsent.vue';
+import LuoguLogo from '@/components/icons/LuoguLogo.vue';
 import { currentRole, isAuthenticated, setCurrentAuth } from '@/utils/auth.ts';
 import { hasAnyPermission, Permission } from '@/utils/permissions.ts';
 import { getCurrentUser } from '@/api/auth.ts';
@@ -465,8 +457,23 @@ setInterval(() => {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 10px;
     border-bottom: 1px solid rgba(22, 119, 255, 0.08);
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.76), rgba(233, 245, 255, 0.52));
+}
+
+.brand-logo {
+    color: #2f6db5;
+    font-size: 32px;
+    flex-shrink: 0;
+}
+
+.brand-text {
+    color: #10233f;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
 }
 
 .app-footer {

@@ -3,7 +3,7 @@ import { UnrecoverableError } from 'bullmq';
 import type { SaveTask } from '@/shared/task';
 import { fetch } from '@/utils/fetch';
 import { C3vkMode } from '@/shared/c3vk';
-import type { UserData } from '@/types/luogu-api';
+import type { LentilleDataResponse, UserData } from '@/types/luogu-api';
 import { UserService } from '@/services/user.service';
 import { logger } from '@/lib/logger';
 import { emitToRoom } from '@/lib/socket';
@@ -23,11 +23,10 @@ export class ProfileHandler implements TaskHandler<SaveTask> {
         }
         const uid = Number(rawTargetId);
 
-        const url = `https://www.luogu.com/api/user/info/${uid}`;
-        // const resp: LentilleDataResponse<UserData> = await fetch(url, C3vkMode.MODERN);
-        const resp: UserData = await fetch(url, C3vkMode.MODERN);
+        const url = `https://www.luogu.com/user/${uid}`;
+        const resp: LentilleDataResponse<UserData> = await fetch(url, C3vkMode.MODERN);
 
-        const userData = resp?.user;
+        const userData = resp?.data?.user;
         if (!userData || typeof userData !== 'object' || typeof userData.uid !== 'number') {
             throw new UnrecoverableError(`Profile response shape invalid for uid=${uid}`);
         }
@@ -36,7 +35,7 @@ export class ProfileHandler implements TaskHandler<SaveTask> {
         //   resp.data.prizes : Array<{ prize: { year, contest, event, prize, score?, rank? } }>
         // Each entry is wrapped in a one-level `prize` object that we must unwrap.
         // The `resp.data.user.prize` field, despite its name, is unrelated and may be empty.
-        const rawPrizes = (resp as { prizes?: unknown }).prizes;
+        const rawPrizes = (resp.data as { prizes?: unknown }).prizes;
         const prizes: UserPrize[] = Array.isArray(rawPrizes)
             ? rawPrizes
                   .map(entry => {

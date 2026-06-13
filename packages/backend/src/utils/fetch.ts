@@ -185,7 +185,7 @@ export async function fetch(
 
     const headers: Record<string, string> = {
         'User-Agent': USER_AGENT,
-        'Content-Type': 'application/json; charset=UTF-8',
+        Accept: 'application/json; charset=UTF-8',
         'x-luogu-type': 'content-only',
         'x-lentille-request': 'content-only',
         ...(cookie
