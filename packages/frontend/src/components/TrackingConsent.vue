@@ -44,7 +44,7 @@ const handleReject = () => {
                             <n-text strong>我们需要您的许可</n-text>
                             <n-text depth="3" class="description">
                                 为了提供更精准的内容推荐，我们希望收集您的设备信息用于数据分析。
-                                <n-button text type="primary" size="tiny"> 查看隐私政策 </n-button>
+                                <n-button text type="primary" size="tiny"> 查看隐私协议 </n-button>
                             </n-text>
                         </div>
                     </div>
