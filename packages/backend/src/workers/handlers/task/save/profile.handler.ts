@@ -10,6 +10,75 @@ import { emitToRoom } from '@/lib/socket';
 import { TaskHandler, TaskTextResult, WorkflowResult } from '@/workers/types';
 import { UserColor, UserPrize } from '@/shared/user';
 import renderMarkdown from '@/lib/markdown';
+import { User } from '@/entities/user';
+
+type ProfileSnapshot = {
+    id: number;
+    name: string;
+    color: UserColor;
+    ccfLevel: number;
+    xcpcLevel: number;
+    slogan: string | null;
+    introduction: string | null;
+    renderedIntroduction: string | null;
+    prizes: UserPrize[];
+};
+
+function normalizePrizes(prizes: UserPrize[] | null | undefined): UserPrize[] {
+    return (prizes ?? []).map(prize => ({
+        year: prize.year,
+        contest: prize.contest,
+        event: typeof prize.event === 'string' ? prize.event : null,
+        prize: prize.prize,
+        ...(typeof prize.score === 'number' ? { score: prize.score } : {}),
+        ...(typeof prize.rank === 'number' ? { rank: prize.rank } : {})
+    }));
+}
+
+function buildExistingProfileSnapshot(user: User | null): ProfileSnapshot | null {
+    if (!user) return null;
+    return {
+        id: user.id,
+        name: user.name,
+        color: user.color,
+        ccfLevel: user.ccfLevel,
+        xcpcLevel: user.xcpcLevel,
+        slogan: user.slogan,
+        introduction: user.introduction,
+        renderedIntroduction: user.renderedIntroduction,
+        prizes: normalizePrizes(user.prizes)
+    };
+}
+
+function prizesEqual(left: UserPrize[], right: UserPrize[]): boolean {
+    if (left.length !== right.length) return false;
+    return left.every((prize, index) => {
+        const other = right[index];
+        return (
+            prize.year === other.year &&
+            prize.contest === other.contest &&
+            prize.event === other.event &&
+            prize.prize === other.prize &&
+            prize.score === other.score &&
+            prize.rank === other.rank
+        );
+    });
+}
+
+function profilesEqual(left: ProfileSnapshot | null, right: ProfileSnapshot): boolean {
+    if (!left) return false;
+    return (
+        left.id === right.id &&
+        left.name === right.name &&
+        left.color === right.color &&
+        left.ccfLevel === right.ccfLevel &&
+        left.xcpcLevel === right.xcpcLevel &&
+        left.slogan === right.slogan &&
+        left.introduction === right.introduction &&
+        left.renderedIntroduction === right.renderedIntroduction &&
+        prizesEqual(left.prizes, right.prizes)
+    );
+}
 
 export class ProfileHandler implements TaskHandler<SaveTask> {
     public taskType = 'save:profile';
@@ -62,15 +131,15 @@ export class ProfileHandler implements TaskHandler<SaveTask> {
                       ...(typeof p.rank === 'number' ? { rank: p.rank } : {})
                   }))
             : [];
+        const normalizedPrizes = normalizePrizes(prizes);
 
         const rawSlogan = (userData as { slogan?: unknown }).slogan;
         const slogan = typeof rawSlogan === 'string' && rawSlogan.length > 0 ? rawSlogan : null;
         const rawIntro = (userData as { introduction?: unknown }).introduction;
         const introduction = typeof rawIntro === 'string' && rawIntro.length > 0 ? rawIntro : null;
         const renderedIntroduction = introduction ? await renderMarkdown(introduction) : null;
-
-        await UserService.saveLuoguUserProfile({
-            uid: userData.uid,
+        const incomingSnapshot: ProfileSnapshot = {
+            id: userData.uid,
             name: userData.name,
             color: userData.color as UserColor,
             ccfLevel: userData.ccfLevel ?? 0,
@@ -78,11 +147,36 @@ export class ProfileHandler implements TaskHandler<SaveTask> {
             slogan,
             introduction,
             renderedIntroduction,
-            prizes
+            prizes: normalizedPrizes
+        };
+        const existingSnapshot = buildExistingProfileSnapshot(
+            await UserService.getUserByIdWithoutCache(uid)
+        );
+
+        if (profilesEqual(existingSnapshot, incomingSnapshot)) {
+            logger.info({ uid }, 'Profile content unchanged, skipping update');
+            return {
+                skipNextStep: true,
+                data: {
+                    text: ''
+                }
+            };
+        }
+
+        await UserService.saveLuoguUserProfile({
+            uid: incomingSnapshot.id,
+            name: incomingSnapshot.name,
+            color: incomingSnapshot.color,
+            ccfLevel: incomingSnapshot.ccfLevel,
+            xcpcLevel: incomingSnapshot.xcpcLevel,
+            slogan: incomingSnapshot.slogan,
+            introduction: incomingSnapshot.introduction,
+            renderedIntroduction: incomingSnapshot.renderedIntroduction,
+            prizes: incomingSnapshot.prizes
         });
 
         emitToRoom(`user_${uid}`, `user:${uid}:profile-updated`);
-        logger.info({ uid, prizeCount: prizes.length }, 'Profile saved');
+        logger.info({ uid, prizeCount: incomingSnapshot.prizes.length }, 'Profile saved');
 
         // The text payload mirrors the contract of save:article / save:paste: emit
         // whatever raw textual content was saved so downstream LLM steps (if any

@@ -164,7 +164,27 @@ The handler is registered in `packages/backend/src/workers/index.ts` alongside `
     - `introduction: string | null` from `response.data.user.introduction`; treat empty strings and non-strings as `null`
     - `prizes: UserPrize[]` from `response.data.prizes`. Each element of `response.data.prizes` is a one-level wrapper `{ prize: LuoguPrize }`; the handler MUST unwrap the inner `prize` object before storing. Despite the name, `response.data.user.prize` is unrelated and may be empty; do NOT read from it. Default to `[]` if `response.data.prizes` is absent or non-array.
 5. If `introduction !== null`, render it via the shared `renderMarkdown` pipeline (`packages/backend/src/lib/markdown.ts`) to produce `renderedIntroduction: string`. Otherwise `renderedIntroduction = null`. The handler does not memoize this; idempotent re-runs re-render.
-6. Build the payload for `UserService.saveLuoguUserProfile`:
+6. Build the incoming profile snapshot:
+    ```typescript
+    {
+        id: user.uid,
+        name: user.name,
+        color: user.color,
+        ccfLevel: user.ccfLevel ?? 0,
+        xcpcLevel: user.xcpcLevel ?? 0,
+        slogan,
+        introduction,
+        renderedIntroduction,
+        prizes
+    }
+    ```
+7. Load the existing user row for `uid` without using the cache.
+8. Compare the incoming profile snapshot with the existing user row snapshot using exactly the fields listed in step 6. The comparison MUST NOT include `profileFetchedAt`, `createdAt`, or `updatedAt`.
+9. If an existing row exists and all compared fields are identical:
+    - Do not call `UserService.saveLuoguUserProfile`.
+    - Do not emit `user:{uid}:profile-updated`.
+    - Return `{ skipNextStep: true, data: { text: '' } }`.
+10. If no existing row exists, or if any compared field differs, build the payload for `UserService.saveLuoguUserProfile`:
     ```typescript
     {
         uid: user.uid,
@@ -178,13 +198,15 @@ The handler is registered in `packages/backend/src/workers/index.ts` alongside `
         prizes
     }
     ```
-7. Call `UserService.saveLuoguUserProfile`.
-8. Emit Socket.IO event `user:{uid}:profile-updated` to room `user_{uid}` (no payload).
-9. Return `{ skipNextStep: false, data: { text: introduction ?? '' } }`. The handler emits the raw Markdown introduction so that downstream LLM tasks (none exist today; profile refresh is single-step) can consume it via `job.getChildrenValues()`. This mirrors the contract of `save:article` and `save:paste` handlers. Empty string indicates no introduction is set.
+11. Call `UserService.saveLuoguUserProfile`.
+12. Emit Socket.IO event `user:{uid}:profile-updated` to room `user_{uid}` with no required payload.
+13. Return `{ skipNextStep: false, data: { text: introduction ?? '' } }`. The handler emits the raw Markdown introduction so that downstream LLM tasks (none exist today; profile refresh is single-step) can consume it via `job.getChildrenValues()`. This mirrors the contract of `save:article` and `save:paste` handlers. Empty string indicates no introduction is set.
 
 ### 5.4 Idempotency
 
-Successive `save:profile` invocations for the same `uid` are idempotent: the row is upserted, `profile_fetched_at` is bumped, and the `slogan` / `introduction` / `rendered_introduction` / `prizes` fields are replaced wholesale. No history is preserved.
+Successive `save:profile` invocations for the same `uid` are idempotent. If any compared profile field differs, the row is upserted, `profile_fetched_at` is bumped, and the compared profile fields are replaced wholesale. No history is preserved.
+
+If the compared profile fields are identical before and after a successful `save:profile` fetch, the handler skips the database write and websocket update event. Updating `profile_fetched_at`, `created_at`, or `updated_at` alone MUST NOT require a write or emit an update event.
 
 ## 6. User Router
 
