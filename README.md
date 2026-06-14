@@ -43,11 +43,11 @@ Ensure you have the following installed:
 
 ## Infrastructure Setup
 
-Before building or running the application, you need to initialize the underlying infrastructure (e.g., databases). A `docker-compose.yml` is provided in the root directory to spin up these external services.
+Before building or running the application for local development, initialize the required external services. The root `docker-compose.yml` is a local infrastructure profile for development and single-host testing. It binds service ports to `127.0.0.1` so MariaDB, Redis, Chroma, and Meilisearch are reachable from the host only.
 
-> **Note:** This Compose file **only** manages external infrastructure. The Node.js application itself is run separately on the host.
+> **Note:** This Compose file **only** manages external infrastructure. The Node.js application itself is run separately on the host. Do not use this file as a production infrastructure plan without replacing all default credentials and keeping service ports off public interfaces.
 
-Start the infrastructure in the background:
+Start the local infrastructure in the background:
 
 ```bash
 docker compose up -d
@@ -128,11 +128,14 @@ This will:
 
 ### 1. Prepare Infrastructure
 
-On your production server, start the required external services:
+Provision production MariaDB, Redis, Chroma, and Meilisearch instances using a managed service or a production-specific Compose/Kubernetes configuration. Do not run the repository root `docker-compose.yml` as the production infrastructure plan.
 
-```bash
-docker compose up -d
-```
+Before starting the backend, ensure all of the following conditions are true:
+
+- MariaDB, Redis, Chroma, and Meilisearch accept connections only from the backend host or from a private network.
+- Public internet clients cannot connect directly to ports `3306`, `6379`, `8000`, or `7700`.
+- MariaDB, Redis, and Meilisearch use non-default secrets.
+- Chroma is protected by the network boundary used for backend-only infrastructure access.
 
 ### 2. Run the Backend Server
 
