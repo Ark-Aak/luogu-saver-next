@@ -220,7 +220,8 @@ Retrieve a stored user profile by Luogu UID.
     ccfLevel: number,
     xcpcLevel: number,
     slogan: string | null,
-    renderedIntroduction: string | null,  // HTML; the raw `introduction` is not returned to the client
+    introduction: string | null,  // Raw Markdown introduction
+    renderedIntroduction: string | null,  // HTML rendered from `introduction`
     prizes: UserPrize[] | null,
     profileFetchedAt: Date | null,
     profileStale: boolean,

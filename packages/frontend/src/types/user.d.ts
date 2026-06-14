@@ -24,6 +24,7 @@ export interface UserProfile {
     ccfLevel: number;
     xcpcLevel: number;
     slogan: string | null;
+    introduction: string | null;
     renderedIntroduction: string | null;
     prizes: UserPrize[] | null;
     profileFetchedAt: string | null;
