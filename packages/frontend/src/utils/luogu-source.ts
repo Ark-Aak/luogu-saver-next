@@ -7,7 +7,7 @@ export type LuoguSourceHost = 'luogu.com' | 'luogu.com.cn';
 export const DEFAULT_LUOGU_SOURCE_HOST: LuoguSourceHost = 'luogu.com';
 
 export const LUOGU_SOURCE_OPTIONS: Array<{ label: string; value: LuoguSourceHost }> = [
-    { label: 'Luogu.com', value: 'luogu.com' },
+    { label: 'luogu.com', value: 'luogu.com' },
     { label: 'luogu.com.cn', value: 'luogu.com.cn' }
 ];
 
