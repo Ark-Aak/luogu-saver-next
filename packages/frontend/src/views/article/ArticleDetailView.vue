@@ -52,6 +52,7 @@ import { formatDate } from '@/utils/render';
 import { useLocalStorage } from '@/composables/useLocalStorage.ts';
 import { isAuthenticated, startCpOAuthLogin } from '@/utils/auth.ts';
 import { useKnowledgeBase } from '@/utils/knowledge-base.ts';
+import { useLuoguSource } from '@/utils/luogu-source.ts';
 
 const route = useRoute();
 const router = useRouter();
@@ -70,6 +71,7 @@ const articleId = route.params.id as string;
 const article = ref<Article | null>(null);
 const loading = ref(true);
 const knowledgeBase = useKnowledgeBase();
+const { buildLuoguUrl } = useLuoguSource();
 
 const recommended = ref<PlazaArticle[]>([]);
 const recLoading = ref(false);
@@ -400,7 +402,7 @@ onMounted(() => {
                                         size="small"
                                         secondary
                                         tag="a"
-                                        :href="`https://www.luogu.com/article/${article.id}`"
+                                        :href="buildLuoguUrl(`/article/${article.id}`)"
                                         target="_blank"
                                     >
                                         <template #icon>

@@ -30,6 +30,7 @@ import LoadingSkeleton from '@/components/LoadingSkeleton.vue';
 import MarkdownViewer from '@/components/MarkdownViewer.vue';
 import UserLink from '@/components/UserLink.vue';
 import { formatDate } from '@/utils/render';
+import { useLuoguSource } from '@/utils/luogu-source.ts';
 
 const route = useRoute();
 const router = useRouter();
@@ -48,6 +49,7 @@ const pasteId = route.params.id as string;
 const paste = ref<Paste | null>(null);
 const loading = ref(true);
 const displayContent = ref('');
+const { buildLuoguUrl } = useLuoguSource();
 let stopTaskListener: (() => void) | null = null;
 
 const title = computed(() => `剪贴板 ${pasteId}`);
@@ -211,7 +213,7 @@ onMounted(() => {
                                         size="small"
                                         secondary
                                         tag="a"
-                                        :href="`https://www.luogu.com/paste/${paste.id}`"
+                                        :href="buildLuoguUrl(`/paste/${paste.id}`)"
                                         target="_blank"
                                     >
                                         <template #icon>
