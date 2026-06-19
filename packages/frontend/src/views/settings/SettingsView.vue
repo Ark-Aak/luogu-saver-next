@@ -1,6 +1,16 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { NAlert, NButton, NIcon, NSpace, NSpin, NSwitch, NTag, useMessage } from 'naive-ui';
+import {
+    NAlert,
+    NButton,
+    NIcon,
+    NSelect,
+    NSpace,
+    NSpin,
+    NSwitch,
+    NTag,
+    useMessage
+} from 'naive-ui';
 import {
     AnalyticsOutline,
     CloudOutline,
@@ -30,6 +40,7 @@ import { generateDeviceId } from '@/utils/device-id.ts';
 import { API_BASE_URL } from '@/utils/api-base-url.ts';
 import { formatDate } from '@/utils/render.ts';
 import { useKnowledgeBase } from '@/utils/knowledge-base.ts';
+import { useLuoguSource } from '@/utils/luogu-source.ts';
 
 const message = useMessage();
 const loading = ref(false);
@@ -38,6 +49,7 @@ const errorMessage = ref('');
 const trackingStorage = useLocalStorage(CONSENT_TRACKING_STORAGE_KEY, 'denied');
 const knowledgeBase = useKnowledgeBase();
 const kbArticles = computed(() => knowledgeBase.getArticles());
+const { selectedSource, sourceBaseUrl, sourceOptions } = useLuoguSource();
 
 const trackingEnabled = computed({
     get: () => trackingStorage.value === 'allowed',
@@ -306,7 +318,23 @@ onMounted(loadCurrentUser);
 
             <Card title="连接信息" :icon="CloudOutline" class="settings-card">
                 <n-space vertical size="large">
+                    <div class="setting-row">
+                        <div>
+                            <div class="setting-title">源站地址</div>
+                            <div class="setting-desc">原站按钮会打开当前选择的洛谷域名。</div>
+                        </div>
+                        <n-select
+                            v-model:value="selectedSource"
+                            :options="sourceOptions"
+                            class="source-select"
+                        />
+                    </div>
+
                     <div class="detail-list">
+                        <div class="detail-row">
+                            <span class="detail-label">源站地址</span>
+                            <span class="detail-value mono-text">{{ sourceBaseUrl }}</span>
+                        </div>
                         <div class="detail-row">
                             <span class="detail-label">API 地址</span>
                             <span class="detail-value mono-text">{{ API_BASE_URL }}</span>
@@ -450,6 +478,11 @@ onMounted(loadCurrentUser);
     overflow-wrap: anywhere;
 }
 
+.source-select {
+    width: 180px;
+    flex: 0 0 auto;
+}
+
 .status-list {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -483,6 +516,10 @@ onMounted(loadCurrentUser);
     .kb-item {
         align-items: flex-start;
         flex-direction: column;
+    }
+
+    .source-select {
+        width: 100%;
     }
 }
 

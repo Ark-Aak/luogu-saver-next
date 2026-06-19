@@ -63,7 +63,8 @@ jobs:
 
             - name: Install & Build Backend
               run: |
-                  npm install
+                  npm ci
+                  npm run build -w @luogu-saver-next/markdown-renderer
                   npm run build -w @luogu-saver-next/backend
 
             - name: Deploy Backend

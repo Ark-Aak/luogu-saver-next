@@ -8,7 +8,7 @@
     ],
     "scripts": {
         "dev": "concurrently -n \"FRONT,BACK\" -c \"green,blue\" \"npm run dev -w @luogu-saver-next/frontend\" \"npm run dev -w @luogu-saver-next/backend\"",
-        "build": "npm run build --workspaces",
+        "build": "npm run build -w @luogu-saver-next/markdown-renderer && npm run build --workspaces --if-present",
         "lint:prettier": "prettier --check .",
         "lint:eslint": "eslint .",
         "format:eslint": "eslint . --fix",

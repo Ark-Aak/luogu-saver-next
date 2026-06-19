@@ -14,10 +14,14 @@
 
 .md-epigraph {
     font-style: italic;
-    border-left: 3px solid #ddd;
-    padding-left: 12px;
-    margin: 12px 0;
+    max-width: 25%;
+    margin: 12px 0 12px auto;
     color: #444;
+}
+
+.md-epigraph .epigraph-body {
+    border-bottom: 1px solid #444;
+    padding-bottom: 8px;
 }
 
 .md-epigraph .epigraph-author {
@@ -25,6 +29,11 @@
     text-align: right;
     margin-top: 6px;
     font-weight: 600;
+    font-style: normal;
+}
+
+.md-epigraph .epigraph-author::before {
+    content: '——';
 }
 
 .md-block.info,
@@ -315,4 +324,98 @@ th {
     background: #f8fafc;
     font-weight: 600;
     color: #374151;
+}
+
+th.md-table-merge,
+td.md-table-merge {
+    color: transparent;
+}
+
+th.md-table-merged-cell,
+td.md-table-merged-cell {
+    vertical-align: middle;
+}
+
+th.merge-up,
+td.merge-up {
+    border-top-color: transparent !important;
+}
+
+th.merge-left,
+td.merge-left {
+    border-left-color: transparent !important;
+}
+
+th.merge-right,
+td.merge-right {
+    border-right-color: transparent !important;
+}
+
+th.merge-down,
+td.merge-down {
+    border-bottom-color: transparent !important;
+}
+
+.table-container:has(> table.cute-table) {
+    border: 0;
+    background: transparent;
+}
+
+table.cute-table {
+    width: auto !important;
+    min-width: min(100%, max-content);
+    margin: 0 auto;
+    border-collapse: collapse;
+    border-top: 4px solid #000;
+    border-bottom: 4px solid #000;
+}
+
+table.cute-table th,
+table.cute-table td {
+    border-color: #000 !important;
+}
+
+table.cute-table th:not(:last-child),
+table.cute-table td:not(:last-child) {
+    border-right: 1px solid #000 !important;
+}
+
+table.cute-table tbody tr:first-child td,
+table.cute-table thead + tbody tr:first-child td,
+table.cute-table thead tr:last-child th {
+    border-top: 2px solid #000 !important;
+}
+
+table.cute-table th:first-child,
+table.cute-table td:first-child {
+    border-left: 0 !important;
+}
+
+table.cute-table th:last-child,
+table.cute-table td:last-child {
+    border-right: 0 !important;
+}
+
+table.cute-table tr:last-child td {
+    border-bottom: 0 !important;
+}
+
+table.cute-table th.merge-up,
+table.cute-table td.merge-up {
+    border-top-color: transparent !important;
+}
+
+table.cute-table th.merge-left,
+table.cute-table td.merge-left {
+    border-left-color: transparent !important;
+}
+
+table.cute-table th.merge-right,
+table.cute-table td.merge-right {
+    border-right-color: transparent !important;
+}
+
+table.cute-table th.merge-down,
+table.cute-table td.merge-down {
+    border-bottom-color: transparent !important;
 }

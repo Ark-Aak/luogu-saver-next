@@ -52,6 +52,7 @@ import { formatDate } from '@/utils/render';
 import { useLocalStorage } from '@/composables/useLocalStorage.ts';
 import { isAuthenticated, startCpOAuthLogin } from '@/utils/auth.ts';
 import { useKnowledgeBase } from '@/utils/knowledge-base.ts';
+import { useLuoguSource } from '@/utils/luogu-source.ts';
 
 const route = useRoute();
 const router = useRouter();
@@ -70,6 +71,7 @@ const articleId = route.params.id as string;
 const article = ref<Article | null>(null);
 const loading = ref(true);
 const knowledgeBase = useKnowledgeBase();
+const { buildLuoguUrl } = useLuoguSource();
 
 const recommended = ref<PlazaArticle[]>([]);
 const recLoading = ref(false);
@@ -81,8 +83,50 @@ interface VersionItem {
     version: number;
     createdAt: string;
     title?: string;
+    content: string;
 }
 const versionHistory = ref<VersionItem[]>([]);
+const selectedVersion = ref<number | null>(null);
+
+const isViewingLatest = computed(() => {
+    return (
+        selectedVersion.value == null || selectedVersion.value === versionHistory.value[0]?.version
+    );
+});
+
+const versionContent = computed(() => {
+    if (isViewingLatest.value) return displayContent.value;
+    const ver = versionHistory.value.find(v => v.version === selectedVersion.value);
+    return ver?.content ?? displayContent.value;
+});
+
+const displayTitle = computed(() => {
+    if (isViewingLatest.value) return article.value?.title ?? '';
+    const ver = versionHistory.value.find(v => v.version === selectedVersion.value);
+    return ver?.title ?? article.value?.title ?? '';
+});
+
+const displayTime = computed(() => {
+    if (isViewingLatest.value) return article.value?.updatedAt ?? '';
+    const ver = versionHistory.value.find(v => v.version === selectedVersion.value);
+    return ver?.createdAt ?? article.value?.updatedAt ?? '';
+});
+
+const handleVersionClick = async (version: number) => {
+    selectedVersion.value = version;
+    const isLatest = version === versionHistory.value[0]?.version;
+    await router.replace({ query: isLatest ? {} : { version: String(version) } });
+    const ver = versionHistory.value.find(v => v.version === version);
+    const title = isLatest
+        ? (article.value?.title ?? '')
+        : (ver?.title ?? article.value?.title ?? '');
+    document.title = `${title} - 洛谷保存站`;
+};
+
+const handleRendered = (html: string) => {
+    const result = generateTocAndProcessHtml(html);
+    tocItems.value = result.toc;
+};
 
 const triggerRefresh = () => {
     handleRefresh(loadData);
@@ -121,7 +165,8 @@ const loadHistory = async () => {
                 .map(h => ({
                     version: h.version,
                     createdAt: h.createdAt,
-                    title: h.title
+                    title: h.title,
+                    content: h.content
                 }))
                 .sort((a, b) => b.version - a.version);
         }
@@ -192,6 +237,18 @@ const loadData = async () => {
         }
 
         await Promise.all([loadRelevant(), loadHistory()]);
+        const queryVersion = Number(route.query.version);
+        const latestVersion = versionHistory.value[0]?.version;
+        if (queryVersion && versionHistory.value.some(v => v.version === queryVersion)) {
+            selectedVersion.value = queryVersion;
+            const ver = versionHistory.value.find(v => v.version === queryVersion);
+            if (ver?.title) {
+                document.title = `${ver.title} - 洛谷保存站`;
+            }
+        } else if (latestVersion) {
+            selectedVersion.value = latestVersion;
+            // no query param for latest version
+        }
         maybeAutoUpdateArticle();
     } catch (err: any) {
         message.error(err.message || '加载失败');
@@ -209,9 +266,12 @@ const openArticle = (id: string) => {
 };
 
 const handleCopy = async () => {
-    if (article.value?.content) {
+    const content = isViewingLatest.value
+        ? article.value?.content
+        : versionHistory.value.find(v => v.version === selectedVersion.value)?.content;
+    if (content) {
         try {
-            await navigator.clipboard.writeText(article.value.content);
+            await navigator.clipboard.writeText(content);
             message.success('源码已复制到剪贴板');
         } catch {
             message.error('复制失败');
@@ -222,6 +282,8 @@ const handleCopy = async () => {
 const handleUpdate = async () => {
     if (!articleId) return;
     try {
+        selectedVersion.value = null;
+        router.replace({ query: {} });
         await submitSaveArticle();
         message.success('更新请求已提交');
     } catch (err: any) {
@@ -353,13 +415,18 @@ onMounted(() => {
                         </template>
 
                         <div v-if="article">
-                            <Card :title="article.title" :icon="NewspaperOutline">
+                            <Card :title="displayTitle" :icon="NewspaperOutline">
                                 <div class="meta-row">
                                     <n-tag :bordered="false" size="small">
                                         <template #icon>
                                             <NIcon :component="CalendarOutline" />
                                         </template>
-                                        更新于 {{ formatDate(article.updatedAt) }}
+                                        {{
+                                            !isViewingLatest
+                                                ? `版本 ${selectedVersion} 创建于`
+                                                : '更新于'
+                                        }}
+                                        {{ formatDate(displayTime) }}
                                     </n-tag>
                                 </div>
 
@@ -400,7 +467,7 @@ onMounted(() => {
                                         size="small"
                                         secondary
                                         tag="a"
-                                        :href="`https://www.luogu.com/article/${article.id}`"
+                                        :href="buildLuoguUrl(`/article/${article.id}`)"
                                         target="_blank"
                                     >
                                         <template #icon>
@@ -462,7 +529,11 @@ onMounted(() => {
                             </template>
 
                             <Card v-if="article">
-                                <MarkdownViewer :content="displayContent" :pre-rendered="true" />
+                                <MarkdownViewer
+                                    :content="versionContent"
+                                    :pre-rendered="isViewingLatest"
+                                    @rendered="handleRendered"
+                                />
                             </Card>
                         </LoadingSkeleton>
                     </div>
@@ -587,16 +658,16 @@ onMounted(() => {
                         <n-skeleton text style="width: 60%" />
                         <n-skeleton text style="width: 70%" />
                     </div>
-                    <n-timeline v-else>
+                    <n-timeline v-else class="version-timeline">
                         <n-timeline-item
                             v-for="ver in versionHistory"
                             :key="ver.version"
                             :title="`版本 ${ver.version}`"
                             :content="ver.title"
                             :time="formatDate(ver.createdAt)"
-                            :type="
-                                ver.version === versionHistory[0]?.version ? 'success' : 'default'
-                            "
+                            :type="selectedVersion === ver.version ? 'success' : 'default'"
+                            class="version-timeline-item"
+                            @click="handleVersionClick(ver.version)"
                         />
                     </n-timeline>
                 </SidebarWidget>
@@ -895,6 +966,10 @@ onMounted(() => {
         transform: translateY(0);
         opacity: 1;
     }
+}
+
+.version-timeline-item {
+    cursor: pointer;
 }
 
 /* noinspection CssUnusedSymbol */

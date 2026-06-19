@@ -11,6 +11,10 @@ const props = defineProps<{
     preRendered?: boolean;
 }>();
 
+const emit = defineEmits<{
+    rendered: [html: string];
+}>();
+
 const contentRef = ref<HTMLElement | null>(null);
 const renderedContent = ref('');
 
@@ -32,7 +36,7 @@ const CHECK_SVG = `
   <polyline points="20 6 9 17 4 12"></polyline>
 </svg>
 `;
-    
+
 const renderMath = () => {
     if (contentRef.value) {
         renderMathInElement(contentRef.value, {
@@ -98,7 +102,7 @@ const addCopyButtons = () => {
         button.innerHTML = COPY_SVG;
         button.title = '复制代码';
 
-        button.addEventListener('click', async (e) => {
+        button.addEventListener('click', async e => {
             e.stopPropagation();
             // 获取代码文本：优先取 code 内的文本，否则取 pre 内的文本
             const codeElement = pre.querySelector('code');
@@ -121,7 +125,7 @@ const addCopyButtons = () => {
         pre.appendChild(button);
     });
 };
-    
+
 const processContent = async () => {
     if (!props.content) {
         renderedContent.value = '';
@@ -138,7 +142,8 @@ const processContent = async () => {
     await nextTick();
     renderMath();
     initMarkdownBlocks();
-    addCopyButtons(); // 新增：添加复制按钮
+    addCopyButtons();
+    emit('rendered', renderedContent.value);
 };
 
 watch(() => [props.content, props.preRendered], processContent);
@@ -172,7 +177,9 @@ onMounted(processContent);
     border-radius: 6px;
     cursor: pointer;
     opacity: 0;
-    transition: opacity 0.2s ease, background 0.2s ease;
+    transition:
+        opacity 0.2s ease,
+        background 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
