@@ -140,7 +140,9 @@ const processContent = async () => {
     }
 
     await nextTick();
-    renderMath();
+    if (!props.preRendered) {
+        renderMath();
+    }
     initMarkdownBlocks();
     addCopyButtons();
     emit('rendered', renderedContent.value);

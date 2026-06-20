@@ -231,9 +231,7 @@ const loadData = async () => {
         document.title = `${article.value.title} - 洛谷保存站`;
 
         if (article.value?.renderedContent) {
-            const result = generateTocAndProcessHtml(article.value.renderedContent);
-            displayContent.value = result.html;
-            tocItems.value = result.toc;
+            displayContent.value = article.value.renderedContent;
         }
 
         await Promise.all([loadRelevant(), loadHistory()]);
