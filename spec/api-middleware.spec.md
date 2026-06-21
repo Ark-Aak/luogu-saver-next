@@ -8,11 +8,9 @@ The API middleware subsystem applies HTTP request preprocessing and postprocessi
 
 For every HTTP request, after authorization middleware has completed, the system SHALL write exactly one info-level log entry.
 
-The client IP address SHALL be resolved by this ordered rule set:
+The client IP address SHALL be Koa `ctx.ip`.
 
-1. If request header `cf-connecting-ip` exists and its first value is a non-empty string, use that value.
-2. Else if request header `x-forwarded-for` exists and its first comma-separated item is a non-empty string, use that first item after trimming whitespace.
-3. Else use Koa `ctx.ip`.
+The client IP resolution rule SHALL NOT read request header `cf-connecting-ip`, request header `x-forwarded-for`, or any other forwarding header.
 
 The access log entry SHALL include:
 
