@@ -15,6 +15,7 @@ export default defineConfig(({ mode }) => {
         base: env.VITE_CDN_URL || '/',
 
         server: {
+            allowedHosts: true,
             proxy: {
                 '/api': {
                     target: 'http://localhost:3000',

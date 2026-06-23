@@ -555,6 +555,14 @@ const themeOverrides = computed<GlobalThemeOverrides>(() => {
             indicatorBoxShadow: uiThemeVars.value.elevatedShadow,
             indicatorBorderRadius: uiThemeVars.value.cardRadius
         },
+        Message: {
+            color: uiThemeVars.value.cardColor,
+            colorInfo: uiThemeVars.value.cardColor,
+            colorSuccess: uiThemeVars.value.cardColor,
+            colorError: uiThemeVars.value.cardColor,
+            colorWarning: uiThemeVars.value.cardColor,
+            colorLoading: uiThemeVars.value.cardColor
+        },
         Space: {
             gapSmall: '8px 8px',
             gapMedium: '12px 12px',
