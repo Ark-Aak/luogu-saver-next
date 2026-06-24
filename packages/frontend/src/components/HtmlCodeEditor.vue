@@ -48,10 +48,10 @@ const buildState = (value: string) =>
             EditorView.theme({
                 '&': {
                     minHeight: '320px',
-                    borderRadius: '6px',
-                    border: '1px solid rgba(15, 23, 42, 0.14)',
-                    backgroundColor: '#ffffff',
-                    color: '#1f2937',
+                    borderRadius: 'var(--ui-card-radius)',
+                    border: '1px solid var(--ui-border-color)',
+                    backgroundColor: 'var(--ui-card-color)',
+                    color: 'var(--ui-text-color)',
                     fontSize: '14px'
                 },
                 '.cm-scroller': {
@@ -62,15 +62,15 @@ const buildState = (value: string) =>
                     padding: '12px 0'
                 },
                 '.cm-gutters': {
-                    backgroundColor: '#f8fafc',
-                    color: '#64748b',
-                    borderRight: '1px solid rgba(148, 163, 184, 0.22)'
+                    backgroundColor: 'var(--ui-panel-color)',
+                    color: 'var(--ui-muted-text-color)',
+                    borderRight: '1px solid var(--ui-border-color)'
                 },
                 '.cm-activeLine': {
-                    backgroundColor: 'rgba(14, 165, 233, 0.08)'
+                    backgroundColor: 'var(--ui-panel-color)'
                 },
                 '.cm-activeLineGutter': {
-                    backgroundColor: 'rgba(14, 165, 233, 0.1)'
+                    backgroundColor: 'var(--ui-panel-color)'
                 }
             })
         ]
@@ -111,6 +111,6 @@ onBeforeUnmount(() => {
 <style scoped>
 .html-code-editor {
     overflow: hidden;
-    border-radius: 6px;
+    border-radius: var(--ui-card-radius);
 }
 </style>

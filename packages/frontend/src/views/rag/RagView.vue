@@ -117,7 +117,8 @@ async function askRag() {
 }
 
 function openArticle(id: string) {
-    router.push(`/article/${id}`);
+    const { href } = router.resolve(`/article/${id}`);
+    window.open(href, '_blank');
 }
 
 function createProgressSteps(): ProgressStep[] {
@@ -363,29 +364,29 @@ function getProgressDetail(taskName: string, data?: any) {
     flex-direction: column;
     gap: 8px;
     padding: 10px 12px;
-    border: 1px solid rgba(47, 109, 181, 0.1);
-    border-radius: 6px;
-    background: rgba(248, 251, 255, 0.78);
+    border: 1px solid var(--ui-border-color);
+    border-radius: var(--ui-card-radius);
+    background: var(--ui-panel-color);
 }
 
 .hint {
-    color: #64748b;
+    color: var(--ui-muted-text-color);
     font-size: 13px;
 }
 
 .progress-panel {
     margin-bottom: 14px;
     padding: 12px;
-    border: 1px solid rgba(47, 109, 181, 0.12);
-    border-radius: 6px;
-    background: linear-gradient(180deg, rgba(248, 251, 255, 0.9), rgba(241, 247, 255, 0.72));
+    border: 1px solid var(--ui-border-color);
+    border-radius: var(--ui-card-radius);
+    background: linear-gradient(180deg, var(--ui-panel-color), var(--ui-body-gradient-end));
 }
 
 .progress-head {
     display: flex;
     align-items: center;
     gap: 12px;
-    color: #10233f;
+    color: var(--ui-card-title-color);
     font-weight: 600;
 }
 
@@ -405,9 +406,9 @@ function getProgressDetail(taskName: string, data?: any) {
     gap: 10px;
     min-width: 0;
     padding: 10px;
-    border: 1px solid rgba(148, 163, 184, 0.2);
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid var(--ui-border-color);
+    border-radius: var(--ui-card-radius);
+    background: var(--ui-translucent-card-color);
 }
 
 .step-dot {
@@ -415,21 +416,21 @@ function getProgressDetail(taskName: string, data?: any) {
     height: 10px;
     flex: 0 0 auto;
     margin-top: 5px;
-    border-radius: 999px;
-    background: #cbd5e1;
+    border-radius: var(--ui-pill-radius);
+    background: var(--ui-muted-accent-color);
 }
 
 .progress-step.is-running .step-dot {
-    background: #2f6db5;
-    box-shadow: 0 0 0 4px rgba(47, 109, 181, 0.12);
+    background: var(--ui-primary-color);
+    box-shadow: var(--ui-focus-ring-shadow);
 }
 
 .progress-step.is-completed .step-dot {
-    background: #18a058;
+    background: var(--ui-success-color);
 }
 
 .progress-step.is-failed .step-dot {
-    background: #d03050;
+    background: var(--ui-error-color);
 }
 
 .step-main {
@@ -437,13 +438,13 @@ function getProgressDetail(taskName: string, data?: any) {
 }
 
 .step-label {
-    color: #10233f;
+    color: var(--ui-card-title-color);
     font-weight: 600;
 }
 
 .step-detail {
     margin-top: 2px;
-    color: #64748b;
+    color: var(--ui-muted-text-color);
     font-size: 12px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -458,19 +459,19 @@ function getProgressDetail(taskName: string, data?: any) {
 
 .source-item {
     padding: 12px;
-    border-radius: 6px;
-    border: 1px solid rgba(47, 109, 181, 0.1);
+    border-radius: var(--ui-card-radius);
+    border: 1px solid var(--ui-border-color);
     cursor: pointer;
     transition: border-color 0.2s ease;
 }
 
 .source-item:hover {
-    border-color: rgba(47, 109, 181, 0.25);
+    border-color: var(--ui-primary-color-suppl);
 }
 
 .source-title {
     margin-bottom: 8px;
-    color: #10233f;
+    color: var(--ui-card-title-color);
     font-weight: 600;
 }
 

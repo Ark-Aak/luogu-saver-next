@@ -155,10 +155,10 @@ onMounted(processContent);
     top: 8px;
     right: 8px;
     padding: 4px 6px;
-    background: rgba(255, 255, 255, 0.7);
+    background: var(--ui-copy-button-background-color);
     backdrop-filter: blur(4px);
     border: none;
-    border-radius: 6px;
+    border-radius: var(--ui-card-radius);
     cursor: pointer;
     opacity: 0;
     transition:
@@ -167,8 +167,8 @@ onMounted(processContent);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #333;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    color: var(--ui-copy-button-text-color);
+    box-shadow: var(--ui-elevated-shadow);
     z-index: 2;
 }
 
@@ -177,8 +177,8 @@ onMounted(processContent);
 }
 
 .md-body :deep(.copy-code-btn:hover) {
-    background: rgba(255, 255, 255, 0.9);
-    color: #1677ff;
+    background: var(--ui-copy-button-background-color);
+    color: var(--ui-primary-color);
 }
 
 .md-body :deep(.copy-code-btn svg) {

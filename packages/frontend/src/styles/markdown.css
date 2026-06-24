@@ -1,5 +1,5 @@
 .code-line.highlight {
-    background: rgba(255, 229, 100, 0.25);
+    background: var(--ui-panel-color);
 }
 
 .md-align-center {
@@ -16,11 +16,11 @@
     font-style: italic;
     max-width: 25%;
     margin: 12px 0 12px auto;
-    color: #444;
+    color: var(--ui-secondary-text-color);
 }
 
 .md-epigraph .epigraph-body {
-    border-bottom: 1px solid #444;
+    border-bottom: 1px solid var(--ui-secondary-text-color);
     padding-bottom: 8px;
 }
 
@@ -40,39 +40,36 @@
 .md-block.warning,
 .md-block.success,
 .md-block.error {
-    border: 0 solid rgba(228, 228, 228, 0);
-    /*border-top-color: #e4e4e4;*/
-    /*box-shadow: 2px 2px 4px #e4e4e4;*/
+    border: 0 solid transparent;
     border-left-width: 6px;
     padding: 10px;
-    /*border-radius: 6px;*/
     margin: 12px 0;
 }
 
 .md-block.info {
-    border-left-color: #7da7ff;
+    border-left-color: var(--ui-info-color);
 }
 .md-block.warning {
-    border-left-color: #ffb454;
+    border-left-color: var(--ui-warning-color);
 }
 .md-block.success {
-    border-left-color: #4dd27a;
+    border-left-color: var(--ui-success-color);
 }
 .md-block.error {
-    border-left-color: #ff5757;
+    border-left-color: var(--ui-error-color);
 }
 
 .md-block.info > .md-block-title {
-    color: #7da7ff;
+    color: var(--ui-info-color);
 }
 .md-block.warning > .md-block-title {
-    color: #ffb454;
+    color: var(--ui-warning-color);
 }
 .md-block.success > .md-block-title {
-    color: #4dd27a;
+    color: var(--ui-success-color);
 }
 .md-block.error > .md-block-title {
-    color: #ff5757;
+    color: var(--ui-error-color);
 }
 
 .md-block > .md-block-title {
@@ -169,7 +166,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #111827;
+    color: var(--ui-text-color);
 }
 
 .heading-anchor {
@@ -179,7 +176,7 @@
     justify-content: center;
     width: 20px;
     height: 20px;
-    color: #1677ff;
+    color: var(--ui-primary-color);
     text-decoration: none;
     transition:
         color 0.2s ease,
@@ -187,7 +184,7 @@
 }
 
 .heading-anchor:hover {
-    color: #0958d9 !important;
+    color: var(--ui-primary-color-pressed) !important;
     transform: translateY(-1px);
 }
 
@@ -200,8 +197,8 @@
 .md-body blockquote {
     margin: 12px 0;
     padding: 2px 0 2px 14px;
-    border-left: 4px solid #cbd5e1;
-    color: #475569;
+    border-left: 4px solid var(--ui-muted-accent-color);
+    color: var(--ui-secondary-text-color);
 }
 
 .md-body blockquote > :first-child {
@@ -219,17 +216,16 @@
 
 pre {
     padding: 10px;
-    border-radius: 8px;
+    border-radius: var(--ui-card-radius);
     overflow-x: auto;
     counter-reset: line-number;
-    background-color: #f8fafc;
 }
 
 .shiki {
     padding: 15px;
-    border-radius: 8px;
-    background-color: #f8fafc !important;
+    border-radius: var(--ui-card-radius);
     position: relative;
+    filter: var(--ui-code-render-filter);
 }
 
 .shiki span.line::before {
@@ -242,19 +238,26 @@ pre {
     text-align: right;
 }
 
+/*为了支持暗色模式，来自 https://shiki.zhcndoc.com/guide/dual-themes */
+
+html.dark .shiki,
+html.dark .shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+}
+
 .table-container {
     width: 100%;
     overflow-x: auto;
     margin: 2rem 0;
-    border-radius: 10px;
-    border: 1px solid #e2e8f0;
-    background: white;
+    border-radius: 10px; /*刻意保留的硬编码，见 PR #39*/
+    border: 1px solid var(--ui-border-color);
+    background: var(--ui-card-color);
 }
 
 pre {
     padding: 16px;
-    border-radius: 6px;
-    background-color: #f6f8fa !important;
+    border-radius: var(--ui-card-radius);
     overflow: auto;
 }
 
@@ -274,33 +277,33 @@ pre {
 
 .empty-tip {
     text-align: center;
-    color: #999;
+    color: var(--ui-muted-text-color);
     padding: 40px;
 }
 
 a {
-    color: #337ab7;
+    color: var(--ui-primary-color);
     transition: color 0.2s;
     text-decoration: none;
 }
 a:hover {
-    color: #286090 !important;
+    color: var(--ui-primary-color-pressed) !important;
 }
 
 .table-container::-webkit-scrollbar {
     height: 8px;
 }
 .table-container::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 4px;
+    background: var(--ui-scrollbar-track-color);
+    border-radius: 4px; /*刻意保留的硬编码，见 PR #39*/
 }
 .table-container::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
+    background: var(--ui-scrollbar-thumb-color);
+    border-radius: 4px; /*刻意保留的硬编码，见 PR #39*/
     transition: background 0.3s ease;
 }
 .table-container::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: var(--ui-muted-accent-color);
 }
 
 table {
@@ -315,15 +318,15 @@ td {
 }
 th:not(:last-child),
 td:not(:last-child) {
-    border-right: 1px solid #e2e8f0 !important;
+    border-right: 1px solid var(--ui-border-color) !important;
 }
 td {
-    border-top: 1px solid #e2e8f0 !important;
+    border-top: 1px solid var(--ui-border-color) !important;
 }
 th {
-    background: #f8fafc;
+    background: var(--ui-table-header-color);
     font-weight: 600;
-    color: #374151;
+    color: var(--ui-secondary-text-color);
 }
 
 th.md-table-merge,
@@ -366,24 +369,24 @@ table.cute-table {
     min-width: min(100%, max-content);
     margin: 0 auto;
     border-collapse: collapse;
-    border-top: 4px solid #000;
-    border-bottom: 4px solid #000;
+    border-top: 4px solid var(--ui-text-color);
+    border-bottom: 4px solid var(--ui-text-color);
 }
 
 table.cute-table th,
 table.cute-table td {
-    border-color: #000 !important;
+    border-color: var(--ui-text-color) !important;
 }
 
 table.cute-table th:not(:last-child),
 table.cute-table td:not(:last-child) {
-    border-right: 1px solid #000 !important;
+    border-right: 1px solid var(--ui-text-color) !important;
 }
 
 table.cute-table tbody tr:first-child td,
 table.cute-table thead + tbody tr:first-child td,
 table.cute-table thead tr:last-child th {
-    border-top: 2px solid #000 !important;
+    border-top: 2px solid var(--ui-text-color) !important;
 }
 
 table.cute-table th:first-child,

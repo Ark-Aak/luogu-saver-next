@@ -101,6 +101,6 @@ async function handleStart() {
 }
 
 .muted {
-    color: #64748b;
+    color: var(--ui-muted-text-color);
 }
 </style>

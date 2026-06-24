@@ -518,7 +518,7 @@ onMounted(() => {
                                             <n-skeleton text :repeat="2" />
                                             <n-skeleton text style="width: 60%" />
                                         </n-space>
-                                        <n-skeleton height="120px" style="border-radius: 4px" />
+                                        <n-skeleton height="120px" style="border-radius: var(--ui-card-radius)" />
                                         <n-space vertical>
                                             <n-skeleton text :repeat="4" />
                                         </n-space>
@@ -565,9 +565,9 @@ onMounted(() => {
                                                 <n-tag
                                                     v-if="it.reason === 'title'"
                                                     :color="{
-                                                        textColor: '#ff6200',
-                                                        color: 'rgba(255, 98, 0, 0.15)',
-                                                        borderColor: '#ff6200'
+                                                        textColor: 'var(--ui-orange-color)',
+                                                        color: 'color-mix(in srgb, var(--ui-orange-color) 15%, transparent)',
+                                                        borderColor: 'var(--ui-orange-color)'
                                                     }"
                                                     size="small"
                                                 >
@@ -576,9 +576,9 @@ onMounted(() => {
                                                 <n-tag
                                                     v-else-if="it.reason === 'vector'"
                                                     :color="{
-                                                        textColor: '#00aaff',
-                                                        color: 'rgba(0, 170, 255, 0.15)',
-                                                        borderColor: '#00aaff'
+                                                        textColor: 'var(--ui-cyan-color)',
+                                                        color: 'color-mix(in srgb, var(--ui-cyan-color) 15%, transparent)',
+                                                        borderColor: 'var(--ui-cyan-color)'
                                                     }"
                                                     size="small"
                                                 >
@@ -774,7 +774,7 @@ onMounted(() => {
     min-width: 0;
     margin-bottom: 0;
     padding: 0;
-    border-radius: 6px;
+    border-radius: var(--ui-card-radius);
     overflow: hidden;
 }
 
@@ -785,7 +785,7 @@ onMounted(() => {
 }
 
 .toc-card :deep(.n-anchor-link--active) {
-    background-color: rgba(22, 119, 255, 0.08) !important;
+    background-color: var(--ui-panel-color) !important;
     box-shadow: none;
 }
 
@@ -799,8 +799,8 @@ onMounted(() => {
     max-width: 100%;
     min-width: 0;
     padding: 5px 10px;
-    border-radius: 6px;
-    color: #111827;
+    border-radius: var(--ui-card-radius);
+    color: var(--ui-text-color);
     white-space: normal;
     line-height: 1.35;
     overflow: hidden;
@@ -811,11 +811,11 @@ onMounted(() => {
 
 .toc-card :deep(.n-anchor-link__title:hover),
 .toc-card :deep(.n-anchor-link__title:focus) {
-    color: #111827 !important;
+    color: var(--ui-text-color) !important;
 }
 
 .toc-card :deep(.n-anchor-link--active > .n-anchor-link__title) {
-    color: #111827;
+    color: var(--ui-text-color);
     font-weight: 600;
 }
 
@@ -829,12 +829,12 @@ onMounted(() => {
     flex: 0 0 auto;
     width: 6px;
     height: 6px;
-    border-radius: 999px;
-    background: #94a3b8;
+    border-radius: var(--ui-pill-radius);
+    background: var(--ui-muted-accent-color);
 }
 
 .toc-card :deep(.n-anchor-link--active > .n-anchor-link__title::before) {
-    background: #1677ff;
+    background: var(--ui-primary-color);
 }
 
 @media (max-width: 1200px) {
@@ -868,10 +868,10 @@ onMounted(() => {
 }
 
 .info-item {
-    background: linear-gradient(180deg, #f8fbff, #f3f8ff);
+    background: linear-gradient(180deg, var(--ui-panel-color), var(--ui-body-gradient-end));
     padding: 10px 12px;
-    border-radius: 6px;
-    border: 1px solid rgba(22, 119, 255, 0.08);
+    border-radius: var(--ui-card-radius);
+    border: 1px solid var(--ui-border-color);
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -885,7 +885,7 @@ onMounted(() => {
 
 .label {
     font-size: 12px;
-    color: #999;
+    color: var(--ui-muted-text-color);
 }
 
 .category-link {
@@ -907,14 +907,14 @@ onMounted(() => {
     cursor: pointer;
 }
 .article-summary {
-    color: #475569;
+    color: var(--ui-secondary-text-color);
     font-size: 14px;
     line-height: 1.6;
     margin-bottom: 8px;
 }
 
 .empty-recommendation {
-    color: #64748b;
+    color: var(--ui-muted-text-color);
     font-size: 14px;
 }
 
@@ -952,7 +952,7 @@ onMounted(() => {
 }
 
 .shadow-button {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--ui-elevated-shadow);
 }
 
 @keyframes slide-in {

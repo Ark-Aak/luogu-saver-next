@@ -50,6 +50,6 @@ const effectiveIconColor = computed(() => {
 
 :deep(.n-statistic__label) {
     font-size: 1.1rem;
-    color: black;
+    color: var(--ui-text-color);
 }
 </style>

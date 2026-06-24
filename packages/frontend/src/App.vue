@@ -3,7 +3,7 @@
     <n-config-provider :theme-overrides="themeOverrides">
         <n-message-provider>
             <n-space vertical>
-                <n-layout has-sider>
+                <n-layout has-sider :style="themeCssVars">
                     <n-layout-sider
                         class="app-sider"
                         bordered
@@ -105,6 +105,12 @@
                                                     <Icon><Code /></Icon>
                                                     <span>
                                                         开发者：Federico2903 & Murasame & quanac-lcx
+                                                        &
+                                                        <a
+                                                            href="https://github.com/Ark-Aak/luogu-saver-next/graphs/contributors"
+                                                            target="_blank"
+                                                            >其他贡献者</a
+                                                        >
                                                     </span>
                                                 </p>
                                                 <p class="footer-element right-aligned">
@@ -384,7 +390,10 @@ const menuOptions = computed<MenuOption[]>(() => [
 import { THEME_STORAGE_KEY } from '@/utils/constants.ts';
 import { useLocalStorage } from '@/composables/useLocalStorage.ts';
 const themeStorage = useLocalStorage(THEME_STORAGE_KEY, defaultTheme);
-const uiThemeVars = ref<UiThemeVars>(themeStorage.value as UiThemeVars);
+const uiThemeVars = ref<UiThemeVars>({
+    ...defaultTheme,
+    ...(themeStorage.value as Partial<UiThemeVars>)
+});
 
 provide(uiThemeKey, uiThemeVars);
 
@@ -416,22 +425,255 @@ const themeOverrides = computed<GlobalThemeOverrides>(() => {
             primaryColorHover: uiThemeVars.value.primaryColorHover,
             primaryColorPressed: uiThemeVars.value.primaryColorPressed,
             primaryColorSuppl: uiThemeVars.value.primaryColorSuppl,
-            cardColor: uiThemeVars.value.cardColor
+            cardColor: uiThemeVars.value.cardColor,
+            textColor1: uiThemeVars.value.textColor,
+            textColor2: uiThemeVars.value.secondaryTextColor,
+            textColor3: uiThemeVars.value.mutedTextColor,
+            placeholderColor: uiThemeVars.value.controlPlaceholderColor,
+            dividerColor: uiThemeVars.value.borderColor,
+            borderColor: uiThemeVars.value.controlBorderColor
         },
         Layout: {
             color: uiThemeVars.value.bodyColor,
-            siderColor: 'rgba(255, 255, 255, 0.78)'
+            siderColor: uiThemeVars.value.translucentCardColor
         },
         Menu: {
             itemTextColorActive: uiThemeVars.value.primaryColor,
             itemIconColorActive: uiThemeVars.value.primaryColor,
-            itemColorActive: 'rgba(22, 119, 255, 0.1)',
-            itemColorActiveHover: 'rgba(22, 119, 255, 0.14)',
-            itemColorHover: 'rgba(22, 119, 255, 0.08)',
+            itemColorActive: uiThemeVars.value.panelColor,
+            itemColorActiveHover: uiThemeVars.value.panelColor,
+            itemColorHover: uiThemeVars.value.panelColor,
             borderRadius: uiThemeVars.value.cardRadius
+        },
+        Input: {
+            color: uiThemeVars.value.controlColor,
+            colorFocus: uiThemeVars.value.controlColorFocus,
+            colorDisabled: uiThemeVars.value.controlColorDisabled,
+            textColor: uiThemeVars.value.controlTextColor,
+            textColorDisabled: uiThemeVars.value.mutedTextColor,
+            placeholderColor: uiThemeVars.value.controlPlaceholderColor,
+            placeholderColorDisabled: uiThemeVars.value.mutedTextColor,
+            border: `1px solid ${uiThemeVars.value.controlBorderColor}`,
+            borderHover: `1px solid ${uiThemeVars.value.controlBorderHoverColor}`,
+            borderFocus: `1px solid ${uiThemeVars.value.controlBorderFocusColor}`,
+            borderDisabled: `1px solid ${uiThemeVars.value.borderColor}`,
+            boxShadowFocus: uiThemeVars.value.focusRingShadow,
+            caretColor: uiThemeVars.value.primaryColor,
+            iconColor: uiThemeVars.value.iconColor,
+            iconColorHover: uiThemeVars.value.primaryColorHover,
+            iconColorPressed: uiThemeVars.value.primaryColorPressed,
+            suffixTextColor: uiThemeVars.value.secondaryTextColor
+        },
+        InternalSelection: {
+            color: uiThemeVars.value.controlColor,
+            colorActive: uiThemeVars.value.controlColorFocus,
+            colorDisabled: uiThemeVars.value.controlColorDisabled,
+            textColor: uiThemeVars.value.controlTextColor,
+            textColorDisabled: uiThemeVars.value.mutedTextColor,
+            placeholderColor: uiThemeVars.value.controlPlaceholderColor,
+            placeholderColorDisabled: uiThemeVars.value.mutedTextColor,
+            border: `1px solid ${uiThemeVars.value.controlBorderColor}`,
+            borderHover: `1px solid ${uiThemeVars.value.controlBorderHoverColor}`,
+            borderActive: `1px solid ${uiThemeVars.value.controlBorderFocusColor}`,
+            borderFocus: `1px solid ${uiThemeVars.value.controlBorderFocusColor}`,
+            boxShadowHover: 'none',
+            boxShadowActive: uiThemeVars.value.focusRingShadow,
+            boxShadowFocus: uiThemeVars.value.focusRingShadow,
+            caretColor: uiThemeVars.value.primaryColor,
+            arrowColor: uiThemeVars.value.iconColor,
+            clearColor: uiThemeVars.value.mutedTextColor,
+            clearColorHover: uiThemeVars.value.secondaryTextColor,
+            clearColorPressed: uiThemeVars.value.primaryColorPressed,
+            peers: {
+                Popover: {
+                    color: uiThemeVars.value.cardColor,
+                    textColor: uiThemeVars.value.textColor,
+                    dividerColor: uiThemeVars.value.borderColor,
+                    boxShadow: uiThemeVars.value.elevatedShadow
+                }
+            }
+        },
+        Select: {
+            menuBoxShadow: uiThemeVars.value.elevatedShadow,
+            peers: {
+                InternalSelection: {
+                    color: uiThemeVars.value.controlColor,
+                    colorActive: uiThemeVars.value.controlColorFocus,
+                    textColor: uiThemeVars.value.controlTextColor,
+                    placeholderColor: uiThemeVars.value.controlPlaceholderColor,
+                    border: `1px solid ${uiThemeVars.value.controlBorderColor}`,
+                    borderHover: `1px solid ${uiThemeVars.value.controlBorderHoverColor}`,
+                    borderActive: `1px solid ${uiThemeVars.value.controlBorderFocusColor}`,
+                    borderFocus: `1px solid ${uiThemeVars.value.controlBorderFocusColor}`,
+                    boxShadowActive: uiThemeVars.value.focusRingShadow,
+                    boxShadowFocus: uiThemeVars.value.focusRingShadow,
+                    arrowColor: uiThemeVars.value.iconColor
+                },
+                InternalSelectMenu: {
+                    color: uiThemeVars.value.cardColor,
+                    optionTextColor: uiThemeVars.value.textColor,
+                    optionTextColorActive: uiThemeVars.value.primaryColor,
+                    optionColorPending: uiThemeVars.value.panelColor,
+                    optionColorActive: uiThemeVars.value.panelColor,
+                    optionColorActivePending: uiThemeVars.value.panelColor,
+                    actionDividerColor: uiThemeVars.value.borderColor
+                }
+            }
+        },
+        Tag: {
+            border: `1px solid ${uiThemeVars.value.controlBorderColor}`,
+            color: uiThemeVars.value.controlTagColor,
+            colorBordered: uiThemeVars.value.controlTagColor,
+            textColor: uiThemeVars.value.controlTagTextColor,
+            closeIconColor: uiThemeVars.value.iconColor,
+            closeIconColorHover: uiThemeVars.value.primaryColorHover,
+            closeIconColorPressed: uiThemeVars.value.primaryColorPressed,
+            borderPrimary: `1px solid ${uiThemeVars.value.primaryColor}`,
+            textColorPrimary: uiThemeVars.value.primaryColor,
+            colorPrimary: uiThemeVars.value.controlTagColor,
+            borderInfo: `1px solid ${uiThemeVars.value.infoColor}`,
+            textColorInfo: uiThemeVars.value.infoColor,
+            colorInfo: uiThemeVars.value.controlTagColor,
+            borderSuccess: `1px solid ${uiThemeVars.value.successColor}`,
+            textColorSuccess: uiThemeVars.value.successColor,
+            colorSuccess: uiThemeVars.value.controlTagColor,
+            borderWarning: `1px solid ${uiThemeVars.value.warningColor}`,
+            textColorWarning: uiThemeVars.value.warningColor,
+            colorWarning: uiThemeVars.value.controlTagColor,
+            borderError: `1px solid ${uiThemeVars.value.errorColor}`,
+            textColorError: uiThemeVars.value.errorColor,
+            colorError: uiThemeVars.value.controlTagColor
+        },
+        Slider: {
+            railColor: uiThemeVars.value.sliderRailColor,
+            railColorHover: uiThemeVars.value.sliderRailHoverColor,
+            fillColor: uiThemeVars.value.sliderFillColor,
+            fillColorHover: uiThemeVars.value.sliderFillHoverColor,
+            handleColor: uiThemeVars.value.sliderHandleColor,
+            handleBoxShadow: `0 0 0 1px ${uiThemeVars.value.controlBorderColor}`,
+            handleBoxShadowHover: `0 0 0 1px ${uiThemeVars.value.controlBorderHoverColor}`,
+            handleBoxShadowActive: `0 0 0 1px ${uiThemeVars.value.controlBorderFocusColor}`,
+            handleBoxShadowFocus: uiThemeVars.value.focusRingShadow,
+            dotColor: uiThemeVars.value.controlColor,
+            dotColorModal: uiThemeVars.value.controlColor,
+            dotColorPopover: uiThemeVars.value.controlColor,
+            dotBorder: `1px solid ${uiThemeVars.value.controlBorderColor}`,
+            dotBorderActive: `1px solid ${uiThemeVars.value.sliderFillColor}`,
+            indicatorColor: uiThemeVars.value.cardColor,
+            indicatorTextColor: uiThemeVars.value.textColor,
+            indicatorBoxShadow: uiThemeVars.value.elevatedShadow,
+            indicatorBorderRadius: uiThemeVars.value.cardRadius
+        },
+        Message: {
+            color: uiThemeVars.value.cardColor,
+            colorInfo: uiThemeVars.value.cardColor,
+            colorSuccess: uiThemeVars.value.cardColor,
+            colorError: uiThemeVars.value.cardColor,
+            colorWarning: uiThemeVars.value.cardColor,
+            colorLoading: uiThemeVars.value.cardColor
+        },
+        Space: {
+            gapSmall: '8px 8px',
+            gapMedium: '12px 12px',
+            gapLarge: '16px 16px'
+        },
+        Statistic: {
+            labelTextColor: uiThemeVars.value.secondaryTextColor,
+            valueTextColor: uiThemeVars.value.textColor,
+            valuePrefixTextColor: uiThemeVars.value.textColor,
+            valueSuffixTextColor: uiThemeVars.value.secondaryTextColor
         }
     };
 });
+
+const themeCssVars = computed(() => {
+    const vars = uiThemeVars.value;
+    return {
+        '--ui-body-color': vars.bodyColor,
+        '--ui-body-gradient-start': vars.bodyGradientStart,
+        '--ui-body-gradient-end': vars.bodyGradientEnd,
+        '--ui-primary-color': vars.primaryColor,
+        '--ui-primary-color-hover': vars.primaryColorHover,
+        '--ui-primary-color-pressed': vars.primaryColorPressed,
+        '--ui-primary-color-suppl': vars.primaryColorSuppl,
+        '--ui-card-color': vars.cardColor,
+        '--ui-translucent-card-color': vars.translucentCardColor,
+        '--ui-card-title-color': vars.cardTitleColor,
+        '--ui-text-color': vars.textColor,
+        '--ui-secondary-text-color': vars.secondaryTextColor,
+        '--ui-muted-text-color': vars.mutedTextColor,
+        '--ui-border-color': vars.borderColor,
+        '--ui-panel-color': vars.panelColor,
+        '--ui-control-color': vars.controlColor,
+        '--ui-control-color-focus': vars.controlColorFocus,
+        '--ui-control-color-disabled': vars.controlColorDisabled,
+        '--ui-control-text-color': vars.controlTextColor,
+        '--ui-control-placeholder-color': vars.controlPlaceholderColor,
+        '--ui-control-border-color': vars.controlBorderColor,
+        '--ui-control-border-hover-color': vars.controlBorderHoverColor,
+        '--ui-control-border-focus-color': vars.controlBorderFocusColor,
+        '--ui-control-tag-color': vars.controlTagColor,
+        '--ui-control-tag-text-color': vars.controlTagTextColor,
+        '--ui-slider-rail-color': vars.sliderRailColor,
+        '--ui-slider-rail-hover-color': vars.sliderRailHoverColor,
+        '--ui-slider-fill-color': vars.sliderFillColor,
+        '--ui-slider-fill-hover-color': vars.sliderFillHoverColor,
+        '--ui-slider-handle-color': vars.sliderHandleColor,
+        '--ui-inline-code-background-color': vars.inlineCodeBackgroundColor,
+        '--ui-inline-code-text-color': vars.inlineCodeTextColor,
+        '--ui-mark-background-color': vars.markBackgroundColor,
+        '--ui-table-header-color': vars.tableHeaderColor,
+        '--ui-scrollbar-track-color': vars.scrollbarTrackColor,
+        '--ui-scrollbar-thumb-color': vars.scrollbarThumbColor,
+        '--ui-copy-button-background-color': vars.copyButtonBackgroundColor,
+        '--ui-copy-button-text-color': vars.copyButtonTextColor,
+        '--ui-footer-text-color': vars.footerTextColor,
+        '--ui-link-color': vars.linkColor,
+        '--ui-link-hover-color': vars.linkHoverColor,
+        '--ui-info-color': vars.infoColor,
+        '--ui-success-color': vars.successColor,
+        '--ui-warning-color': vars.warningColor,
+        '--ui-error-color': vars.errorColor,
+        '--ui-orange-color': vars.orangeColor,
+        '--ui-cyan-color': vars.cyanColor,
+        '--ui-muted-accent-color': vars.mutedAccentColor,
+        '--ui-card-shadow': vars.cardShadow,
+        '--ui-elevated-shadow': vars.elevatedShadow,
+        '--ui-focus-ring-shadow': vars.focusRingShadow,
+        '--ui-card-radius': vars.cardRadius,
+        '--ui-pill-radius': vars.pillRadius,
+        '--ui-icon-color': vars.iconColor,
+        '--ui-user-red-color': vars.userRedColor,
+        '--ui-user-orange-color': vars.userOrangeColor,
+        '--ui-user-purple-color': vars.userPurpleColor,
+        '--ui-user-green-color': vars.userGreenColor,
+        '--ui-user-blue-color': vars.userBlueColor,
+        '--ui-user-gray-color': vars.userGrayColor,
+        '--ui-user-cheater-color': vars.userCheaterColor,
+        '--ui-prize-green-color': vars.prizeGreenColor,
+        '--ui-prize-blue-color': vars.prizeBlueColor,
+        '--ui-prize-gold-color': vars.prizeGoldColor,
+        '--ui-category-personal-color': vars.categoryPersonalColor,
+        '--ui-category-solution-color': vars.categorySolutionColor,
+        '--ui-category-tech-color': vars.categoryTechColor,
+        '--ui-category-algorithm-color': vars.categoryAlgorithmColor,
+        '--ui-category-life-color': vars.categoryLifeColor,
+        '--ui-category-study-color': vars.categoryStudyColor,
+        '--ui-category-fun-color': vars.categoryFunColor,
+        '--ui-category-chat-color': vars.categoryChatColor,
+        '--ui-category-unknown-color': vars.categoryUnknownColor
+    };
+});
+
+watch(
+    themeCssVars,
+    vars => {
+        Object.entries(vars).forEach(([key, value]) => {
+            document.documentElement.style.setProperty(key, value);
+        });
+    },
+    { immediate: true }
+);
 
 const handleMenuSelect = (key: string) => {
     if (key === 'home') {
@@ -455,14 +697,14 @@ setInterval(() => {
 
 .app-main {
     background:
-        radial-gradient(circle at top left, rgba(22, 119, 255, 0.12), transparent 34vw),
-        linear-gradient(180deg, #f7fbff 0%, #eef6ff 100%);
+        radial-gradient(circle at top left, var(--ui-panel-color), transparent 34vw),
+        linear-gradient(180deg, var(--ui-body-gradient-start) 0%, var(--ui-body-gradient-end) 100%);
 }
 
 .app-sider {
-    border-right: 1px solid rgba(22, 119, 255, 0.1) !important;
+    border-right: 1px solid var(--ui-border-color) !important;
     backdrop-filter: blur(18px);
-    box-shadow: 12px 0 32px rgba(15, 70, 130, 0.06);
+    box-shadow: var(--ui-card-shadow);
 }
 
 .brand-shell {
@@ -471,18 +713,18 @@ setInterval(() => {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    border-bottom: 1px solid rgba(22, 119, 255, 0.08);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.76), rgba(233, 245, 255, 0.52));
+    border-bottom: 1px solid var(--ui-border-color);
+    background: var(--ui-translucent-card-color);
 }
 
 .brand-logo {
-    color: #2f6db5;
+    color: var(--ui-icon-color);
     font-size: 32px;
     flex-shrink: 0;
 }
 
 .brand-text {
-    color: #10233f;
+    color: var(--ui-card-title-color);
     font-size: 18px;
     font-weight: 700;
     letter-spacing: 0.02em;
@@ -492,7 +734,8 @@ setInterval(() => {
 .app-footer {
     margin: 28px -28px -28px -28px;
     padding: 14px 40px;
-    background: rgba(255, 255, 255, 0.72);
+    background: var(--ui-translucent-card-color);
+    color: var(--ui-footer-text-color);
     backdrop-filter: blur(16px);
 }
 
@@ -512,12 +755,12 @@ setInterval(() => {
 .footer-link {
     display: flex;
     align-items: center;
-    color: var(--n-text-color);
+    color: var(--ui-footer-text-color);
     transition: color 0.2s;
     text-decoration: none;
 }
 .footer-link:hover {
-    color: #337ab7 !important;
+    color: var(--ui-link-hover-color) !important;
 }
 .footer-link:not(:first-child) {
     margin-left: 16px;

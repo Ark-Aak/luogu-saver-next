@@ -398,9 +398,9 @@ onMounted(loadCurrentUser);
     justify-content: space-between;
     gap: 12px;
     padding: 10px 12px;
-    border: 1px solid rgba(47, 109, 181, 0.1);
-    border-radius: 6px;
-    background: rgba(248, 251, 255, 0.78);
+    border: 1px solid var(--ui-border-color);
+    border-radius: var(--ui-card-radius);
+    background: var(--ui-panel-color);
 }
 
 .kb-main {
@@ -408,7 +408,7 @@ onMounted(loadCurrentUser);
 }
 
 .kb-title {
-    color: #10233f;
+    color: var(--ui-card-title-color);
     font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -416,7 +416,7 @@ onMounted(loadCurrentUser);
 }
 
 .kb-meta {
-    color: #64748b;
+    color: var(--ui-muted-text-color);
     font-size: 12px;
 }
 
@@ -446,13 +446,13 @@ onMounted(loadCurrentUser);
 }
 
 .detail-label {
-    color: #64748b;
+    color: var(--ui-muted-text-color);
     white-space: nowrap;
 }
 
 .detail-value {
     min-width: 0;
-    color: #334155;
+    color: var(--ui-secondary-text-color);
     word-break: break-word;
 }
 
@@ -460,12 +460,12 @@ onMounted(loadCurrentUser);
 .setting-title {
     font-size: 16px;
     font-weight: 600;
-    color: #10233f;
+    color: var(--ui-card-title-color);
 }
 
 .account-meta,
 .setting-desc {
-    color: #64748b;
+    color: var(--ui-muted-text-color);
     line-height: 1.6;
 }
 
@@ -474,7 +474,7 @@ onMounted(loadCurrentUser);
     max-width: 100%;
     font-family: 'Fira Code', monospace;
     font-size: 12px;
-    color: #334155;
+    color: var(--ui-secondary-text-color);
     overflow-wrap: anywhere;
 }
 
@@ -491,9 +491,9 @@ onMounted(loadCurrentUser);
 
 .status-item {
     padding: 10px 12px;
-    border: 1px solid rgba(47, 109, 181, 0.1);
-    border-radius: 6px;
-    background: rgba(248, 251, 255, 0.78);
+    border: 1px solid var(--ui-border-color);
+    border-radius: var(--ui-card-radius);
+    background: var(--ui-panel-color);
 }
 
 @media (max-width: 900px) {

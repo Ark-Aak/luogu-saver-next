@@ -271,7 +271,7 @@ onMounted(loadSearch);
     display: flex;
     justify-content: space-between;
     margin: 4px 4px 14px;
-    color: #64748b;
+    color: var(--ui-muted-text-color);
     font-size: 13px;
 }
 
@@ -301,7 +301,7 @@ onMounted(loadSearch);
 .summary {
     min-height: 54px;
     margin: 0 0 14px;
-    color: #475569;
+    color: var(--ui-secondary-text-color);
     line-height: 1.7;
     display: -webkit-box;
     -webkit-line-clamp: 5;
@@ -310,7 +310,7 @@ onMounted(loadSearch);
 }
 
 .result-footer {
-    color: #64748b;
+    color: var(--ui-muted-text-color);
     font-size: 13px;
 }
 

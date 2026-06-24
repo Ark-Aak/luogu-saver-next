@@ -36,7 +36,7 @@ const handleReject = () => {
                 <div class="content-wrapper">
                     <div class="text-section">
                         <div class="icon-wrapper">
-                            <n-icon size="24" color="#2080f0">
+                            <n-icon size="24" color="var(--ui-primary-color)">
                                 <AnalyticsOutline />
                             </n-icon>
                         </div>
@@ -71,11 +71,11 @@ const handleReject = () => {
 }
 
 .consent-card {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-    border-radius: 6px;
-    background-color: rgba(255, 255, 255, 0.95);
+    box-shadow: var(--ui-elevated-shadow);
+    border-radius: var(--ui-card-radius);
+    background-color: var(--ui-translucent-card-color);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--ui-border-color);
 }
 
 .content-wrapper {
@@ -109,11 +109,11 @@ const handleReject = () => {
         left: 0;
         width: 100%;
         transform: none;
-        border-radius: 6px 6px 0 0;
+        border-radius: var(--ui-card-radius) var(--ui-card-radius) 0 0;
     }
 
     .consent-card {
-        border-radius: 6px 6px 0 0;
+        border-radius: var(--ui-card-radius) var(--ui-card-radius) 0 0;
     }
 
     .content-wrapper {

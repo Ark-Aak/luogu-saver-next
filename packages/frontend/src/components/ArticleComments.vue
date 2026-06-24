@@ -151,7 +151,7 @@ onUnmounted(() => {
     gap: 16px;
 }
 .comment-item {
-    border-bottom: 1px solid var(--n-divider-color, #eee);
+    border-bottom: 1px solid var(--n-divider-color, var(--ui-border-color));
     padding-bottom: 16px;
 }
 .comment-item:last-child {
@@ -167,14 +167,14 @@ onUnmounted(() => {
 }
 .comment-time {
     font-size: 12px;
-    color: var(--n-text-color-3, #999);
+    color: var(--n-text-color-3, var(--ui-muted-text-color));
     flex-shrink: 0;
 }
 .comment-content {
     margin-top: 6px;
     font-size: 14px;
     line-height: 1.7;
-    color: var(--n-text-color-1, #333);
+    color: var(--n-text-color-1, var(--ui-text-color));
     /* preserve newlines from plain-text comments; wrap long content */
     white-space: pre-wrap;
     overflow-wrap: anywhere;
@@ -186,7 +186,7 @@ onUnmounted(() => {
 .comment-source {
     margin: 16px 0 0;
     font-size: 12px;
-    color: var(--n-text-color-3, #999);
+    color: var(--n-text-color-3, var(--ui-muted-text-color));
     text-align: right;
 }
 </style>

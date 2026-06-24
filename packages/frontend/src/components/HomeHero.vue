@@ -103,10 +103,10 @@ const handleSearch = () => {
     padding: 48px;
     position: relative;
     overflow: hidden;
-    border-radius: 6px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(240, 246, 252, 0.92));
-    border: 1px solid rgba(47, 109, 181, 0.1);
-    box-shadow: 0 14px 32px rgba(47, 109, 181, 0.07);
+    border-radius: var(--ui-card-radius);
+    background: linear-gradient(135deg, var(--ui-card-color), var(--ui-body-gradient-end));
+    border: 1px solid var(--ui-border-color);
+    box-shadow: var(--ui-card-shadow);
 }
 
 .hero-content {
@@ -127,10 +127,10 @@ const handleSearch = () => {
     display: inline-flex;
     padding: 7px 12px;
     margin-bottom: 18px;
-    border-radius: 6px;
-    color: #2f6db5;
-    background: rgba(47, 109, 181, 0.08);
-    border: 1px solid rgba(47, 109, 181, 0.12);
+    border-radius: var(--ui-card-radius);
+    color: var(--ui-primary-color);
+    background: var(--ui-panel-color);
+    border: 1px solid var(--ui-border-color);
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.14em;
@@ -149,10 +149,10 @@ const handleSearch = () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.86);
+    border-radius: var(--ui-card-radius);
+    background: var(--ui-translucent-card-color);
     box-shadow: none;
-    border: 1px solid rgba(47, 109, 181, 0.1);
+    border: 1px solid var(--ui-border-color);
 }
 
 .hero-title {
@@ -167,7 +167,7 @@ const handleSearch = () => {
 
 .hero-subtitle {
     font-size: 24px;
-    color: #3d5a80;
+    color: var(--ui-secondary-text-color);
     margin: 0 0 12px;
     font-weight: 600;
     letter-spacing: 0.01em;
@@ -176,7 +176,7 @@ const handleSearch = () => {
 .hero-description {
     max-width: 650px;
     margin: 0 0 34px;
-    color: #64748b;
+    color: var(--ui-muted-text-color);
     font-size: 16px;
     line-height: 1.8;
 }
@@ -188,25 +188,25 @@ const handleSearch = () => {
 
 /* macOS Style Input */
 :deep(.mac-input) {
-    background-color: rgba(255, 255, 255, 0.78) !important;
+    background-color: var(--ui-translucent-card-color) !important;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(22, 119, 255, 0.14) !important;
-    border-radius: 6px !important;
-    box-shadow: 0 10px 24px rgba(47, 109, 181, 0.08);
+    border: 1px solid var(--ui-border-color) !important;
+    border-radius: var(--ui-card-radius) !important;
+    box-shadow: var(--ui-card-shadow);
     height: 58px;
     font-size: 18px;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 :deep(.mac-input:hover) {
-    background-color: rgba(255, 255, 255, 0.8) !important;
-    box-shadow: 0 12px 28px rgba(47, 109, 181, 0.1);
+    background-color: var(--ui-translucent-card-color) !important;
+    box-shadow: var(--ui-card-shadow);
 }
 
 :deep(.mac-input.n-input--focus) {
-    background-color: #fff !important;
-    box-shadow: 0 14px 32px rgba(47, 109, 181, 0.12);
+    background-color: var(--ui-card-color) !important;
+    box-shadow: var(--ui-card-shadow);
 }
 
 :deep(.n-input__input-el) {
@@ -232,20 +232,20 @@ const handleSearch = () => {
 
 .panel-card {
     padding: 16px;
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.72);
-    border: 1px solid rgba(47, 109, 181, 0.1);
+    border-radius: var(--ui-card-radius);
+    background: var(--ui-translucent-card-color);
+    border: 1px solid var(--ui-border-color);
 }
 
 .panel-card strong {
     display: block;
     margin-top: 8px;
-    color: #10233f;
+    color: var(--ui-card-title-color);
     font-size: 16px;
 }
 
 .panel-label {
-    color: #2f6db5;
+    color: var(--ui-primary-color);
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.12em;
@@ -268,7 +268,7 @@ const handleSearch = () => {
 @media (max-width: 640px) {
     .hero-section {
         padding: 30px 18px;
-        border-radius: 6px;
+        border-radius: var(--ui-card-radius);
     }
 
     .brand-header {

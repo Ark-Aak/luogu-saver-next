@@ -237,24 +237,24 @@ onUnmounted(() => {
 }
 
 .summary-number {
-    color: #10233f;
+    color: var(--ui-card-title-color);
     font-size: 32px;
     font-weight: 700;
 }
 
 .summary-value,
 .queue-name {
-    color: #334155;
+    color: var(--ui-secondary-text-color);
     font-weight: 600;
 }
 
 .summary-number.danger {
-    color: #d03050;
+    color: var(--ui-error-color);
 }
 
 .summary-hint,
 .toolbar-text {
-    color: #64748b;
+    color: var(--ui-muted-text-color);
     line-height: 1.6;
 }
 
@@ -272,7 +272,7 @@ onUnmounted(() => {
     justify-content: center;
     gap: 10px;
     min-height: 160px;
-    color: #64748b;
+    color: var(--ui-muted-text-color);
 }
 
 .queue-head {
@@ -294,14 +294,14 @@ onUnmounted(() => {
     justify-content: space-between;
     gap: 8px;
     padding: 8px 10px;
-    border: 1px solid rgba(47, 109, 181, 0.1);
-    border-radius: 6px;
-    background: rgba(248, 251, 255, 0.78);
-    color: #64748b;
+    border: 1px solid var(--ui-border-color);
+    border-radius: var(--ui-card-radius);
+    background: var(--ui-panel-color);
+    color: var(--ui-muted-text-color);
 }
 
 .metric strong {
-    color: #10233f;
+    color: var(--ui-card-title-color);
 }
 
 .detail-card,

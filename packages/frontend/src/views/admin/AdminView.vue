@@ -633,7 +633,7 @@ onBeforeUnmount(() => {
 }
 
 .muted {
-    color: #64748b;
+    color: var(--ui-muted-text-color);
 }
 
 .batch-size-field {
@@ -662,10 +662,10 @@ onBeforeUnmount(() => {
 .announcement-preview {
     min-height: 120px;
     padding: 16px;
-    border-radius: 6px;
-    background: rgba(248, 251, 255, 0.9);
-    border: 1px solid rgba(22, 119, 255, 0.08);
-    color: #334155;
+    border-radius: var(--ui-card-radius);
+    background: var(--ui-panel-color);
+    border: 1px solid var(--ui-border-color);
+    color: var(--ui-secondary-text-color);
     line-height: 1.7;
 }
 

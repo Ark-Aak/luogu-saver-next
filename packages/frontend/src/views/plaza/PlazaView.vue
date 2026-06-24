@@ -113,9 +113,9 @@ const goToDetail = (id: string) => {
                             <n-tag
                                 v-if="article.reason === 'hot'"
                                 :color="{
-                                    textColor: '#ff6200',
-                                    color: 'rgba(255, 98, 0, 0.2)',
-                                    borderColor: '#ff6200'
+                                    textColor: 'var(--ui-orange-color)',
+                                    color: 'color-mix(in srgb, var(--ui-orange-color) 20%, transparent)',
+                                    borderColor: 'var(--ui-orange-color)'
                                 }"
                                 size="small"
                             >
@@ -127,9 +127,9 @@ const goToDetail = (id: string) => {
                             <n-tag
                                 v-else-if="article.reason === 'vector'"
                                 :color="{
-                                    textColor: '#00aaff',
-                                    color: 'rgba(0, 170, 255, 0.2)',
-                                    borderColor: '#00aaff'
+                                    textColor: 'var(--ui-cyan-color)',
+                                    color: 'color-mix(in srgb, var(--ui-cyan-color) 20%, transparent)',
+                                    borderColor: 'var(--ui-cyan-color)'
                                 }"
                                 size="small"
                             >
@@ -194,11 +194,11 @@ const goToDetail = (id: string) => {
         <div ref="loadTrigger" class="load-trigger">
             <div v-if="loading" class="loading-state">
                 <n-spin size="small" />
-                <span style="margin-left: 8px; color: #64748b">正在加载更多推荐...</span>
+                <span style="margin-left: 8px; color: var(--ui-muted-text-color)">正在加载更多推荐...</span>
             </div>
 
             <div v-else-if="error" class="error-state">
-                <span style="color: #d03050">加载失败</span>
+                <span style="color: var(--ui-error-color)">加载失败</span>
                 <n-button size="small" style="margin-left: 10px" @click="loadMore">重试</n-button>
             </div>
 
@@ -261,7 +261,7 @@ const goToDetail = (id: string) => {
 }
 
 .article-summary {
-    color: #475569;
+    color: var(--ui-secondary-text-color);
     font-size: 14px;
     line-height: 1.65;
     margin-bottom: 6px;

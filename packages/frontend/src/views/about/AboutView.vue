@@ -178,7 +178,7 @@ onMounted(() => {
 }
 .about-subtitle {
     margin: 6px 0 0;
-    color: var(--n-text-color-3, #999);
+    color: var(--n-text-color-3, var(--ui-muted-text-color));
     font-size: 14px;
 }
 
@@ -190,7 +190,7 @@ onMounted(() => {
     margin: 0;
     line-height: 1.8;
     font-size: 15px;
-    color: var(--n-text-color-1, #333);
+    color: var(--n-text-color-1, var(--ui-text-color));
 }
 
 .feature-list {
@@ -228,7 +228,7 @@ onMounted(() => {
 .feature-desc {
     font-size: 13px;
     line-height: 1.5;
-    color: var(--n-text-color-2, #666);
+    color: var(--n-text-color-2, var(--ui-secondary-text-color));
 }
 
 .about-link {
@@ -257,6 +257,6 @@ onMounted(() => {
 .disclaimer-list li {
     font-size: 13px;
     line-height: 1.7;
-    color: var(--n-text-color-2, #666);
+    color: var(--n-text-color-2, var(--ui-secondary-text-color));
 }
 </style>

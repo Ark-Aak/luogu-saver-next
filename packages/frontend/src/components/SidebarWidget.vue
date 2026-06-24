@@ -31,9 +31,9 @@ const radius = computed(() => themeVars.value.cardRadius);
 .sidebar-widget {
     margin-bottom: 24px;
     padding: 16px;
-    background: rgba(255, 255, 255, 0.72);
-    border: 1px solid rgba(22, 119, 255, 0.1);
-    box-shadow: 0 14px 32px rgba(22, 119, 255, 0.08);
+    background: var(--ui-translucent-card-color);
+    border: 1px solid var(--ui-border-color);
+    box-shadow: var(--ui-card-shadow);
     backdrop-filter: blur(14px);
 }
 
@@ -43,7 +43,7 @@ const radius = computed(() => themeVars.value.cardRadius);
     gap: 8px;
     margin-bottom: 16px;
     padding-bottom: 8px;
-    border-bottom: 1px solid rgba(22, 119, 255, 0.1);
+    border-bottom: 1px solid var(--ui-border-color);
 }
 
 .widget-icon {

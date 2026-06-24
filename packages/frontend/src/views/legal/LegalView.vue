@@ -78,7 +78,7 @@ const iconComponent = computed(() => ICON_MAP[doc.value.icon]);
     align-items: center;
     justify-content: center;
     font-size: 28px;
-    color: var(--n-primary-color, #2f6db5);
+    color: var(--n-primary-color, var(--ui-primary-color));
     flex-shrink: 0;
 }
 .legal-header-text {
@@ -93,7 +93,7 @@ const iconComponent = computed(() => ICON_MAP[doc.value.icon]);
 .legal-updated {
     margin: 4px 0 0;
     font-size: 13px;
-    color: var(--n-text-color-3, #999);
+    color: var(--n-text-color-3, var(--ui-muted-text-color));
 }
 
 .legal-section {
@@ -112,7 +112,7 @@ const iconComponent = computed(() => ICON_MAP[doc.value.icon]);
     margin: 0;
     line-height: 1.8;
     font-size: 14px;
-    color: var(--n-text-color-1, #333);
+    color: var(--n-text-color-1, var(--ui-text-color));
 }
 .legal-list {
     margin: 0;
@@ -124,7 +124,7 @@ const iconComponent = computed(() => ICON_MAP[doc.value.icon]);
 .legal-list li {
     line-height: 1.8;
     font-size: 14px;
-    color: var(--n-text-color-1, #333);
+    color: var(--n-text-color-1, var(--ui-text-color));
 }
 .legal-paragraph + .legal-list {
     margin-top: 10px;

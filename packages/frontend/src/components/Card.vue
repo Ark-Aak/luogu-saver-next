@@ -102,7 +102,7 @@ const showHeader = computed(() => {
 <style scoped>
 .saver-card {
     padding: 20px;
-    border: 1px solid rgba(47, 109, 181, 0.08);
+    border: 1px solid var(--ui-border-color);
     transition:
         transform 0.3s ease,
         box-shadow 0.3s ease,
@@ -113,8 +113,8 @@ const showHeader = computed(() => {
 
 .saver-card.is-hoverable:hover {
     transform: translateY(-2px);
-    border-color: rgba(47, 109, 181, 0.16);
-    box-shadow: 0 14px 28px rgba(47, 109, 181, 0.1) !important;
+    border-color: var(--ui-primary-color-suppl);
+    box-shadow: var(--ui-card-shadow) !important;
 }
 
 .card-header {
@@ -136,8 +136,8 @@ const showHeader = computed(() => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 6px;
-    background: rgba(47, 109, 181, 0.08);
+    border-radius: var(--ui-card-radius);
+    background: var(--ui-mark-background-color);
 }
 
 .card-title {
@@ -152,8 +152,8 @@ const showHeader = computed(() => {
 
 :deep(mark) {
     padding: 0 2px;
-    border-radius: 3px;
-    background: rgba(47, 109, 181, 0.14);
+    border-radius: 3px; /*刻意保留的硬编码，见 PR #39*/
+    background: var(--ui-panel-color);
     color: inherit;
 }
 </style>

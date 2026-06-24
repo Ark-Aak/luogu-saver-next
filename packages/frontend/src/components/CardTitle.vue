@@ -38,14 +38,14 @@ const containerStyle = computed(
     (): CSSProperties => ({
         background:
             props.backgroundColor ||
-            `linear-gradient(135deg, ${hexToRgba(themeVars.value.primaryColor, 0.16)} 0%, rgba(255, 255, 255, 0.92) 52%, ${hexToRgba(themeVars.value.primaryColorHover, 0.2)} 100%)`,
-        color: '#10233f'
+            `linear-gradient(135deg, ${hexToRgba(themeVars.value.primaryColor, 0.16)} 0%, ${themeVars.value.translucentCardColor} 52%, ${hexToRgba(themeVars.value.primaryColorHover, 0.2)} 100%)`,
+        color: themeVars.value.cardTitleColor
     })
 );
 
 const titleStyle = computed(
     (): CSSProperties => ({
-        color: props.textColor || '#10233f',
+        color: props.textColor || themeVars.value.cardTitleColor,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'flex-start',
@@ -91,9 +91,9 @@ const effectiveIconColor = computed(() => {
     position: relative;
     overflow: hidden;
     padding: 24px 30px;
-    border-radius: 6px;
-    box-shadow: 0 12px 26px rgba(47, 109, 181, 0.08);
-    border: 1px solid rgba(47, 109, 181, 0.1);
+    border-radius: var(--ui-card-radius);
+    box-shadow: var(--ui-card-shadow);
+    border: 1px solid var(--ui-border-color);
 }
 
 .banner-content {
@@ -114,13 +114,13 @@ const effectiveIconColor = computed(() => {
 .icon-frame {
     width: 48px;
     height: 48px;
-    border-radius: 6px;
+    border-radius: var(--ui-card-radius);
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(47, 109, 181, 0.08);
-    border: 1px solid rgba(47, 109, 181, 0.13);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    background: var(--ui-panel-color);
+    border: 1px solid var(--ui-border-color);
+    box-shadow: inset 0 1px 0 var(--ui-translucent-card-color);
 }
 
 .title {
@@ -129,21 +129,21 @@ const effectiveIconColor = computed(() => {
 }
 
 :deep(.title .n-h1) {
-    color: #10233f;
+    color: var(--ui-card-title-color);
 }
 
 .subtitle {
-    color: #5f7188 !important;
+    color: var(--ui-muted-text-color) !important;
     font-size: 1rem;
     letter-spacing: 0.08em;
 }
 
 .banner-chip {
     padding: 8px 12px;
-    border-radius: 6px;
-    color: #2f6db5;
-    border: 1px solid rgba(47, 109, 181, 0.14);
-    background: rgba(47, 109, 181, 0.07);
+    border-radius: var(--ui-card-radius);
+    color: var(--ui-primary-color);
+    border: 1px solid var(--ui-border-color);
+    background: var(--ui-panel-color);
     font-size: 12px;
     letter-spacing: 0.12em;
     white-space: nowrap;
@@ -152,7 +152,7 @@ const effectiveIconColor = computed(() => {
 @media (max-width: 720px) {
     .title-banner {
         padding: 22px;
-        border-radius: 6px;
+        border-radius: var(--ui-card-radius);
     }
 
     .banner-content {

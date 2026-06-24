@@ -1,39 +1,132 @@
 /*fixed from https://cdn.luogu.com.cn/css/luogu3.css?ver=20190102 prefix: lg-fg-* */
 
 .user-Red {
-    color: #e74c3c !important;
+    color: var(--ui-user-red-color) !important;
 }
 .user-Orange {
-    color: #e67e22 !important;
+    color: var(--ui-user-orange-color) !important;
 }
 .user-Purple {
-    color: #8e44ad !important;
+    color: var(--ui-user-purple-color) !important;
 }
 .user-Green {
-    color: #2ecc71 !important;
-    color: #5eb95e !important;
+    color: var(--ui-user-green-color) !important;
 }
 .user-Blue {
-    color: #3498db !important;
-    color: #0e90d2 !important;
+    color: var(--ui-user-blue-color) !important;
 	/*note: in luogu homepage, blue using "bluelight"*/
 }
 .user-Gray {
-    color: #7f8c8d !important;
-    color: #bbb !important;
+    color: var(--ui-user-gray-color) !important;
 }
 .user-Cheater {
-    color: #ad8b00 !important;
-    color: #996600 !important;
+    color: var(--ui-user-cheater-color) !important;
 }
 
 :not(pre) > code {
-    background: #f1f5f9 !important;
+    background: var(--ui-inline-code-background-color) !important;
     padding: 2px 6px !important;
-    border-radius: 4px !important;
-    border: 1px solid #e2e8f0 !important;
+    border-radius: var(--ui-card-radius) !important;
+    border: 1px solid var(--ui-border-color) !important;
     font-size: 0.85em !important;
-    color: #e11d48 !important;
+    color: var(--ui-inline-code-text-color) !important;
+}
+
+.n-input .n-input-wrapper,
+.n-input .n-input__input-el,
+.n-input .n-input__textarea-el,
+.n-base-selection .n-base-selection-label {
+    background-color: var(--ui-control-color, transparent) !important;
+    color: var(--ui-control-text-color, inherit) !important;
+}
+
+.n-input .n-input__placeholder,
+.n-base-selection .n-base-selection-placeholder {
+    color: var(--ui-control-placeholder-color, currentColor) !important;
+}
+
+.n-input:not(.n-input--disabled):hover .n-input__border,
+.n-base-selection:not(.n-base-selection--disabled):hover .n-base-selection__border {
+    border-color: var(--ui-control-border-hover-color, currentColor) !important;
+}
+
+.n-input:not(.n-input--disabled).n-input--focus .n-input__state-border,
+.n-base-selection:not(.n-base-selection--disabled).n-base-selection--active .n-base-selection__state-border {
+    border-color: var(--ui-control-border-focus-color, currentColor) !important;
+    box-shadow: var(--ui-focus-ring-shadow, none) !important;
+}
+
+.n-input .n-input__border,
+.n-base-selection .n-base-selection__border {
+    border-color: var(--ui-control-border-color, currentColor) !important;
+}
+
+.n-base-selection .n-base-selection-tags .n-tag,
+.n-tag.n-tag--icon {
+    background-color: var(--ui-control-tag-color, transparent) !important;
+    color: var(--ui-control-tag-text-color, inherit) !important;
+    border-color: var(--ui-control-border-color, currentColor) !important;
+}
+
+.n-tag.n-tag--icon .n-tag__icon,
+.n-tag.n-tag--icon .n-icon {
+    color: inherit !important;
+}
+
+.n-space {
+    color: inherit;
+}
+
+.n-slider .n-slider-rail {
+    background-color: var(--ui-slider-rail-color, currentColor) !important;
+}
+
+.n-slider:hover .n-slider-rail {
+    background-color: var(--ui-slider-rail-hover-color, currentColor) !important;
+}
+
+.n-slider .n-slider-rail__fill {
+    background-color: var(--ui-slider-fill-color, currentColor) !important;
+}
+
+.n-slider:hover .n-slider-rail__fill {
+    background-color: var(--ui-slider-fill-hover-color, currentColor) !important;
+}
+
+.n-slider .n-slider-handle {
+    background-color: var(--ui-slider-handle-color, currentColor) !important;
+    box-shadow: 0 0 0 1px var(--ui-control-border-color, currentColor) !important;
+}
+
+.n-slider .n-slider-dot {
+    background-color: var(--ui-control-color, transparent) !important;
+    border-color: var(--ui-control-border-color, currentColor) !important;
+}
+
+.n-slider .n-slider-dot--active {
+    border-color: var(--ui-slider-fill-color, currentColor) !important;
+}
+
+* {
+    scrollbar-color: var(--ui-scrollbar-thumb-color, auto) var(--ui-scrollbar-track-color, auto);
+}
+
+*::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+    background: var(--ui-scrollbar-track-color, transparent);
+}
+
+*::-webkit-scrollbar-thumb {
+    background: var(--ui-scrollbar-thumb-color, currentColor);
+    border-radius: var(--ui-card-radius, 6px);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: var(--ui-muted-accent-color, currentColor);
 }
 
 :root {

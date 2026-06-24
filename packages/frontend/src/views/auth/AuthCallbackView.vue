@@ -53,6 +53,6 @@ onMounted(() => {
     align-items: center;
     justify-content: center;
     gap: 12px;
-    color: #666;
+    color: var(--ui-secondary-text-color);
 }
 </style>

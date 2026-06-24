@@ -19,7 +19,11 @@ export function renderIcon(icon: Component) {
  */
 export function hexToRgba(hex: string, alphaOverride?: number): string {
     if (!/^#([A-Fa-f0-9]{3,4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/.test(hex)) {
-        throw new Error(`Invalid HEX color format: ${hex}`);
+        if (typeof alphaOverride === 'number') {
+            const percent = Math.max(0, Math.min(1, alphaOverride)) * 100;
+            return `color-mix(in srgb, ${hex} ${percent}%, transparent)`;
+        }
+        return hex;
     }
 
     let hexValue = hex.substring(1);

@@ -255,7 +255,7 @@ onMounted(() => {
                                             <n-skeleton text :repeat="2" />
                                             <n-skeleton text style="width: 60%" />
                                         </n-space>
-                                        <n-skeleton height="120px" style="border-radius: 4px" />
+                                        <n-skeleton height="120px" style="border-radius: var(--ui-card-radius)" />
                                         <n-space vertical>
                                             <n-skeleton text :repeat="4" />
                                         </n-space>
@@ -327,10 +327,10 @@ onMounted(() => {
 
 .info-item {
     min-height: 58px;
-    background: linear-gradient(180deg, #f8fbff, #f3f8ff);
+    background: linear-gradient(180deg, var(--ui-panel-color), var(--ui-body-gradient-end));
     padding: 10px 12px;
-    border-radius: 6px;
-    border: 1px solid rgba(22, 119, 255, 0.08);
+    border-radius: var(--ui-card-radius);
+    border: 1px solid var(--ui-border-color);
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -338,7 +338,7 @@ onMounted(() => {
 
 .label {
     font-size: 12px;
-    color: #999;
+    color: var(--ui-muted-text-color);
 }
 
 .skeleton-line {
@@ -357,7 +357,7 @@ onMounted(() => {
 }
 
 .shadow-button {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--ui-elevated-shadow);
 }
 
 @keyframes slide-in {
