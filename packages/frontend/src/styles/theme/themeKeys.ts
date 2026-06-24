@@ -31,11 +31,9 @@ export interface UiThemeVars {
     sliderFillColor: string;
     sliderFillHoverColor: string;
     sliderHandleColor: string;
-    codeBackgroundColor: string;
-    codeTextColor: string;
-    codeRenderFilter: string;
     inlineCodeBackgroundColor: string;
     inlineCodeTextColor: string;
+    codeTheme: string;
     markBackgroundColor: string;
     tableHeaderColor: string;
     scrollbarTrackColor: string;

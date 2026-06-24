@@ -238,11 +238,19 @@ pre {
     text-align: right;
 }
 
+/*为了支持暗色模式，来自 https://shiki.zhcndoc.com/guide/dual-themes */
+
+html.dark .shiki,
+html.dark .shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+}
+
 .table-container {
     width: 100%;
     overflow-x: auto;
     margin: 2rem 0;
-    border-radius: var(--ui-card-radius);
+    border-radius: 10px; /*刻意保留的硬编码，见 PR #39*/
     border: 1px solid var(--ui-border-color);
     background: var(--ui-card-color);
 }
@@ -251,10 +259,6 @@ pre {
     padding: 16px;
     border-radius: var(--ui-card-radius);
     overflow: auto;
-}
-
-pre:not(.shiki) {
-    filter: var(--ui-code-render-filter);
 }
 
 .toggle-btn {
@@ -291,11 +295,11 @@ a:hover {
 }
 .table-container::-webkit-scrollbar-track {
     background: var(--ui-scrollbar-track-color);
-    border-radius: var(--ui-card-radius);
+    border-radius: 4px; /*刻意保留的硬编码，见 PR #39*/
 }
 .table-container::-webkit-scrollbar-thumb {
     background: var(--ui-scrollbar-thumb-color);
-    border-radius: var(--ui-card-radius);
+    border-radius: 4px; /*刻意保留的硬编码，见 PR #39*/
     transition: background 0.3s ease;
 }
 .table-container::-webkit-scrollbar-thumb:hover {

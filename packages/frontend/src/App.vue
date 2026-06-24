@@ -104,7 +104,13 @@
                                                 <p class="footer-element right-aligned">
                                                     <Icon><Code /></Icon>
                                                     <span>
-                                                        开发者：Federico2903 & Murasame & quanac-lcx & <a href="https://github.com/Ark-Aak/luogu-saver-next/graphs/contributors" target="_blank">其他贡献者</a>
+                                                        开发者：Federico2903 & Murasame & quanac-lcx
+                                                        &
+                                                        <a
+                                                            href="https://github.com/Ark-Aak/luogu-saver-next/graphs/contributors"
+                                                            target="_blank"
+                                                            >其他贡献者</a
+                                                        >
                                                     </span>
                                                 </p>
                                                 <p class="footer-element right-aligned">
@@ -384,7 +390,10 @@ const menuOptions = computed<MenuOption[]>(() => [
 import { THEME_STORAGE_KEY } from '@/utils/constants.ts';
 import { useLocalStorage } from '@/composables/useLocalStorage.ts';
 const themeStorage = useLocalStorage(THEME_STORAGE_KEY, defaultTheme);
-const uiThemeVars = ref<UiThemeVars>({ ...defaultTheme, ...(themeStorage.value as Partial<UiThemeVars>) });
+const uiThemeVars = ref<UiThemeVars>({
+    ...defaultTheme,
+    ...(themeStorage.value as Partial<UiThemeVars>)
+});
 
 provide(uiThemeKey, uiThemeVars);
 
@@ -610,9 +619,6 @@ const themeCssVars = computed(() => {
         '--ui-slider-fill-color': vars.sliderFillColor,
         '--ui-slider-fill-hover-color': vars.sliderFillHoverColor,
         '--ui-slider-handle-color': vars.sliderHandleColor,
-        '--ui-code-background-color': vars.codeBackgroundColor,
-        '--ui-code-text-color': vars.codeTextColor,
-        '--ui-code-render-filter': vars.codeRenderFilter,
         '--ui-inline-code-background-color': vars.inlineCodeBackgroundColor,
         '--ui-inline-code-text-color': vars.inlineCodeTextColor,
         '--ui-mark-background-color': vars.markBackgroundColor,

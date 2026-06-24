@@ -31,11 +31,9 @@ export const defaultTheme: UiThemeVars = {
     sliderFillColor: '#2f6db5',
     sliderFillHoverColor: '#4b83c2',
     sliderHandleColor: '#ffffff',
-    codeBackgroundColor: '#f1f5f9',
-    codeTextColor: '#e11d48',
-    codeRenderFilter: 'none',
     inlineCodeBackgroundColor: '#f1f5f9',
     inlineCodeTextColor: '#e11d48',
+    codeTheme: 'light',
     markBackgroundColor: 'rgba(47, 109, 181, 0.14)',
     tableHeaderColor: 'rgba(47, 109, 181, 0.08)',
     scrollbarTrackColor: '#f1f5f9',
@@ -79,7 +77,6 @@ export const defaultTheme: UiThemeVars = {
     categoryUnknownColor: '#95a5a6'
 };
 
-
 export const darkTheme: UiThemeVars = {
     bodyColor: '#0f1219',
     bodyGradientStart: '#131825',
@@ -111,11 +108,9 @@ export const darkTheme: UiThemeVars = {
     sliderFillColor: '#5b9bd5',
     sliderFillHoverColor: '#7db3e0',
     sliderHandleColor: '#e2e8f0',
-    codeBackgroundColor: '#1e2536',
-    codeTextColor: '#fb7185',
-    codeRenderFilter: 'invert(1) hue-rotate(180deg)',
     inlineCodeBackgroundColor: '#1e2536',
     inlineCodeTextColor: '#fb7185',
+    codeTheme: 'dark',
     markBackgroundColor: 'rgba(91, 155, 213, 0.18)',
     tableHeaderColor: 'rgba(91, 155, 213, 0.08)',
     scrollbarTrackColor: '#1e2536',
