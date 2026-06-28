@@ -581,7 +581,7 @@ async function getProcessor() {
             .use(rehypeCustomContainers)
             .use(rehypeSafeKatex, { strict: 'ignore' })
             .use(rehypeShiki, {
-                themes: { light: 'github-light', dark: 'github-dark' },
+                themes: { light: 'github-light', dark: 'github-light' },
                 langs: [
                     'javascript',
                     'typescript',

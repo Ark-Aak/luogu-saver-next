@@ -152,7 +152,7 @@ const showHeader = computed(() => {
 
 :deep(mark) {
     padding: 0 2px;
-    border-radius: 3px; /*刻意保留的硬编码，见 PR #39*/
+    border-radius: var(--ui-card-radius);
     background: var(--ui-panel-color);
     color: inherit;
 }
