@@ -282,6 +282,9 @@ const handleUpdate = async () => {
     try {
         selectedVersion.value = null;
         router.replace({ query: {} });
+        if (article.value?.title) {
+            document.title = `${article.value.title} - 洛谷保存站`;
+        }
         await submitSaveArticle();
         message.success('更新请求已提交');
     } catch (err: any) {

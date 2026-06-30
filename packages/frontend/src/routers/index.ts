@@ -51,8 +51,10 @@ router.beforeEach(async to => {
 
 const DEFAULT_TITLE = '洛谷保存站';
 
-router.afterEach(to => {
-    document.title = to.meta.title ? `${to.meta.title} - ${DEFAULT_TITLE}` : DEFAULT_TITLE;
+router.afterEach((to, from) => {
+    if (to.path !== from.path) {
+        document.title = to.meta.title ? `${to.meta.title} - ${DEFAULT_TITLE}` : DEFAULT_TITLE;
+    }
 });
 
 export default router;
