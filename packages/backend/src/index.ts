@@ -18,7 +18,7 @@ import http from 'http';
 import { socketJoinHandler } from '@/socket';
 import { ArticlePlazaDiscoveryScheduler } from '@/services/article-plaza-discovery-scheduler.service';
 
-const app = new Koa({ proxy: true, proxyIpHeader: 'X-Forwarded-For' });
+const app = new Koa({ proxy: true, proxyIpHeader: 'CF-Connecting-IP' });
 const server = http.createServer(app.callback());
 initSocket(server, socketJoinHandler);
 
