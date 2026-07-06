@@ -42,7 +42,8 @@ const {
     handle404,
     setupUpdateListener,
     setupTaskUpdateListener,
-    handleRefresh
+    handleRefresh,
+    notifyWorkflowSubmitted
 } = useContentSaver();
 
 const pasteId = route.params.id as string;
@@ -83,7 +84,9 @@ const trackSaveTask = (taskId?: string) => {
                 positiveText: '重试',
                 negativeText: '取消',
                 onPositiveClick: async () => {
-                    trackSaveTask(getSaveReportTaskId(await savePaste(pasteId)));
+                    const response = await savePaste(pasteId);
+                    trackSaveTask(getSaveReportTaskId(response));
+                    notifyWorkflowSubmitted(response, '重试请求已提交');
                 },
                 maskClosable: false,
                 closable: false,
@@ -133,8 +136,8 @@ const handleCopy = async () => {
 const handleUpdate = async () => {
     if (!pasteId) return;
     try {
-        await submitSavePaste();
-        message.success('更新请求已提交');
+        const response = await submitSavePaste();
+        notifyWorkflowSubmitted(response, '更新请求已提交');
     } catch (err: any) {
         message.error(err.message || '更新请求失败');
     }
@@ -255,7 +258,10 @@ onMounted(() => {
                                             <n-skeleton text :repeat="2" />
                                             <n-skeleton text style="width: 60%" />
                                         </n-space>
-                                        <n-skeleton height="120px" style="border-radius: var(--ui-card-radius)" />
+                                        <n-skeleton
+                                            height="120px"
+                                            style="border-radius: var(--ui-card-radius)"
+                                        />
                                         <n-space vertical>
                                             <n-skeleton text :repeat="4" />
                                         </n-space>

@@ -3,7 +3,7 @@ import { TaskStatus, TaskType } from '@/shared/task';
 import { getQueueByType } from '@/lib/queue-factory';
 import { getRandomString } from '@/utils/string';
 import { retryOnDuplicateKey } from '@/utils/db-errors';
-import { EntityManager } from 'typeorm';
+import { EntityManager, In, Not } from 'typeorm';
 import {
     findOneServiceEntity,
     getServiceRepository,
@@ -27,66 +27,65 @@ export class TaskService {
     static async dispatchTask(taskId: string) {
         const task = await this.getTaskById(taskId);
         if (!task) throw new Error(`Task with ID ${taskId} not found.`);
+        const queue = getQueueByType(task.type);
+        if (!queue) throw new Error(`No queue found for task type ${task.type}`);
 
-        if (task.type === TaskType.SAVE) {
-            const queueSave = getQueueByType(TaskType.SAVE);
-
-            await queueSave.add(
-                TaskType.SAVE,
-                {
-                    id: task.id,
-                    type: TaskType.SAVE,
-                    payload: task.payload
-                },
-                { jobId: task.id }
-            );
-        }
-
-        if (task.type === TaskType.LLM) {
-            const queueAi = getQueueByType(TaskType.LLM);
-            await queueAi.add(
-                TaskType.LLM,
-                {
-                    id: task.id,
-                    type: TaskType.LLM,
-                    payload: task.payload
-                },
-                { jobId: task.id }
-            );
-        }
-
-        if (
-            task.type === TaskType.UPDATE ||
-            task.type === TaskType.SEARCH ||
-            task.type === TaskType.READ ||
-            task.type === TaskType.RAG ||
-            task.type === TaskType.DISCOVER
-        ) {
-            const queue = getQueueByType(task.type);
-            await queue.add(
-                task.type,
-                {
-                    id: task.id,
-                    type: task.type,
-                    payload: task.payload
-                },
-                { jobId: task.id }
-            );
-        }
+        await queue.add(
+            task.type,
+            {
+                id: task.id,
+                type: task.type,
+                payload: task.payload
+            },
+            { jobId: task.id }
+        );
     }
 
     static async updateTask(
         taskId: string,
         status: TaskStatus,
         info?: string,
-        manager?: EntityManager
+        manager?: EntityManager,
+        result?: any
     ) {
         const updateData: Partial<Task> = { status };
         if (info !== undefined) {
             updateData.info = info;
         }
+        if (result !== undefined) {
+            updateData.result = result;
+        }
 
-        await getServiceRepository<Task>(Task, manager).update(taskId, updateData);
+        const criteria =
+            status === TaskStatus.PROCESSING
+                ? { id: taskId, status: Not(In([TaskStatus.COMPLETED, TaskStatus.FAILED])) }
+                : taskId;
+        await getServiceRepository<Task>(Task, manager).update(criteria, updateData);
+    }
+
+    static async completeTask(taskId: string, info: string, result?: any): Promise<boolean> {
+        const updateData: Partial<Task> = {
+            status: TaskStatus.COMPLETED,
+            info
+        };
+        if (result !== undefined) updateData.result = result;
+
+        const updateResult = await getServiceRepository<Task>(Task).update(
+            { id: taskId, status: Not(In([TaskStatus.COMPLETED, TaskStatus.FAILED])) },
+            updateData
+        );
+        return Boolean(updateResult.affected && updateResult.affected > 0);
+    }
+
+    static async failTask(taskId: string, info: string): Promise<boolean> {
+        const updateResult = await getServiceRepository<Task>(Task).update(
+            { id: taskId, status: Not(In([TaskStatus.COMPLETED, TaskStatus.FAILED])) },
+            {
+                status: TaskStatus.FAILED,
+                info
+            }
+        );
+        return Boolean(updateResult.affected && updateResult.affected > 0);
     }
 
     static async getTaskById(taskId: string, manager?: EntityManager): Promise<Task | null> {

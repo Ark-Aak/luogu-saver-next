@@ -64,7 +64,8 @@ const {
     handle404,
     setupUpdateListener,
     setupTaskUpdateListener,
-    handleRefresh
+    handleRefresh,
+    notifyWorkflowSubmitted
 } = useContentSaver();
 
 const articleId = route.params.id as string;
@@ -202,7 +203,9 @@ const trackSaveTask = (taskId?: string) => {
                 positiveText: '重试',
                 negativeText: '取消',
                 onPositiveClick: async () => {
-                    trackSaveTask(getSaveReportTaskId(await saveArticle(articleId)));
+                    const response = await saveArticle(articleId);
+                    trackSaveTask(getSaveReportTaskId(response));
+                    notifyWorkflowSubmitted(response, '重试请求已提交');
                 },
                 maskClosable: false,
                 closable: false,
@@ -285,8 +288,8 @@ const handleUpdate = async () => {
         if (article.value?.title) {
             document.title = `${article.value.title} - 洛谷保存站`;
         }
-        await submitSaveArticle();
-        message.success('更新请求已提交');
+        const response = await submitSaveArticle();
+        notifyWorkflowSubmitted(response, '更新请求已提交');
     } catch (err: any) {
         message.error(err.message || '更新请求失败');
     }

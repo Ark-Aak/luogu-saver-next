@@ -30,8 +30,8 @@ app.use(bodyParser());
 app.use(tracking);
 app.use(router.routes()).use(router.allowedMethods());
 
-AppDataSource.initialize().then(() => {
-    worker.bootstrap();
+AppDataSource.initialize().then(async () => {
+    await worker.bootstrap();
     ArticlePlazaDiscoveryScheduler.start();
     server.listen(config.port, config.host, () => {
         logger.info({ host: config.host, port: config.port }, `Server started.`);

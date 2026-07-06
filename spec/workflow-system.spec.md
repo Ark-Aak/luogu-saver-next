@@ -4,7 +4,11 @@
 
 This specification defines backend workflow orchestration behavior implemented under `packages/backend`.
 
-A workflow definition is a logical DAG of task definitions. The backend compiles the logical DAG into one linear BullMQ Flow. The `fathers` field controls upstream data visibility and linear order; it does not require parallel execution.
+A workflow definition is a logical DAG of task definitions. The backend stores every workflow node as a `task` row and executes ready nodes as independent BullMQ jobs. The backend, not BullMQ Flow, owns DAG scheduling.
+
+The `fathers` field defines task readiness and upstream data visibility. A task is ready when every named father task has completed successfully.
+
+Redis stores workflow runtime keys for dispatch acceleration. The database is the durable source of truth. For every non-terminal workflow, the backend MUST be able to reconstruct Redis runtime keys from `workflow` and `task` rows after a process restart.
 
 ## 2. Workflow Entity
 
@@ -13,8 +17,8 @@ Table name: `workflow`
 | Column        | Type     | Constraints       | Description                                                  |
 | ------------- | -------- | ----------------- | ------------------------------------------------------------ |
 | `id`          | UUID     | PRIMARY KEY       | Workflow identifier exposed as `workflowId` in API responses |
-| `root_job_id` | VARCHAR  | NOT NULL          | BullMQ root job ID. It equals one workflow node `Task.id`    |
-| `queue_name`  | VARCHAR  | NOT NULL          | Queue name containing the root job                           |
+| `root_job_id` | VARCHAR  | NULLABLE          | Legacy BullMQ Flow root job ID. New DAG workflows set `null` |
+| `queue_name`  | VARCHAR  | NULLABLE          | Legacy BullMQ Flow root queue. New DAG workflows set `null`  |
 | `status`      | VARCHAR  | DEFAULT `pending` | Last known workflow status                                   |
 | `definition`  | JSON     | NOT NULL          | Normalized workflow definition                               |
 | `result`      | JSON     | NULLABLE          | Tracked task result map                                      |
@@ -66,29 +70,37 @@ Output:
 ```json
 {
     "workflowId": "<uuid>",
-    "rootJobId": "<16_char_task_id>",
     "taskIds": {
         "<taskName>": "<16_char_task_id>"
     },
     "reportTaskIds": {
         "<reportTaskName>": "<16_char_task_id>"
+    },
+    "trackTaskIds": {
+        "<trackTaskName>": "<16_char_task_id>"
     }
 }
 ```
 
 Postconditions:
 
-1. A `workflow` row is created with `id = workflowId` before any workflow task row is created.
-2. For every item in `tasks`, one `task` row is created before the BullMQ Flow is submitted.
-3. Each workflow node BullMQ job ID equals the corresponding `task.id`.
-4. Each task ID in `taskIds` is a 16-character random string.
-5. `workflow.root_job_id` equals the BullMQ root job ID and equals one value in `taskIds`.
-6. The submitted BullMQ Flow contains every task in `tasks` exactly once.
-7. Each submitted BullMQ job SHALL set `failParentOnFailure = true`.
-8. Each submitted BullMQ job SHALL set `priority` equal to the workflow creation option `priority`.
-9. If the workflow is created from an HTTP workflow API endpoint, the creation option `priority` SHALL be `1`.
-10. If a workflow node reaches final failure, each parent waiting on that node SHALL fail instead of remaining in `waiting-children` indefinitely.
-11. If workflow creation fails before the API response is sent, no `workflow` row with `id = workflowId` remains in the database.
+1. A `workflow` row is created with `id = workflowId`, `status = 'active'`, `root_job_id = null`, and `queue_name = null`.
+2. `workflow.definition` stores the accepted workflow definition.
+3. `workflow.result` contains one key for every task with `track = true`; every initial value is `null`.
+4. For every item in `tasks`, one `task` row is created before any BullMQ job is added.
+5. Each workflow task row has `workflow_id = workflowId`, `task_name = task.name`, `type = task.data.type`, `payload = task.data.payload`, `status = PENDING`, and `priority` equal to the workflow creation option `priority`.
+6. Each task ID in `taskIds` is a 16-character random string.
+7. Each BullMQ job ID equals the corresponding `task.id`.
+8. The backend initializes Redis runtime state for every workflow task before adding entrypoint jobs.
+9. A task with no fathers is an entrypoint task.
+10. Only entrypoint tasks are added to BullMQ during workflow creation.
+11. Each added BullMQ job name equals the workflow task name.
+12. Each added BullMQ job stores complete task execution data: `id`, `type`, `payload`, `workflowId`, `taskName`, `track`, `report`, `fathers`, and `fatherIds`.
+13. Each added BullMQ job SHALL set `priority` equal to the workflow creation option `priority`.
+14. If the workflow is created from an HTTP workflow API endpoint, the creation option `priority` SHALL be `1`.
+15. `reportTaskIds` contains exactly the task-name subset whose task definition has `report = true`.
+16. `trackTaskIds` contains exactly the task-name subset whose task definition has `track = true`.
+17. If workflow creation fails before the API response is sent, no `workflow` row with `id = workflowId` and no `task` rows with `workflow_id = workflowId` remain in the database.
 
 ### 4.2 POST `/workflow/create/template/:name`
 
@@ -120,9 +132,18 @@ Output:
     "updatedAt": "<datetime>",
     "tasks": [
         {
-            "jobId": "<task_id>",
-            "jobName": "<task_name>",
-            "status": "<bullmq_state>"
+            "taskId": "<task_id>",
+            "taskName": "<task_name>",
+            "status": "pending|processing|completed|failed|missing",
+            "type": "<task_type>",
+            "target": "<task_target>",
+            "fathers": ["<father_task_name>"],
+            "fatherIds": {
+                "<father_task_name>": "<father_task_id>"
+            },
+            "track": true,
+            "report": false,
+            "info": "<task_status_info>"
         }
     ],
     "result": {
@@ -134,9 +155,11 @@ Output:
 }
 ```
 
-If runtime flow data cannot be loaded from Redis and current status is not terminal, status is set to `expired` and `tasks` is returned as `null`.
-If runtime flow data cannot be loaded from Redis and current status is terminal, status is unchanged and `tasks` is returned as `null`.
+The query endpoint reads workflow and task state from the database. Missing Redis runtime keys MUST NOT make the query endpoint return `expired`.
 For tracked task entries that are not finished yet, `result[taskName]` is `null`.
+For every returned task, `fathers` equals the task definition `fathers` array or `[]` when omitted.
+For every returned task, `fatherIds` maps each father task name to the corresponding SQL task ID when that task row exists.
+For every returned task, `type`, `target`, `track`, and `report` are read from the workflow definition, not from Redis runtime state.
 
 ## 5. Template Definitions
 
@@ -334,16 +357,20 @@ Read task handlers SHALL be the only task handlers that load article or paste co
 
 ## 6. Status, Result, and Report Synchronization
 
-1. Each workflow node updates the `task` row whose `id` equals the BullMQ job ID.
+1. Each workflow job updates the `task` row whose `id` equals the BullMQ job ID.
 2. Only report tasks emit websocket events `task:{taskId}:completed` and `task:{taskId}:failed`.
 3. A report task completed event payload SHALL contain `status='completed'` and `result=returnvalue.__result`.
 4. A report task failed event payload SHALL contain `status='failed'` and `error`.
 5. Non-report workflow tasks do not emit `task:{taskId}` websocket events.
 6. Legacy non-workflow tasks emit websocket task events for every completed or failed task.
-7. Workflow completion status is set to `completed` only when the root job completes successfully.
-8. Workflow failure status is set to `failed` when any workflow node reaches final failure.
-9. For tracked tasks (`track = true`), when a job includes `workflowId` and `taskName`, its return payload is merged into `workflow.result[taskName]`.
-10. Result payload is normalized as:
+7. When a workflow task completes successfully, its `task.result` stores the full processor return value.
+8. When a workflow task completes successfully, its direct descendant counters are released exactly once.
+9. A descendant task is added to BullMQ when every father task has `status = COMPLETED` and the descendant task status is neither `COMPLETED` nor `FAILED`.
+10. Workflow completion status is set to `completed` when every task row with `workflow_id = workflowId` has `status = COMPLETED`.
+11. Workflow failure status is set to `failed` when any workflow task reaches final failure.
+12. After workflow status becomes `failed`, no new descendant tasks for that workflow SHALL be added by workflow scheduling code.
+13. For tracked tasks (`track = true`), when a job includes `workflowId` and `taskName`, its return payload is merged into `workflow.result[taskName]`.
+14. Result payload is normalized as:
 
 ```json
 {
@@ -352,14 +379,59 @@ Read task handlers SHALL be the only task handlers that load article or paste co
 }
 ```
 
-11. Status writes are monotonic with respect to terminal states.
-12. If current `workflow.status` is `completed`, `failed`, or `expired`, later queue status reads or queue events MUST NOT replace it.
-13. If current `workflow.status` is not terminal, a queue status read or queue event MAY replace it with the observed BullMQ state.
+15. Status writes are monotonic with respect to terminal states.
+16. If current `workflow.status` is `completed`, `failed`, or `expired`, later queue status reads, worker events, recovery passes, or queue events MUST NOT replace it.
+17. If current `workflow.status` is not terminal, worker events or recovery passes MAY replace it with `active`, `completed`, or `failed`.
 
-## 7. Invariants
+## 7. Runtime Redis Keys
+
+For each workflow task ID `taskId`, the scheduler MAY create these Redis keys:
+
+1. `workflow:task:def:{taskId}` stores the complete BullMQ job data and priority for the task.
+2. `workflow:task:counter:{taskId}` stores the number of incomplete father tasks.
+3. `workflow:task:descendants:{taskId}` stores an array of direct descendant task IDs.
+4. `workflow:task:result:{taskId}` stores `returnvalue.__result` after successful completion.
+5. `workflow:task:released:{taskId}` stores a marker that descendant counters were released for `taskId`.
+
+Runtime keys for active workflows SHALL NOT require a fixed expiration time. Runtime keys MAY be deleted after the workflow reaches a terminal status.
+
+## 8. Restart Recovery
+
+On worker startup, the backend SHALL perform one recovery pass before considering recovery complete:
+
+1. Select every workflow whose status is not `completed`, `failed`, or `expired`.
+2. Load every task row with `workflow_id = workflow.id`.
+3. Rebuild Redis runtime keys from `workflow.definition`, task rows, task statuses, task results, and task priorities.
+4. For each completed task row with a stored result, restore `workflow:task:result:{taskId}`.
+5. For each completed task row, create `workflow:task:released:{taskId}` because rebuilt counters already exclude completed fathers.
+6. If any workflow task row has `status = FAILED`, set the workflow status to `failed`.
+7. If every workflow task row has `status = COMPLETED`, set the workflow status to `completed`.
+8. For every non-terminal task whose BullMQ job exists and is `completed`, store its return value, mark the task `COMPLETED`, update tracked workflow result when applicable, and release descendants.
+9. For every non-terminal task whose BullMQ job exists and is `failed`, mark the task `FAILED` and set the workflow status to `failed`.
+10. For every task whose fathers are all completed, whose task row is not terminal, and whose BullMQ job is missing, add the task to BullMQ with `jobId = task.id`.
+11. For every task whose BullMQ job already exists in `waiting`, `delayed`, `prioritized`, or `active`, recovery MUST NOT add a duplicate job.
+12. If recovery for one workflow throws an error, set that workflow status to `failed` and continue recovery for the remaining workflows.
+
+Recovery is idempotent. Running recovery more than once without new task completions MUST NOT enqueue more than one BullMQ job for the same task ID.
+
+## 9. Debug Logging
+
+The backend SHALL write structured workflow logs that allow one workflow run to be reconstructed from log records:
+
+1. Workflow creation logs SHALL include `workflowId`, `priority`, `taskCount`, `entryPointIds`, `reportTaskIds`, and `trackTaskIds`.
+2. Runtime initialization logs SHALL include one entry per task with `workflowId`, `taskId`, `taskName`, `type`, `queueName`, `fathers`, `fatherIds`, `descendantIds`, `incompleteFatherCount`, `track`, `report`, and `priority`.
+3. Task dispatch logs SHALL include `workflowId`, `taskId`, `taskName`, `type`, `queueName`, `priority`, and `reason`.
+4. Upstream data loading logs SHALL include `workflowId`, `taskId`, `taskName`, `fatherNames`, `redisHitCount`, `dbHitCount`, and `missingFatherNames`.
+5. Task completion logs SHALL include `workflowId`, `taskId`, `taskName`, `track`, `report`, `changed`, and `resultKeys`.
+6. Descendant release logs SHALL include `workflowId`, `taskId`, `taskName`, `descendantIds`, each descendant counter value after decrement, and `dispatchedTaskIds`.
+7. Workflow recovery logs SHALL include `workflowId`, `taskCount`, `pendingCount`, `processingCount`, `completedCount`, `failedCount`, and every recovered BullMQ job state that changes task or workflow state.
+8. Workflow query logs SHALL include `workflowId`, `status`, `taskCount`, and counts by task status.
+9. Debug logs SHALL NOT include full workflow result payloads, full embeddings, article bodies, paste bodies, or LLM prompt text.
+
+## 10. Invariants
 
 1. `workflowId` is the only workflow identifier accepted by `/workflow/query/:id`.
-2. `rootJobId` is exposed only as the BullMQ root job locator.
-3. Every value in `taskIds` is both a `task.id` and a BullMQ job ID.
-4. `reportTaskIds` contains exactly the task-name subset whose task definition has `report = true`.
+2. Every value in `taskIds` is both a `task.id` and a BullMQ job ID.
+3. `reportTaskIds` contains exactly the task-name subset whose task definition has `report = true`.
+4. `trackTaskIds` contains exactly the task-name subset whose task definition has `track = true`.
 5. Template permission lookup is exact-key based; missing keys are rejected as invalid templates.

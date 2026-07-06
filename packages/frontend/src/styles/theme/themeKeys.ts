@@ -56,6 +56,10 @@ export interface UiThemeVars {
     successColor: string;
     warningColor: string;
     errorColor: string;
+    alertInfoBackgroundColor: string;
+    alertSuccessBackgroundColor: string;
+    alertWarningBackgroundColor: string;
+    alertErrorBackgroundColor: string;
     orangeColor: string;
     cyanColor: string;
     mutedAccentColor: string;

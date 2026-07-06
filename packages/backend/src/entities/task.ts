@@ -21,4 +21,16 @@ export class Task extends BaseEntity {
 
     @Column({ type: 'json' })
     payload: any;
+
+    @Column({ name: 'workflow_id', type: 'varchar', length: 36, nullable: true })
+    workflowId: string | null;
+
+    @Column({ name: 'task_name', type: 'varchar', nullable: true })
+    taskName: string | null;
+
+    @Column({ type: 'int', nullable: true })
+    priority: number | null;
+
+    @Column({ type: 'json', nullable: true })
+    result: any;
 }

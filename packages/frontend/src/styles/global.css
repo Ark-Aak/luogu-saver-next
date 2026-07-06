@@ -1,5 +1,93 @@
 /*fixed from https://cdn.luogu.com.cn/css/luogu3.css?ver=20190102 prefix: lg-fg-* */
 
+:root {
+    --ui-body-color: #f6f9fd;
+    --ui-body-gradient-start: #f7fbff;
+    --ui-body-gradient-end: #eef6ff;
+    --ui-primary-color: #2f6db5;
+    --ui-primary-color-hover: #4b83c2;
+    --ui-primary-color-pressed: #1f4f8f;
+    --ui-primary-color-suppl: #8ab7dd;
+    --ui-card-color: #ffffff;
+    --ui-translucent-card-color: rgba(255, 255, 255, 0.78);
+    --ui-card-title-color: #10233f;
+    --ui-text-color: #10233f;
+    --ui-secondary-text-color: #475569;
+    --ui-muted-text-color: #64748b;
+    --ui-border-color: rgba(47, 109, 181, 0.1);
+    --ui-panel-color: rgba(47, 109, 181, 0.08);
+    --ui-control-color: #ffffff;
+    --ui-control-color-focus: #ffffff;
+    --ui-control-color-disabled: #f1f5f9;
+    --ui-control-text-color: #10233f;
+    --ui-control-placeholder-color: #94a3b8;
+    --ui-control-border-color: rgba(47, 109, 181, 0.18);
+    --ui-control-border-hover-color: rgba(47, 109, 181, 0.36);
+    --ui-control-border-focus-color: #2f6db5;
+    --ui-control-tag-color: rgba(47, 109, 181, 0.1);
+    --ui-control-tag-text-color: #10233f;
+    --ui-slider-rail-color: rgba(47, 109, 181, 0.12);
+    --ui-slider-rail-hover-color: rgba(47, 109, 181, 0.18);
+    --ui-slider-fill-color: #2f6db5;
+    --ui-slider-fill-hover-color: #4b83c2;
+    --ui-slider-handle-color: #ffffff;
+    --ui-back-top-color: rgba(255, 255, 255, 0.9);
+    --ui-back-top-hover-color: #ffffff;
+    --ui-back-top-icon-color: #2f6db5;
+    --ui-back-top-icon-hover-color: #4b83c2;
+    --ui-code-background-color: #f1f5f9;
+    --ui-code-text-color: #e11d48;
+    --ui-inline-code-background-color: #f1f5f9;
+    --ui-inline-code-text-color: #e11d48;
+    --ui-mark-background-color: rgba(47, 109, 181, 0.14);
+    --ui-table-header-color: rgba(47, 109, 181, 0.08);
+    --ui-scrollbar-track-color: #f1f5f9;
+    --ui-scrollbar-thumb-color: #94a3b8;
+    --ui-copy-button-background-color: rgba(255, 255, 255, 0.78);
+    --ui-copy-button-text-color: #10233f;
+    --ui-footer-text-color: #10233f;
+    --ui-link-color: #2f6db5;
+    --ui-link-hover-color: #4b83c2;
+    --ui-info-color: #7da7ff;
+    --ui-success-color: #4dd27a;
+    --ui-warning-color: #ffb454;
+    --ui-error-color: #d03050;
+    --ui-alert-info-background-color: rgba(125, 167, 255, 0.14);
+    --ui-alert-success-background-color: rgba(77, 210, 122, 0.14);
+    --ui-alert-warning-background-color: rgba(255, 180, 84, 0.18);
+    --ui-alert-error-background-color: rgba(208, 48, 80, 0.12);
+    --ui-orange-color: #ff6200;
+    --ui-cyan-color: #00aaff;
+    --ui-muted-accent-color: #94a3b8;
+    --ui-card-shadow: 0 14px 36px rgba(47, 109, 181, 0.08);
+    --ui-elevated-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --ui-focus-ring-shadow: 0 0 0 4px rgba(47, 109, 181, 0.12);
+    --ui-card-radius: 6px;
+    --ui-pill-radius: 999px;
+    --ui-icon-color: #2f6db5;
+    --ui-user-red-color: #e74c3c;
+    --ui-user-orange-color: #e67e22;
+    --ui-user-purple-color: #8e44ad;
+    --ui-user-green-color: #5eb95e;
+    --ui-user-blue-color: #0e90d2;
+    --ui-user-gray-color: #bbbbbb;
+    --ui-user-cheater-color: #996600;
+    --ui-prize-green-color: #52c41a;
+    --ui-prize-blue-color: #3498db;
+    --ui-prize-gold-color: #ffc116;
+    --ui-category-personal-color: #667eea;
+    --ui-category-solution-color: #f39c12;
+    --ui-category-tech-color: #e74c3c;
+    --ui-category-algorithm-color: #3498db;
+    --ui-category-life-color: #2ecc71;
+    --ui-category-study-color: #9b59b6;
+    --ui-category-fun-color: #1abc9c;
+    --ui-category-chat-color: #34495e;
+    --ui-category-unknown-color: #95a5a6;
+    --article-tag-background-color: transparent;
+    --article-tag-color: var(--ui-muted-text-color);
+}
+
 .user-Red {
     color: var(--ui-user-red-color) !important;
 }
@@ -63,16 +151,10 @@
     border-color: var(--ui-control-border-color, currentColor) !important;
 }
 
-.n-base-selection .n-base-selection-tags .n-tag,
-.n-tag.n-tag--icon {
+.n-base-selection .n-base-selection-tags .n-tag {
     background-color: var(--ui-control-tag-color, transparent) !important;
     color: var(--ui-control-tag-text-color, inherit) !important;
     border-color: var(--ui-control-border-color, currentColor) !important;
-}
-
-.n-tag.n-tag--icon .n-tag__icon,
-.n-tag.n-tag--icon .n-icon {
-    color: inherit !important;
 }
 
 .n-tag.article-color-tag,
@@ -112,23 +194,8 @@
     color: var(--ui-text-color) !important;
 }
 
-.n-dialog .n-dialog__close,
-.n-dialog .n-dialog-icon {
+.n-dialog .n-dialog__close {
     color: var(--ui-icon-color) !important;
-}
-
-.n-alert {
-    background-color: var(--ui-panel-color) !important;
-    color: var(--ui-text-color) !important;
-    border-color: var(--ui-border-color) !important;
-}
-
-.n-alert .n-alert-body__title {
-    color: var(--ui-card-title-color) !important;
-}
-
-.n-alert .n-alert-body__content {
-    color: var(--ui-text-color) !important;
 }
 
 .n-alert a {
@@ -195,7 +262,7 @@
 }
 
 * {
-    scrollbar-color: var(--ui-scrollbar-thumb-color, auto) var(--ui-scrollbar-track-color, auto);
+    scrollbar-color: var(--ui-scrollbar-thumb-color) var(--ui-scrollbar-track-color);
 }
 
 *::-webkit-scrollbar {

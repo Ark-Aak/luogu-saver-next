@@ -10,15 +10,19 @@ The task queue system manages asynchronous background jobs using BullMQ backed b
 
 Table name: `task`
 
-| Column       | Type        | Constraints | Description                                  |
-| ------------ | ----------- | ----------- | -------------------------------------------- |
-| `id`         | VARCHAR(32) | PRIMARY KEY | Unique task ID (8-char random)               |
-| `info`       | TEXT        | NULLABLE    | Task result/error information                |
-| `status`     | INT         | DEFAULT 0   | Task status (TaskStatus enum)                |
-| `created_at` | DATETIME    | NOT NULL    | Task creation timestamp                      |
-| `type`       | VARCHAR     | NOT NULL    | Task type (TaskType enum)                    |
-| `target`     | VARCHAR     | NULLABLE    | Target identifier (e.g., "article", "paste") |
-| `payload`    | JSON        | NOT NULL    | Task-specific payload data                   |
+| Column        | Type        | Constraints | Description                                  |
+| ------------- | ----------- | ----------- | -------------------------------------------- |
+| `id`          | VARCHAR(32) | PRIMARY KEY | Unique task ID (8-char random)               |
+| `info`        | TEXT        | NULLABLE    | Task result/error information                |
+| `status`      | INT         | DEFAULT 0   | Task status (TaskStatus enum)                |
+| `created_at`  | DATETIME    | NOT NULL    | Task creation timestamp                      |
+| `type`        | VARCHAR     | NOT NULL    | Task type (TaskType enum)                    |
+| `target`      | VARCHAR     | NULLABLE    | Target identifier (e.g., "article", "paste") |
+| `payload`     | JSON        | NOT NULL    | Task-specific payload data                   |
+| `workflow_id` | UUID        | NULLABLE    | Owning workflow ID for workflow tasks        |
+| `task_name`   | VARCHAR     | NULLABLE    | Workflow-local task name                     |
+| `priority`    | INT         | NULLABLE    | BullMQ priority used for workflow dispatch   |
+| `result`      | JSON        | NULLABLE    | Processor return value for workflow recovery |
 
 ### 2.2 TaskStatus Enum
 
@@ -31,11 +35,15 @@ Table name: `task`
 
 ### 2.3 TaskType Enum
 
-| Value        | Description                 |
-| ------------ | --------------------------- |
-| `save`       | Save content from Luogu     |
-| `ai_process` | AI-based content processing |
-| `discover`   | Discovery producer tasks    |
+| Value      | Description                  |
+| ---------- | ---------------------------- |
+| `save`     | Save content from Luogu      |
+| `llm`      | LLM-based content processing |
+| `update`   | Persistent data update tasks |
+| `search`   | Search backend tasks         |
+| `read`     | Workflow source read tasks   |
+| `rag`      | RAG orchestration tasks      |
+| `discover` | Discovery producer tasks     |
 
 ### 2.4 SaveTarget Enum
 
@@ -63,6 +71,8 @@ interface CommonTask {
         target: string;
         [key: string]: any;
     };
+    fathers?: string[];
+    fatherIds?: Record<string, string>;
 }
 ```
 
@@ -101,7 +111,7 @@ Create and dispatch a new task.
 
 ```json
 {
-    "type": "save" | "ai_process",
+    "type": "save" | "llm" | "update" | "search" | "read" | "rag" | "discover",
     "payload": {
         "target": string,
         "targetId": string,
@@ -155,10 +165,10 @@ Query task status.
 
 1. Load the task from the database.
 2. If task not found, throw an error.
-3. Based on `task.type`:
-    - `SAVE`: Add job to the save queue.
-    - `LLM`: Add job to the AI processing queue.
-4. Use `task.id` as the BullMQ job ID.
+3. Map `task.type` to a queue using `getQueueByType(task.type)`.
+4. If no queue exists for `task.type`, throw an error.
+5. Add one BullMQ job whose name equals `task.type`.
+6. Use `task.id` as the BullMQ job ID.
 
 ### 5.3 updateTask(taskId, status, info?)
 
@@ -206,11 +216,11 @@ The `getQueueByName(queueName)` function:
 
 `WorkflowService.createWorkflow(definition)` SHALL:
 
-1. Compute every BullMQ queue used by the workflow before calling `FlowProducer.add`.
+1. Compute every BullMQ queue used by the workflow before inserting workflow rows, task rows, or Redis runtime keys.
 2. For each used queue, compute the number of jobs the workflow would add to that queue.
 3. For each used queue, read BullMQ counts for `waiting`, `paused`, `delayed`, `prioritized`, and `waiting-children`.
 4. If `currentPendingCount + workflowJobsForQueue > maxQueueLength` for any used queue, throw `Queue is full. Please try again later.` before inserting workflow rows or task rows.
-5. If all used queues have capacity, continue workflow creation.
+5. If all used queues have capacity, continue workflow creation and add only entrypoint workflow jobs.
 
 `maxQueueLength` is a per-queue limit. The save queue limit SHALL NOT be used for other queues.
 
@@ -233,7 +243,7 @@ Handlers implement the `TaskHandler<T>` interface:
 
 ```typescript
 interface TaskHandler<T extends CommonTask> {
-    handle(task: T): Promise<void>;
+    handle(task: T, job: Job<T>): Promise<WorkflowResult<any>>;
     taskType: string; // Format: "{type}" or "{type}:{target}"
 }
 ```
@@ -245,7 +255,9 @@ interface TaskHandler<T extends CommonTask> {
 3. Determine handler key: `{type}:{target}` if target exists, else `{type}`.
 4. Look up registered handler.
 5. If no handler found, throw `UnrecoverableError`.
-6. Execute `handler.handle(task)`.
+6. If `job.data.workflowId` is present, override `job.getChildrenValues()` so it returns direct father task results keyed by father task name.
+7. Execute `handler.handle(task)`.
+8. Return `{ __result, __name }`, where `__result` is the handler result and `__name` is the BullMQ job name.
 
 ### 7.3 Registered Handlers
 
@@ -268,7 +280,7 @@ Queue behavior is controlled by `config.queue`:
 | `regenerationInterval` | Token regeneration interval in ms       |
 | `maxQueueLength`       | Maximum pending jobs in queue           |
 
-`config.queue` SHALL contain separate sections for `save`, `ai`, `update`, `search`, `read`, and `rag`.
+`config.queue` SHALL contain separate sections for `save`, `ai`, `update`, `search`, `read`, `rag`, and `discover`.
 
 The `search` worker SHALL use `config.queue.search.concurrencyLimit`.
 
@@ -340,11 +352,12 @@ When no clients are subscribed to `stats:queues`, the server SHALL stop the peri
 
 ## 10. Invariants
 
-1. Each task has a unique 8-character ID.
-2. Task status transitions: PENDING -> PROCESSING -> (COMPLETED | FAILED).
-3. Failed tasks are marked with `FAILED` status and error info.
-4. Queue names are derived from task types via constant mapping.
-5. A duplicate random task ID does not overwrite an existing task row.
+1. Each legacy non-workflow task has a unique 8-character ID.
+2. Each workflow task has a unique 16-character ID.
+3. Task status transitions: PENDING -> PROCESSING -> (COMPLETED | FAILED).
+4. Failed tasks are marked with `FAILED` status and error info.
+5. Queue names are derived from task types via constant mapping.
+6. A duplicate random task ID does not overwrite an existing task row.
 
 ## 11. File Locations
 

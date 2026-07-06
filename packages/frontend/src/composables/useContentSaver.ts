@@ -16,6 +16,28 @@ export function useContentSaver() {
         cleanupCallbacks.add(cleanup);
     };
 
+    const openWorkflowTracker = (workflowId: string) => {
+        const { href } = router.resolve({ name: 'workflow-tracker', params: { id: workflowId } });
+        const newWindow = window.open(href, '_blank', 'noopener,noreferrer');
+        if (newWindow) newWindow.opener = null;
+    };
+
+    const notifyWorkflowSubmitted = (response: any, title = '保存任务已提交') => {
+        const workflowId = response?.data?.workflowId;
+        if (!workflowId) {
+            message.success(title);
+            return;
+        }
+
+        dialog.success({
+            title,
+            content: `工作流 ${workflowId} 已创建。`,
+            positiveText: '跟踪工作流',
+            negativeText: '留在当前页',
+            onPositiveClick: () => openWorkflowTracker(workflowId)
+        });
+    };
+
     onUnmounted(() => {
         for (const cleanup of cleanupCallbacks) {
             cleanup();
@@ -36,8 +58,7 @@ export function useContentSaver() {
                 try {
                     isSaving.value = true;
                     const res = await saveAction();
-                    const taskId = res?.data?.taskId;
-                    message.success(taskId ? `保存任务已提交: ${taskId}` : '保存任务已提交');
+                    notifyWorkflowSubmitted(res);
                 } catch (e: any) {
                     message.error(e.message || '保存失败');
                     isSaving.value = false;
@@ -154,6 +175,8 @@ export function useContentSaver() {
         stopSaving,
         setupUpdateListener,
         setupTaskUpdateListener,
-        handleRefresh
+        handleRefresh,
+        notifyWorkflowSubmitted,
+        openWorkflowTracker
     };
 }

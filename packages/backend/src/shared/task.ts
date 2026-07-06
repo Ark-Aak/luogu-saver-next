@@ -5,8 +5,8 @@ export interface CommonTask {
     taskName?: string;
     track?: boolean;
     report?: boolean;
-    __fathers?: string[];
-    __isRoot?: boolean;
+    fathers?: string[];
+    fatherIds?: Record<string, string>;
     payload: {
         target: string;
         metadata: Record<string, any>;

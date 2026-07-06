@@ -12,11 +12,11 @@ export class Workflow extends BaseEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column({ name: 'root_job_id', nullable: true })
-    rootJobId: string;
+    @Column({ name: 'root_job_id', type: 'varchar', nullable: true })
+    rootJobId: string | null;
 
-    @Column({ name: 'queue_name', nullable: true })
-    queueName: string;
+    @Column({ name: 'queue_name', type: 'varchar', nullable: true })
+    queueName: string | null;
 
     @Column({ default: 'pending' })
     status: string;

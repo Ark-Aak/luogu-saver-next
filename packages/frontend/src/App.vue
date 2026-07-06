@@ -569,24 +569,46 @@ watch(
     { immediate: true }
 );
 
+const mixThemeColor = (color: string, colorRatio: number, base: string) => {
+    return `color-mix(in srgb, ${color} ${colorRatio}%, ${base})`;
+};
+
 const themeOverrides = computed<GlobalThemeOverrides>(() => {
+    const vars = uiThemeVars.value;
+
     return {
         common: {
             fontFamily: "'Lato', sans-serif",
             fontFamilyMono: "'Fira Code', monospace",
-            borderRadius: uiThemeVars.value.cardRadius,
-            bodyColor: uiThemeVars.value.bodyColor,
-            primaryColor: uiThemeVars.value.primaryColor,
-            primaryColorHover: uiThemeVars.value.primaryColorHover,
-            primaryColorPressed: uiThemeVars.value.primaryColorPressed,
-            primaryColorSuppl: uiThemeVars.value.primaryColorSuppl,
-            cardColor: uiThemeVars.value.cardColor,
-            textColor1: uiThemeVars.value.textColor,
-            textColor2: uiThemeVars.value.secondaryTextColor,
-            textColor3: uiThemeVars.value.mutedTextColor,
-            placeholderColor: uiThemeVars.value.controlPlaceholderColor,
-            dividerColor: uiThemeVars.value.borderColor,
-            borderColor: uiThemeVars.value.controlBorderColor
+            borderRadius: vars.cardRadius,
+            bodyColor: vars.bodyColor,
+            primaryColor: vars.primaryColor,
+            primaryColorHover: vars.primaryColorHover,
+            primaryColorPressed: vars.primaryColorPressed,
+            primaryColorSuppl: vars.primaryColorSuppl,
+            infoColor: vars.infoColor,
+            infoColorHover: mixThemeColor(vars.infoColor, 82, vars.cardColor),
+            infoColorPressed: mixThemeColor(vars.infoColor, 82, '#000000'),
+            infoColorSuppl: mixThemeColor(vars.infoColor, 35, vars.cardColor),
+            successColor: vars.successColor,
+            successColorHover: mixThemeColor(vars.successColor, 82, vars.cardColor),
+            successColorPressed: mixThemeColor(vars.successColor, 82, '#000000'),
+            successColorSuppl: mixThemeColor(vars.successColor, 35, vars.cardColor),
+            warningColor: vars.warningColor,
+            warningColorHover: mixThemeColor(vars.warningColor, 82, vars.cardColor),
+            warningColorPressed: mixThemeColor(vars.warningColor, 82, '#000000'),
+            warningColorSuppl: mixThemeColor(vars.warningColor, 35, vars.cardColor),
+            errorColor: vars.errorColor,
+            errorColorHover: mixThemeColor(vars.errorColor, 82, vars.cardColor),
+            errorColorPressed: mixThemeColor(vars.errorColor, 82, '#000000'),
+            errorColorSuppl: mixThemeColor(vars.errorColor, 35, vars.cardColor),
+            cardColor: vars.cardColor,
+            textColor1: vars.textColor,
+            textColor2: vars.secondaryTextColor,
+            textColor3: vars.mutedTextColor,
+            placeholderColor: vars.controlPlaceholderColor,
+            dividerColor: vars.borderColor,
+            borderColor: vars.controlBorderColor
         },
         Layout: {
             color: uiThemeVars.value.bodyColor,
@@ -741,11 +763,11 @@ const themeOverrides = computed<GlobalThemeOverrides>(() => {
             borderRadius: uiThemeVars.value.pillRadius
         },
         Alert: {
-            color: uiThemeVars.value.panelColor,
-            colorInfo: uiThemeVars.value.panelColor,
-            colorSuccess: uiThemeVars.value.panelColor,
-            colorWarning: uiThemeVars.value.panelColor,
-            colorError: uiThemeVars.value.panelColor,
+            color: vars.panelColor,
+            colorInfo: vars.alertInfoBackgroundColor,
+            colorSuccess: vars.alertSuccessBackgroundColor,
+            colorWarning: vars.alertWarningBackgroundColor,
+            colorError: vars.alertErrorBackgroundColor,
             border: `1px solid ${uiThemeVars.value.borderColor}`,
             borderInfo: `1px solid ${uiThemeVars.value.infoColor}`,
             borderSuccess: `1px solid ${uiThemeVars.value.successColor}`,
@@ -925,6 +947,10 @@ const themeCssVars = computed(() => {
         '--ui-success-color': vars.successColor,
         '--ui-warning-color': vars.warningColor,
         '--ui-error-color': vars.errorColor,
+        '--ui-alert-info-background-color': vars.alertInfoBackgroundColor,
+        '--ui-alert-success-background-color': vars.alertSuccessBackgroundColor,
+        '--ui-alert-warning-background-color': vars.alertWarningBackgroundColor,
+        '--ui-alert-error-background-color': vars.alertErrorBackgroundColor,
         '--ui-orange-color': vars.orangeColor,
         '--ui-cyan-color': vars.cyanColor,
         '--ui-muted-accent-color': vars.mutedAccentColor,

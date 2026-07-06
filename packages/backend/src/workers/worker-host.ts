@@ -13,6 +13,7 @@ import { config } from '@/config';
 import { logger } from '@/lib/logger';
 import { TaskService } from '@/services/task.service';
 import { emitToRoom } from '@/lib/socket';
+import { FlowManager } from '@/workers/flow-manager';
 
 export class WorkerHost<T extends CommonTask> {
     public worker: Worker<T>;
@@ -98,18 +99,22 @@ export class WorkerHost<T extends CommonTask> {
 
         this.worker.on('completed', async job => {
             logger.info({ jobId: job.id }, 'Job completed successfully.');
+            const returnvalue = job.returnvalue as any;
             if (this.shouldEmitTaskEvent(job)) {
-                const returnvalue = job.returnvalue as any;
                 emitToRoom(`task:${job.id}`, `task:${job.id}:completed`, {
                     status: 'completed',
                     result: this.sanitizeReportedResult(returnvalue?.__result)
                 });
             }
-            await TaskService.updateTask(
-                job.id!,
-                TaskStatus.COMPLETED,
-                'Task completed successfully'
-            );
+            if (job.data?.workflowId) {
+                await FlowManager.handleWorkflowJobCompleted(job, returnvalue);
+            } else {
+                await TaskService.updateTask(
+                    job.id!,
+                    TaskStatus.COMPLETED,
+                    'Task completed successfully'
+                );
+            }
         });
 
         this.worker.on('paused', () => {
@@ -131,7 +136,13 @@ export class WorkerHost<T extends CommonTask> {
                     });
                 }
                 logger.error({ jobId: job?.id, err }, 'Job failed PERMANENTLY.');
-                if (job?.id) await TaskService.updateTask(job.id, TaskStatus.FAILED, err.message);
+                if (job?.id) {
+                    if (job.data?.workflowId) {
+                        await FlowManager.handleWorkflowJobFailed(job, err.message);
+                    } else {
+                        await TaskService.updateTask(job.id, TaskStatus.FAILED, err.message);
+                    }
+                }
             } else {
                 logger.warn(
                     { jobId: job?.id, attempt: job?.attemptsMade, err },

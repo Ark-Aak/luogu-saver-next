@@ -31,9 +31,9 @@ export interface DiscoveryRun {
 
 interface CreateWorkflowTemplateResponse {
     workflowId: string;
-    rootJobId: string;
     taskIds: Record<string, string>;
     reportTaskIds: Record<string, string>;
+    trackTaskIds: Record<string, string>;
 }
 
 export async function getAdminUsers() {

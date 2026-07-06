@@ -1,4 +1,6 @@
 import { type CommonTask } from '@/shared/task';
+import { logger } from '@/lib/logger';
+import { WorkflowHelper } from '@/services/helpers/workflow.helper';
 import { type TaskHandler } from '@/workers/types';
 import { Job, UnrecoverableError } from 'bullmq';
 
@@ -11,6 +13,19 @@ export class TaskProcessor<T extends CommonTask> {
 
     process = async (job: Job<T>) => {
         const task = job.data as any;
+        logger.debug(
+            {
+                jobId: job.id,
+                jobName: job.name,
+                workflowId: task.workflowId,
+                taskName: task.taskName,
+                type: task.type,
+                target: task.payload?.target,
+                fathers: task.fathers || []
+            },
+            'Task processor received job'
+        );
+
         await job.updateProgress('Fetching handler');
         const typeName = task.payload.target ? `${task.type}:${task.payload.target}` : task.type;
         const handler = this.taskHandlers.get(typeName);
@@ -18,45 +33,51 @@ export class TaskProcessor<T extends CommonTask> {
             throw new UnrecoverableError(`No handler registered for task type: ${typeName}`);
         }
 
-        const originalGetChildrenValues = job.getChildrenValues.bind(job);
-        const rawValues = await originalGetChildrenValues();
-        const allAncestors: Record<string, any> = {};
-        for (const value of Object.values(rawValues)) {
-            if (value && typeof value === 'object' && '__result' in value) {
-                if (value.__name) {
-                    allAncestors[value.__name] = value.__result;
-                }
-                if (value.__ancestors) {
-                    Object.assign(allAncestors, value.__ancestors);
-                }
-            }
+        if (task.workflowId) {
+            job.getChildrenValues = async () => WorkflowHelper.getFatherResults(task);
+            logger.debug(
+                {
+                    jobId: job.id,
+                    workflowId: task.workflowId,
+                    taskName: task.taskName,
+                    fatherNames: task.fathers || []
+                },
+                'Task processor configured workflow upstream result loader'
+            );
         }
-        job.getChildrenValues = async () => {
-            const declaredFathers = task.__fathers;
-            if (Array.isArray(declaredFathers)) {
-                const filtered: Record<string, any> = {};
-                for (const name of declaredFathers) {
-                    if (name in allAncestors) {
-                        filtered[name] = allAncestors[name];
-                    }
-                }
-                return filtered;
-            }
-            return allAncestors;
-        };
+
+        logger.debug(
+            {
+                jobId: job.id,
+                workflowId: task.workflowId,
+                taskName: task.taskName,
+                handlerKey: typeName
+            },
+            'Task processor resolved handler'
+        );
 
         await job.updateProgress('Sending to handler');
         const result = await handler.handle(task, job);
 
-        const nextAncestors = { ...allAncestors };
-        if (job.name) {
-            nextAncestors[job.name] = result;
-        }
+        logger.debug(
+            {
+                jobId: job.id,
+                workflowId: task.workflowId,
+                taskName: task.taskName,
+                handlerKey: typeName,
+                resultKeys: this.getResultKeys(result)
+            },
+            'Task processor handler completed'
+        );
 
         return {
             __result: result,
-            __name: job.name,
-            __ancestors: nextAncestors
+            __name: job.name
         };
     };
+
+    private getResultKeys(result: any) {
+        if (!result || typeof result !== 'object') return [];
+        return Object.keys(result);
+    }
 }

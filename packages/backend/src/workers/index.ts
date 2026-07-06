@@ -44,7 +44,7 @@ import { config } from '@/config';
 import { WorkerOptions } from 'bullmq';
 import { FlowManager } from './flow-manager';
 
-export function bootstrap() {
+export async function bootstrap() {
     const saveTaskPointGuard = new PointGuard(
         'save_task_guard',
         config.queue.save.maxRequestToken,
@@ -95,6 +95,8 @@ export function bootstrap() {
 
     discoverProcessor.registerHandler(new ArticlePlazaDiscoveryHandler());
     discoverProcessor.registerHandler(new UserArticlesDiscoveryHandler());
+
+    await FlowManager.recoverActiveWorkflows();
 
     const saveWorkerHost = new WorkerHost<SaveTask>(
         QUEUE_NAMES[TaskType.SAVE],
@@ -174,8 +176,6 @@ export function bootstrap() {
         process.exit(0);
     });
 
-    logger.info('Worker hosts initialized and running.');
-
     FlowManager.setupQueueEvents();
-    logger.info('FlowManager queue events set up.');
+    logger.info('Worker hosts initialized and running.');
 }
