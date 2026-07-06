@@ -13,7 +13,13 @@ import {
     useDialog,
     useMessage
 } from 'naive-ui';
-import { SyncOutline, TrophyOutline, ReaderOutline, PersonCircleOutline } from '@vicons/ionicons5';
+import {
+    SyncOutline,
+    TrophyOutline,
+    ReaderOutline,
+    PersonCircleOutline,
+    ShareSocialOutline
+} from '@vicons/ionicons5';
 
 import { getUserProfile, refreshUserProfile } from '@/api/user';
 import type { UserProfile } from '@/types/user';
@@ -22,10 +28,12 @@ import Card from '@/components/Card.vue';
 import MarkdownViewer from '@/components/MarkdownViewer.vue';
 import UserPrizeBadge from '@/components/UserPrizeBadge.vue';
 import { useContentSaver } from '@/composables/useContentSaver';
+import { useLuoguSource } from '@/utils/luogu-source.ts';
 
 const route = useRoute();
 const message = useMessage();
 const dialog = useDialog();
+const { buildLuoguUrl } = useLuoguSource();
 const {
     isSaving,
     hasUpdate,
@@ -267,6 +275,21 @@ onUnmounted(() => {
                         title="用户主页"
                         :icon="PersonCircleOutline"
                     >
+                        <template #header-extra>
+                            <n-button
+                                size="small"
+                                secondary
+                                tag="a"
+                                :href="buildLuoguUrl(`/user/${profile.id}`)"
+                                target="_blank"
+                            >
+                                <template #icon>
+                                    <n-icon><ShareSocialOutline /></n-icon>
+                                </template>
+                                原站
+                            </n-button>
+                        </template>
+
                         <div class="identity-header">
                             <n-avatar
                                 round

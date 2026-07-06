@@ -215,7 +215,7 @@ const handleReset = () => {
 
     <n-drawer
         v-model:show="showDrawer"
-        :width="420"
+        width="min(420px, 66.666vw)"
         placement="right"
         :theme-overrides="{
             color: uiTheme?.cardColor,

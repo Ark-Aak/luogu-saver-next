@@ -135,7 +135,7 @@ onUnmounted(() => {
         </n-spin>
 
         <p v-if="fetchedAt && comments.length > 0" class="comment-source">
-            评论来源于洛谷,最后同步于
+            评论来源于洛谷，最后同步于
             <n-time :time="new Date(fetchedAt)" type="relative" />
         </p>
     </Card>
