@@ -1,18 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { inject, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { NIcon, NInput, NButton } from 'naive-ui';
-import { IconSearch, IconNewspaper, IconGlobe } from '@/utils/icons';
+import { Search, ArrowForward } from '@vicons/ionicons5';
+import { uiThemeKey } from '@/styles/theme/themeKeys.ts';
 import LuoguLogo from '@/components/icons/LuoguLogo.vue';
 
+const themeVars = inject(uiThemeKey)!;
 const searchText = ref('');
 const router = useRouter();
-
-const features = [
-    { icon: IconNewspaper, title: '内容归档', desc: '文章与剪贴板长期保存，原文删除后仍可访问' },
-    { icon: IconSearch, title: '全文检索', desc: '按标题、正文、作者快速定位已保存内容' },
-    { icon: IconGlobe, title: '文章广场', desc: '浏览社区最新收录与个性化推荐' }
-];
 
 function parsePathLikeInput(input: string) {
     try {
@@ -83,178 +79,253 @@ const handleSearch = () => {
 </script>
 
 <template>
-    <section class="hero-section" aria-labelledby="hero-title">
-        <div class="hero-brand">
-            <n-icon class="hero-logo" size="44" :component="LuoguLogo" aria-hidden="true" />
-            <h1 id="hero-title" class="hero-title">洛谷保存站</h1>
-        </div>
-        <p class="hero-subtitle">Save everything, keep it alive.</p>
-
-        <div class="hero-search">
-            <n-input
-                v-model:value="searchText"
-                class="hero-input"
-                size="large"
-                placeholder="输入链接、文章 ID、关键词或作者用户名"
-                aria-label="搜索已保存内容"
-                clearable
-                @keydown.enter="handleSearch"
-            >
-                <template #prefix>
-                    <n-icon :component="IconSearch" class="search-icon" />
-                </template>
-            </n-input>
-            <n-button
-                secondary
-                type="primary"
-                size="large"
-                class="search-button"
-                aria-label="搜索"
-                @click="handleSearch"
-            >
-                查看
-            </n-button>
-        </div>
-
-        <ul class="hero-features">
-            <li v-for="feature in features" :key="feature.title" class="feature-item">
-                <div class="feature-icon" aria-hidden="true">
-                    <n-icon :component="feature.icon" size="18" />
+    <div class="hero-section">
+        <div class="hero-content">
+            <div class="hero-copy">
+                <div class="hero-eyebrow">ARCHIVE / SEARCH / RESTORE</div>
+                <div class="brand-header">
+                    <div class="logo-placeholder">
+                        <n-icon size="42" :color="themeVars.primaryColor" :component="LuoguLogo" />
+                    </div>
+                    <h1 class="hero-title">
+                        <span :style="{ color: themeVars.primaryColor }">洛谷</span>保存站
+                    </h1>
                 </div>
-                <div class="feature-text">
-                    <span class="feature-title">{{ feature.title }}</span>
-                    <span class="feature-desc">{{ feature.desc }}</span>
+                <p class="hero-subtitle">Save everything, keep it alive.</p>
+                <!--
+                <p class="hero-description">
+                
+                </p>
+                -->
+
+                <div class="hero-search">
+                    <n-input
+                        v-model:value="searchText"
+                        class="mac-input"
+                        size="large"
+                        placeholder="&nbsp;&nbsp;&nbsp输入链接、文章标题、文章 ID、关键词或作者用户名查看"
+                        @keydown.enter="handleSearch"
+                    >
+                        <template #prefix>
+                            <n-icon :component="Search" class="search-icon" />
+                        </template>
+                        <template #suffix>
+                            <n-button
+                                circle
+                                type="primary"
+                                class="search-button"
+                                @click="handleSearch"
+                            >
+                                <template #icon>
+                                    <n-icon :component="ArrowForward" />
+                                </template>
+                            </n-button>
+                        </template>
+                    </n-input>
                 </div>
-            </li>
-        </ul>
-    </section>
+            </div>
+            <div class="hero-panel">
+                <div class="panel-card">
+                    <span class="panel-label">INDEX</span>
+                    <strong>保存入口</strong>
+                </div>
+                <div class="panel-card">
+                    <span class="panel-label">FEED</span>
+                    <strong>文章推荐</strong>
+                </div>
+                <div class="panel-card">
+                    <span class="panel-label">VIEW</span>
+                    <strong>内容渲染</strong>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
 
 <style scoped>
 .hero-section {
-    max-width: 720px;
+    width: 100%;
+    max-width: 1220px;
     margin: 0 auto;
-    padding: clamp(32px, 6vh, 72px) 16px 0;
     box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+    padding: 48px;
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--ui-card-radius);
+    background: linear-gradient(135deg, var(--ui-card-color), var(--ui-body-gradient-end));
+    border: 1px solid var(--ui-border-color);
+    box-shadow: var(--ui-card-shadow);
 }
 
-.hero-brand {
-    display: flex;
+.hero-content {
+    position: relative;
+    z-index: 1;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
     align-items: center;
-    gap: 14px;
-    margin-bottom: 10px;
+    gap: 32px;
 }
 
-.hero-logo {
+.hero-copy {
+    width: 100%;
+}
+
+.hero-eyebrow {
+    display: inline-flex;
+    padding: 7px 12px;
+    margin-bottom: 18px;
+    border-radius: var(--ui-card-radius);
     color: var(--ui-primary-color);
+    background: var(--ui-panel-color);
+    border: 1px solid var(--ui-border-color);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+}
+
+.brand-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.logo-placeholder {
+    width: 62px;
+    height: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--ui-card-radius);
+    background: var(--ui-translucent-card-color);
+    box-shadow: none;
+    border: 1px solid var(--ui-border-color);
 }
 
 .hero-title {
-    margin: 0;
-    font-size: clamp(32px, 4.5vw, 44px);
+    font-size: clamp(40px, 5vw, 60px);
     font-weight: 700;
-    line-height: 1.15;
-    color: var(--ui-card-title-color);
+    margin: 0;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-family:
+        -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 .hero-subtitle {
-    margin: 0 0 28px;
-    font-size: 16px;
-    line-height: 1.7;
+    font-size: 24px;
     color: var(--ui-secondary-text-color);
+    margin: 0 0 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
+.hero-description {
+    max-width: 650px;
+    margin: 0 0 34px;
+    color: var(--ui-muted-text-color);
+    font-size: 16px;
+    line-height: 1.8;
 }
 
 .hero-search {
     width: 100%;
-    display: flex;
-    gap: 10px;
+    max-width: 700px;
 }
 
-.hero-input {
-    flex: 1;
+/* macOS Style Input */
+:deep(.mac-input) {
+    background-color: var(--ui-translucent-card-color) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--ui-border-color) !important;
+    border-radius: var(--ui-card-radius) !important;
+    box-shadow: var(--ui-card-shadow);
+    height: 58px;
+    font-size: 18px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.hero-input :deep(.n-input__input-el) {
-    height: 44px;
+:deep(.mac-input:hover) {
+    background-color: var(--ui-translucent-card-color) !important;
+    box-shadow: var(--ui-card-shadow);
 }
 
-.search-icon {
-    color: var(--ui-muted-text-color);
+:deep(.mac-input.n-input--focus) {
+    background-color: var(--ui-card-color) !important;
+    box-shadow: var(--ui-card-shadow);
 }
 
-/* The input's visible fill is inset by its 1px border; mirror that inset with
-   a transparent border so both controls paint the same 42px visual height. */
+:deep(.n-input__input-el) {
+    height: 100% !important;
+    padding-left: 8px;
+}
+
+:deep(.search-icon) {
+    opacity: 0.5;
+    margin-left: 8px;
+}
+
 .search-button {
-    flex-shrink: 0;
-    height: 44px;
-    border: 1px solid transparent;
-    background-clip: padding-box;
+    width: 40px;
+    height: 40px;
 }
 
-.hero-features {
-    list-style: none;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+.hero-panel {
     width: 100%;
-    margin: 36px 0 0;
-    padding: 0;
+    display: grid;
+    gap: 12px;
 }
 
-.feature-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 14px 16px;
-    text-align: left;
-    background: var(--ui-card-color);
-    border: 1px solid var(--ui-border-color);
+.panel-card {
+    padding: 16px;
     border-radius: var(--ui-card-radius);
+    background: var(--ui-translucent-card-color);
+    border: 1px solid var(--ui-border-color);
 }
 
-.feature-icon {
-    width: 32px;
-    height: 32px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    background: var(--ui-panel-color);
-    color: var(--ui-primary-color);
-}
-
-.feature-text {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-}
-
-.feature-title {
-    font-size: 14px;
-    font-weight: 600;
+.panel-card strong {
+    display: block;
+    margin-top: 8px;
     color: var(--ui-card-title-color);
+    font-size: 16px;
 }
 
-.feature-desc {
-    font-size: 12px;
-    line-height: 1.6;
-    color: var(--ui-muted-text-color);
-    text-wrap: pretty;
+.panel-label {
+    color: var(--ui-primary-color);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
 }
 
-@media (max-width: 720px) {
-    .hero-features {
+@media (max-width: 980px) {
+    .hero-section {
+        padding: 40px 28px;
+    }
+
+    .hero-content {
         grid-template-columns: 1fr;
     }
 
-    .hero-subtitle {
-        font-size: 15px;
+    .hero-panel {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .hero-section {
+        padding: 30px 18px;
+        border-radius: var(--ui-card-radius);
+    }
+
+    .brand-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .hero-panel {
+        grid-template-columns: 1fr;
     }
 }
 </style>

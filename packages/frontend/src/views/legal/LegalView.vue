@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { IconShieldUser, IconCircleAlert, IconTrash2 } from '@/utils/icons';
+import { Icon } from '@vicons/utils';
+import { UserShield, ExclamationCircle, TrashAlt } from '@vicons/fa';
 
 import Card from '@/components/Card.vue';
 import { LEGAL_DOCUMENTS, type LegalKey } from '@/views/legal/legal-content.ts';
@@ -12,9 +13,9 @@ const props = defineProps<{
 const doc = computed(() => LEGAL_DOCUMENTS[props.docKey]);
 
 const ICON_MAP = {
-    privacy: IconShieldUser,
-    disclaimer: IconCircleAlert,
-    deletion: IconTrash2
+    privacy: UserShield,
+    disclaimer: ExclamationCircle,
+    deletion: TrashAlt
 } as const;
 
 const iconComponent = computed(() => ICON_MAP[doc.value.icon]);
@@ -25,7 +26,9 @@ const iconComponent = computed(() => ICON_MAP[doc.value.icon]);
         <Card class="legal-card">
             <div class="legal-header">
                 <span class="legal-icon">
-                    <component :is="iconComponent" />
+                    <Icon>
+                        <component :is="iconComponent" />
+                    </Icon>
                 </span>
                 <div class="legal-header-text">
                     <h1 class="legal-title">{{ doc.title }}</h1>

@@ -15,7 +15,7 @@ import {
     NTag,
     useMessage
 } from 'naive-ui';
-import { IconSearch, IconNewspaper, IconUser, IconCalendar } from '@/utils/icons';
+import { SearchOutline, NewspaperOutline, PersonOutline, CalendarOutline } from '@vicons/ionicons5';
 import CardTitle from '@/components/CardTitle.vue';
 import Card from '@/components/Card.vue';
 import { searchArticles, type ArticleSearchHit } from '@/api/search.ts';
@@ -157,8 +157,8 @@ onMounted(loadSearch);
 
 <template>
     <div class="search-page">
-        <CardTitle title="搜索" :icon="IconSearch" class="search-header" chip="SEARCH">
-            按标题、摘要与作者检索已保存的文章
+        <CardTitle title="搜索" :icon="SearchOutline" class="search-header" chip="ARTICLE SEARCH">
+            SEARCH ARTICLES
         </CardTitle>
 
         <Card class="search-controls">
@@ -171,17 +171,12 @@ onMounted(loadSearch);
                         @keydown.enter="handleSearch"
                     >
                         <template #prefix>
-                            <n-icon :component="IconSearch" />
+                            <n-icon :component="SearchOutline" />
                         </template>
                     </n-input>
                 </n-gi>
                 <n-gi>
-                    <n-select
-                        v-model:value="category"
-                        :options="categoryOptions"
-                        placeholder="全部分类"
-                        clearable
-                    />
+                    <n-select v-model:value="category" :options="categoryOptions" clearable />
                 </n-gi>
                 <n-gi>
                     <n-button type="primary" block @click="handleSearch">搜索</n-button>
@@ -189,7 +184,7 @@ onMounted(loadSearch);
             </n-grid>
         </Card>
 
-        <div v-if="total > 0" class="result-meta">
+        <div class="result-meta">
             <span>共 {{ total }} 条结果</span>
             <span>耗时 {{ processingTimeMs }} ms</span>
         </div>
@@ -200,7 +195,7 @@ onMounted(loadSearch);
                     v-for="item in hits"
                     :key="item.id"
                     :title-html="renderSafeMarkedHtml(item.formatted?.title, item.title)"
-                    :icon="IconNewspaper"
+                    :icon="NewspaperOutline"
                     class="result-card"
                     hoverable
                     @click="openArticle(item.id)"
@@ -229,7 +224,7 @@ onMounted(loadSearch);
                                 {{ getCategory(item.category).label }}
                             </n-tag>
                             <span class="meta-item">
-                                <n-icon :component="IconUser" />
+                                <n-icon :component="PersonOutline" />
                                 <span
                                     v-html="
                                         renderSafeMarkedHtml(
@@ -241,13 +236,13 @@ onMounted(loadSearch);
                             </span>
                         </n-space>
                         <span class="meta-item">
-                            <n-icon :component="IconCalendar" />
+                            <n-icon :component="CalendarOutline" />
                             {{ formatDate(item.updatedAt) }}
                         </span>
                     </n-space>
                 </Card>
             </div>
-            <n-empty v-else-if="!loading" class="search-empty" description="没有搜索结果" />
+            <n-empty v-else-if="!loading" description="没有搜索结果" />
         </n-spin>
 
         <div v-if="total > limit" class="pagination">
@@ -288,7 +283,7 @@ onMounted(loadSearch);
 .result-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
+    gap: 14px;
 }
 
 .result-card {
@@ -309,13 +304,12 @@ onMounted(loadSearch);
 }
 
 .summary {
-    min-height: calc(3 * 1.7em);
+    min-height: 54px;
     margin: 0 0 14px;
     color: var(--ui-secondary-text-color);
-    font-size: 14px;
     line-height: 1.7;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 5;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -331,14 +325,10 @@ onMounted(loadSearch);
     gap: 4px;
 }
 
-.search-empty {
-    padding: 64px 0;
-}
-
 .pagination {
     display: flex;
     justify-content: center;
-    margin-top: 24px;
+    margin-top: 20px;
 }
 
 @media (max-width: 900px) {

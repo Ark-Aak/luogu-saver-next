@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { computed, inject, type Component, type Ref } from 'vue';
-import { NIcon } from 'naive-ui';
+import { computed, type Component, type CSSProperties, type Ref } from 'vue';
+import { NIcon, NCard, NH1, NText } from 'naive-ui';
 import { uiThemeKey, type UiThemeVars } from '@/styles/theme/themeKeys.ts';
+import { inject } from 'vue';
+import { hexToRgba } from '@/utils/render';
 
 const themeVars: Ref<UiThemeVars> = inject(uiThemeKey)!;
 
@@ -28,102 +30,137 @@ const props = defineProps({
     },
     chip: {
         type: String,
-        default: null
+        default: 'LUOGU SAVER'
     }
 });
 
-const effectiveIconColor = computed(() => props.iconColor || themeVars.value.primaryColor);
-const effectiveTextColor = computed(() => props.textColor || themeVars.value.cardTitleColor);
-const effectiveBackground = computed(() => props.backgroundColor || themeVars.value.cardColor);
+const containerStyle = computed(
+    (): CSSProperties => ({
+        background:
+            props.backgroundColor ||
+            `linear-gradient(135deg, ${hexToRgba(themeVars.value.primaryColor, 0.16)} 0%, ${themeVars.value.translucentCardColor} 52%, ${hexToRgba(themeVars.value.primaryColorHover, 0.2)} 100%)`,
+        color: themeVars.value.cardTitleColor
+    })
+);
+
+const titleStyle = computed(
+    (): CSSProperties => ({
+        color: props.textColor || themeVars.value.cardTitleColor,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        gap: '12px'
+    })
+);
+
+const effectiveIconColor = computed(() => {
+    return props.iconColor || themeVars.value.primaryColor;
+});
 </script>
 
 <template>
-    <header class="page-header" :style="{ background: effectiveBackground }">
-        <div class="header-main">
-            <div v-if="icon" class="icon-frame" aria-hidden="true">
-                <n-icon :component="icon" :color="effectiveIconColor" size="22" />
-            </div>
-            <div class="header-text">
-                <h1 class="title" :style="{ color: effectiveTextColor }">{{ title }}</h1>
-                <p class="subtitle">
-                    <slot />
-                </p>
+    <n-card :bordered="false" content-style="padding: 0;">
+        <div class="title-banner" :style="containerStyle">
+            <div class="banner-content">
+                <div class="banner-main">
+                    <div v-if="icon" class="icon-frame">
+                        <n-icon
+                            :component="icon"
+                            :color="effectiveIconColor"
+                            size="34"
+                            :depth="1"
+                        />
+                    </div>
+                    <div>
+                        <n-h1 class="title">
+                            <span :style="titleStyle">{{ title }}</span>
+                        </n-h1>
+                        <n-text class="subtitle">
+                            <slot />
+                        </n-text>
+                    </div>
+                </div>
+                <div v-if="chip" class="banner-chip">{{ chip }}</div>
             </div>
         </div>
-        <span v-if="chip" class="header-chip">{{ chip }}</span>
-    </header>
+    </n-card>
 </template>
 
 <style scoped>
-.page-header {
+.title-banner {
+    position: relative;
+    overflow: hidden;
+    padding: 24px 30px;
+    border-radius: var(--ui-card-radius);
+    box-shadow: var(--ui-card-shadow);
+    border: 1px solid var(--ui-border-color);
+}
+
+.banner-content {
+    position: relative;
+    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    padding: 20px 24px;
-    border: 1px solid var(--ui-border-color);
-    border-radius: var(--ui-card-radius);
-    box-shadow: var(--ui-card-shadow);
+    gap: 20px;
 }
 
-.header-main {
+.banner-main {
     display: flex;
     align-items: center;
-    gap: 14px;
-    min-width: 0;
+    gap: 16px;
 }
 
 .icon-frame {
-    width: 44px;
-    height: 44px;
-    flex-shrink: 0;
-    border-radius: 10px;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--ui-card-radius);
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--ui-panel-color);
-}
-
-.header-text {
-    min-width: 0;
+    border: 1px solid var(--ui-border-color);
+    box-shadow: inset 0 1px 0 var(--ui-translucent-card-color);
 }
 
 .title {
-    margin: 0;
-    font-size: 20px;
-    font-weight: 600;
-    line-height: 1.3;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    margin: 0 0 4px;
+    font-weight: bold;
+}
+
+:deep(.title .n-h1) {
+    color: var(--ui-card-title-color);
 }
 
 .subtitle {
-    margin: 2px 0 0;
-    color: var(--ui-muted-text-color);
-    font-size: 13px;
-    line-height: 1.6;
+    color: var(--ui-muted-text-color) !important;
+    font-size: 1rem;
+    letter-spacing: 0.08em;
 }
 
-.subtitle:empty {
-    display: none;
-}
-
-.header-chip {
-    flex-shrink: 0;
-    color: var(--ui-muted-text-color);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+.banner-chip {
+    padding: 8px 12px;
+    border-radius: var(--ui-card-radius);
+    color: var(--ui-primary-color);
+    border: 1px solid var(--ui-border-color);
+    background: var(--ui-panel-color);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    white-space: nowrap;
 }
 
 @media (max-width: 720px) {
-    .page-header {
-        padding: 16px 20px;
+    .title-banner {
+        padding: 22px;
+        border-radius: var(--ui-card-radius);
     }
 
-    .header-chip {
+    .banner-content {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .banner-chip {
         display: none;
     }
 }

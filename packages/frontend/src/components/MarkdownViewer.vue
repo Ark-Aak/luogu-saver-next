@@ -254,6 +254,7 @@ onMounted(processContent);
     right: 8px;
     padding: 4px 6px;
     background: var(--ui-copy-button-background-color);
+    backdrop-filter: blur(4px);
     border: none;
     border-radius: var(--ui-card-radius);
     cursor: pointer;

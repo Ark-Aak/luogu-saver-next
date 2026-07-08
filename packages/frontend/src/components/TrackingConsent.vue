@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { NCard, NSpace, NButton, NText, NIcon } from 'naive-ui';
-import { IconChartLine } from '@/utils/icons';
+import { AnalyticsOutline } from '@vicons/ionicons5';
 
 const show = ref(false);
 
@@ -37,7 +37,7 @@ const handleReject = () => {
                     <div class="text-section">
                         <div class="icon-wrapper">
                             <n-icon size="24" color="var(--ui-primary-color)">
-                                <IconChartLine />
+                                <AnalyticsOutline />
                             </n-icon>
                         </div>
                         <div class="text-content">
@@ -73,7 +73,8 @@ const handleReject = () => {
 .consent-card {
     box-shadow: var(--ui-elevated-shadow);
     border-radius: var(--ui-card-radius);
-    background-color: var(--ui-card-color);
+    background-color: var(--ui-translucent-card-color);
+    backdrop-filter: blur(10px);
     border: 1px solid var(--ui-border-color);
 }
 

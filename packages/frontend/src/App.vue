@@ -36,8 +36,6 @@
                             v-model:value="activeKey"
                             :collapsed="collapsed"
                             :collapsed-width="64"
-                            :icon-size="20"
-                            :collapsed-icon-size="20"
                             :options="menuOptions"
                             :responsive="true"
                             :accordion="true"
@@ -62,130 +60,143 @@
                                         @click.stop="openMobileSider"
                                     >
                                         <template #icon>
-                                            <n-icon :component="IconMenu" />
+                                            <n-icon :component="MenuOutline" />
                                         </template>
                                     </n-button>
                                     <SiteNotificationCenter />
-                                    <n-back-top :right="20" :bottom="200" />
+                                    <n-back-top :right="50" :bottom="200" />
                                     <router-view />
                                 </div>
-                                <n-layout-footer bordered class="app-footer">
-                                    <n-grid class="footer-grid" cols="1 s:2" responsive="screen">
-                                        <n-gi>
-                                            <p class="footer-element">
-                                                <n-icon class="footer-icon">
-                                                    <IconCopyright />
-                                                </n-icon>
-                                                <span> 2025-2026 洛谷保存站 </span>
-                                            </p>
-                                            <p class="footer-element">
-                                                <a
-                                                    href="https://github.com/Ark-Aak/luogu-saver-next"
-                                                    class="footer-link"
-                                                >
-                                                    <n-icon class="footer-icon">
-                                                        <IconGithub />
-                                                    </n-icon>
-                                                    <span> GitHub </span>
-                                                </a>
-                                                <a href="https://help.luogu.me" class="footer-link">
-                                                    <n-icon class="footer-icon">
-                                                        <IconBookOpen />
-                                                    </n-icon>
-                                                    <span> 帮助文档 </span>
-                                                </a>
-                                                <a
-                                                    href="https://help.luogu.me/docs/update"
-                                                    class="footer-link"
-                                                >
-                                                    <n-icon class="footer-icon">
-                                                        <IconHistory />
-                                                    </n-icon>
-                                                    <span> 更新日志 </span>
-                                                </a>
-                                            </p>
-                                            <p class="footer-element">
-                                                <n-icon class="footer-icon">
-                                                    <IconClock />
-                                                </n-icon>
-                                                <span class="tabular-nums">
-                                                    本网站已运行
-                                                    {{ timeSinceFound }} 秒
-                                                </span>
-                                            </p>
-                                            <p class="footer-element">
-                                                <a
-                                                    href="https://github.com/laikit-dev/luogu-saver/graphs/contributors"
-                                                    class="footer-link"
-                                                >
-                                                    <n-icon class="footer-icon">
-                                                        <IconUsers />
-                                                    </n-icon>
-                                                    <span> 项目贡献者 </span>
-                                                </a>
-                                            </p>
-                                        </n-gi>
-                                        <n-gi>
-                                            <p class="footer-element right-aligned">
-                                                <n-icon class="footer-icon"><IconCodeXml /></n-icon>
-                                                <span>
-                                                    开发者：Federico2903 & Murasame & quanac-lcx &
+                                <IconConfigProvider size="14">
+                                    <n-layout-footer bordered class="app-footer">
+                                        <n-grid
+                                            class="footer-grid"
+                                            cols="1 s:2"
+                                            responsive="screen"
+                                        >
+                                            <n-gi>
+                                                <p class="footer-element">
+                                                    <Icon>
+                                                        <Copyright />
+                                                    </Icon>
+                                                    <span> 2025-2026 洛谷保存站 </span>
+                                                </p>
+                                                <p class="footer-element">
+                                                    <a
+                                                        href="https://github.com/Ark-Aak/luogu-saver-next"
+                                                        class="footer-link"
+                                                    >
+                                                        <Icon>
+                                                            <Github />
+                                                        </Icon>
+                                                        <span> GitHub </span>
+                                                    </a>
+                                                    <a
+                                                        href="https://help.luogu.me"
+                                                        class="footer-link"
+                                                    >
+                                                        <Icon>
+                                                            <Book />
+                                                        </Icon>
+                                                        <span> 帮助文档 </span>
+                                                    </a>
+                                                    <a
+                                                        href="https://help.luogu.me/docs/update"
+                                                        class="footer-link"
+                                                    >
+                                                        <Icon>
+                                                            <History />
+                                                        </Icon>
+                                                        <span> 更新日志 </span>
+                                                    </a>
+                                                </p>
+                                                <p class="footer-element">
+                                                    <Icon>
+                                                        <Clock />
+                                                    </Icon>
+                                                    <span>
+                                                        本网站已运行
+                                                        {{ timeSinceFound }} 秒
+                                                    </span>
+                                                </p>
+                                                <p class="footer-element">
                                                     <a
                                                         href="https://github.com/laikit-dev/luogu-saver/graphs/contributors"
+                                                        class="footer-link"
+                                                    >
+                                                        <Icon>
+                                                            <Users />
+                                                        </Icon>
+                                                        <span> 项目贡献者 </span>
+                                                    </a>
+                                                </p>
+                                            </n-gi>
+                                            <n-gi>
+                                                <p class="footer-element right-aligned">
+                                                    <Icon><Code /></Icon>
+                                                    <span>
+                                                        开发者：Federico2903 & Murasame & quanac-lcx
+                                                        &
+                                                        <a
+                                                            href="https://github.com/laikit-dev/luogu-saver/graphs/contributors"
+                                                            target="_blank"
+                                                            >其他贡献者</a
+                                                        >
+                                                    </span>
+                                                </p>
+                                                <p class="footer-element right-aligned">
+                                                    <a
+                                                        href="https://qm.qq.com/q/QVM9YFEb26"
                                                         target="_blank"
-                                                        >其他贡献者</a
+                                                        class="footer-link"
                                                     >
-                                                </span>
-                                            </p>
-                                            <p class="footer-element right-aligned">
-                                                <a
-                                                    href="https://qm.qq.com/q/QVM9YFEb26"
-                                                    target="_blank"
-                                                    class="footer-link"
-                                                >
-                                                    <n-icon class="footer-icon">
-                                                        <IconMessagesSquare />
-                                                    </n-icon>
-                                                    <span
-                                                        >洛谷保存站用户群：1017248143（点击加入）</span
+                                                        <Icon>
+                                                            <Qq />
+                                                        </Icon>
+                                                        <span
+                                                            >洛谷保存站用户群：1017248143（点击加入）</span
+                                                        >
+                                                    </a>
+                                                </p>
+                                                <p class="footer-element right-aligned">
+                                                    <router-link to="/privacy" class="footer-link">
+                                                        <Icon>
+                                                            <UserShield />
+                                                        </Icon>
+                                                        <span>隐私协议</span>
+                                                    </router-link>
+                                                    <router-link
+                                                        to="/disclaimer"
+                                                        class="footer-link"
                                                     >
-                                                </a>
-                                            </p>
-                                            <p class="footer-element right-aligned">
-                                                <router-link to="/privacy" class="footer-link">
-                                                    <n-icon class="footer-icon">
-                                                        <IconShieldUser />
-                                                    </n-icon>
-                                                    <span>隐私协议</span>
-                                                </router-link>
-                                                <router-link to="/disclaimer" class="footer-link">
-                                                    <n-icon class="footer-icon">
-                                                        <IconCircleAlert />
-                                                    </n-icon>
-                                                    <span>免责声明</span>
-                                                </router-link>
-                                                <router-link to="/deletion" class="footer-link">
-                                                    <n-icon class="footer-icon">
-                                                        <IconTrash2 />
-                                                    </n-icon>
-                                                    <span>数据移除政策</span>
-                                                </router-link>
-                                            </p>
-                                            <p class="footer-element right-aligned">
-                                                <a
-                                                    href="https://www.rainyun.com/federico_?s=saver"
-                                                    target="_blank"
-                                                    class="footer-link"
-                                                >
-                                                    <n-icon class="footer-icon">
-                                                        <IconServer />
-                                                    </n-icon>
-                                                    <span>本站由雨云提供支持</span>
-                                                </a>
-                                            </p>
-                                        </n-gi>
-                                    </n-grid>
-                                </n-layout-footer>
+                                                        <Icon>
+                                                            <ExclamationCircle />
+                                                        </Icon>
+                                                        <span>免责声明</span>
+                                                    </router-link>
+                                                    <router-link to="/deletion" class="footer-link">
+                                                        <Icon>
+                                                            <TrashAlt />
+                                                        </Icon>
+                                                        <span>数据移除政策</span>
+                                                    </router-link>
+                                                </p>
+                                                <p class="footer-element right-aligned">
+                                                    <a
+                                                        href="https://www.rainyun.com/federico_?s=saver"
+                                                        target="_blank"
+                                                        class="footer-link"
+                                                    >
+                                                        <Icon>
+                                                            <Server />
+                                                        </Icon>
+                                                        <span>本站由雨云提供支持</span>
+                                                    </a>
+                                                </p>
+                                            </n-gi>
+                                        </n-grid>
+                                    </n-layout-footer>
+                                </IconConfigProvider>
                             </n-layout-content>
                         </n-layout>
                     </n-dialog-provider>
@@ -219,30 +230,35 @@ import {
 } from 'naive-ui';
 
 import {
-    IconHouse,
-    IconLayoutGrid,
-    IconSearch,
-    IconChartColumn,
-    IconGlobe,
-    IconSettings,
-    IconShieldCheck,
-    IconMessageCircleMore,
-    IconCloudDownload,
-    IconMenu,
-    IconHammer,
-    IconCopyright,
-    IconCodeXml,
-    IconShieldUser,
-    IconCircleAlert,
-    IconTrash2,
-    IconMessagesSquare,
-    IconServer,
-    IconGithub,
-    IconClock,
-    IconBookOpen,
-    IconHistory,
-    IconUsers
-} from '@/utils/icons';
+    HomeOutline,
+    AppsOutline,
+    SearchOutline,
+    StatsChartOutline,
+    GlobeOutline,
+    SettingsOutline,
+    ShieldCheckmarkOutline,
+    ChatbubbleEllipsesOutline,
+    CloudDownloadOutline,
+    MenuOutline,
+    HammerOutline
+} from '@vicons/ionicons5';
+
+import { Icon, IconConfigProvider } from '@vicons/utils';
+
+import {
+    Copyright,
+    Code,
+    UserShield,
+    ExclamationCircle,
+    TrashAlt,
+    Qq,
+    Server,
+    Github,
+    Clock,
+    Book,
+    History,
+    Users
+} from '@vicons/fa';
 
 import { renderIcon } from '@/utils/render';
 
@@ -365,46 +381,46 @@ const menuOptions = computed<MenuOption[]>(() => [
     {
         label: '主页',
         key: 'home',
-        icon: renderIcon(IconHouse)
+        icon: renderIcon(HomeOutline)
     },
     {
         label: '搜索',
         key: 'search',
-        icon: renderIcon(IconSearch)
+        icon: renderIcon(SearchOutline)
     },
     {
         label: 'RAG 问答',
         key: 'rag',
-        icon: renderIcon(IconMessageCircleMore)
+        icon: renderIcon(ChatbubbleEllipsesOutline)
     },
     // {
     //     label: '题目',
     //     key: 'problem',
-    //     icon: renderIcon(IconList)
+    //     icon: renderIcon(ListOutline)
     // },
     {
         label: '文章广场',
         key: 'plaza',
-        icon: renderIcon(IconGlobe)
+        icon: renderIcon(GlobeOutline)
     },
     ...(canShowDiscoveryMenu.value
         ? [
               {
                   label: '用户文章爬取',
                   key: 'discovery/user-articles',
-                  icon: renderIcon(IconCloudDownload)
+                  icon: renderIcon(CloudDownloadOutline)
               }
           ]
         : []),
     // {
     //     label: '用户动态',
     //     key: 'benben',
-    //     icon: renderIcon(IconShare2),
+    //     icon: renderIcon(ShareSocialOutline),
     //     children: [
     //         {
     //             label: '被 at 查询',
     //             key: 'benben/mentions',
-    //             icon: renderIcon(IconAtSign)
+    //             icon: renderIcon(AtOutline)
     //         },
     //         {
     //             label: '用户历史',
@@ -414,7 +430,7 @@ const menuOptions = computed<MenuOption[]>(() => [
     //         {
     //             label: '用户抓取',
     //             key: 'benben/crawl',
-    //             icon: renderIcon(IconCloudDownload)
+    //             icon: renderIcon(CloudDownloadOutline)
     //         }
     //     ]
     // },
@@ -431,36 +447,36 @@ const menuOptions = computed<MenuOption[]>(() => [
     //         {
     //             label: '申请凭据',
     //             key: 'paintboard/token',
-    //             icon: renderIcon(IconKeyRound)
+    //             icon: renderIcon(KeyOutline)
     //         }
     //     ]
     // },
     {
         label: '陶片放逐',
         key: 'judgement',
-        icon: renderIcon(IconHammer)
+        icon: renderIcon(HammerOutline)
     },
     {
         label: '统计数据',
         key: 'statistic',
-        icon: renderIcon(IconChartColumn)
+        icon: renderIcon(StatsChartOutline)
     },
     {
         label: '关于',
         key: 'about',
-        icon: renderIcon(IconLayoutGrid)
+        icon: renderIcon(AppsOutline)
     },
     {
         label: '设置',
         key: 'settings',
-        icon: renderIcon(IconSettings)
+        icon: renderIcon(SettingsOutline)
     },
     ...(canShowAdminMenu.value
         ? [
               {
                   label: '后台',
                   key: 'admin',
-                  icon: renderIcon(IconShieldCheck)
+                  icon: renderIcon(ShieldCheckmarkOutline)
               }
           ]
         : [])
@@ -564,9 +580,8 @@ const themeOverrides = computed<GlobalThemeOverrides>(() => {
 
     return {
         common: {
-            fontFamily:
-                "-apple-system, BlinkMacSystemFont, 'SF Pro Text', Inter, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif",
-            fontFamilyMono: "'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace",
+            fontFamily: "'Lato', sans-serif",
+            fontFamilyMono: "'Fira Code', monospace",
             borderRadius: vars.cardRadius,
             bodyColor: vars.bodyColor,
             primaryColor: vars.primaryColor,
@@ -604,12 +619,10 @@ const themeOverrides = computed<GlobalThemeOverrides>(() => {
         Menu: {
             itemTextColorActive: uiThemeVars.value.primaryColor,
             itemIconColorActive: uiThemeVars.value.primaryColor,
-            itemTextColorActiveHover: uiThemeVars.value.primaryColor,
-            itemIconColorActiveHover: uiThemeVars.value.primaryColor,
-            itemColorActive: mixThemeColor(uiThemeVars.value.primaryColor, 10, vars.cardColor),
-            itemColorActiveHover: mixThemeColor(uiThemeVars.value.primaryColor, 14, vars.cardColor),
+            itemColorActive: uiThemeVars.value.panelColor,
+            itemColorActiveHover: uiThemeVars.value.panelColor,
             itemColorHover: uiThemeVars.value.panelColor,
-            borderRadius: '8px'
+            borderRadius: uiThemeVars.value.cardRadius
         },
         Input: {
             color: uiThemeVars.value.controlColor,
@@ -978,16 +991,6 @@ watch(
             document.documentElement.style.setProperty(key, value);
         });
         document.documentElement.dataset.uiCodeTheme = uiThemeVars.value.codeTheme;
-
-        // Keep the browser chrome (mobile address bar) in sync with the page
-        // background so the app reads as one continuous surface.
-        let themeColorMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-        if (!themeColorMeta) {
-            themeColorMeta = document.createElement('meta');
-            themeColorMeta.name = 'theme-color';
-            document.head.appendChild(themeColorMeta);
-        }
-        themeColorMeta.content = uiThemeVars.value.bodyColor;
     },
     { immediate: true }
 );
@@ -1016,81 +1019,48 @@ setInterval(() => {
 }
 
 .app-main {
-    background: var(--ui-body-color);
+    background:
+        radial-gradient(circle at top left, var(--ui-panel-color), transparent 34vw),
+        linear-gradient(180deg, var(--ui-body-gradient-start) 0%, var(--ui-body-gradient-end) 100%);
 }
 
 .app-sider {
     background: var(--ui-card-color) !important;
     border-right: 1px solid var(--ui-border-color) !important;
+    backdrop-filter: none;
+    box-shadow: var(--ui-card-shadow);
 }
 
-/* Constant geometry in BOTH states: 8px menu inset + 14px item padding puts
-   the icon center at 8 + 14 + 10 = 32px (the collapsed rail's axis) whether
-   collapsed or expanded. Nothing padding-related ever changes, so icons and
-   the active pill cannot drift mid-transition — only the sider width animates
-   and the labels appear. This intentionally replaces Naive's own collapsed
-   centering (which pairs an instant container-padding switch with a
-   transitioned item padding, causing a visible sideways bounce). */
-.app-sider :deep(.n-menu) {
-    padding: 0 8px;
-}
-
-.app-sider :deep(.n-menu .n-menu-item-content) {
-    padding-left: 14px !important;
-}
-
-/* Naive draws the hover/active pill on ::before with an extra 8px horizontal
-   inset; zero it so the pill hugs the item box. Combined with the constant
-   paddings above, the pill sits 8px from the sider edge with the icon 14px
-   inside it — identical in collapsed and expanded states. */
-.app-sider :deep(.n-menu .n-menu-item-content::before) {
-    left: 0;
-    right: 0;
-}
-
-/* Left-anchored with the logo centered on the collapsed rail (18 + 28 / 2 =
-   32px), so the mark stays put and only the wordmark appears on expand. */
 .brand-shell {
-    height: 64px;
+    height: 72px;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    padding-left: 18px;
+    justify-content: center;
     gap: 10px;
     border-bottom: 1px solid var(--ui-border-color);
     background: var(--ui-card-color);
-    margin-bottom: 8px;
 }
 
 .brand-logo {
-    color: var(--ui-primary-color);
-    font-size: 28px;
+    color: var(--ui-icon-color);
+    font-size: 32px;
     flex-shrink: 0;
 }
 
 .brand-text {
     color: var(--ui-card-title-color);
-    font-size: 16px;
-    font-weight: 600;
-    letter-spacing: 0.01em;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
     white-space: nowrap;
 }
 
 .app-footer {
-    margin: 48px -28px -28px -28px;
-    padding: 20px 40px;
-    background: var(--ui-card-color);
-    border-top: 1px solid var(--ui-border-color) !important;
+    margin: 28px -28px -28px -28px;
+    padding: 14px 40px;
+    background: var(--ui-translucent-card-color);
     color: var(--ui-footer-text-color);
-    font-size: 13px;
-    line-height: 1.9;
-}
-
-/* Cap the footer to the content column so right-aligned links stay clear of
-   fixed bottom-right controls (theme editor, back-top). */
-.app-footer .footer-grid {
-    max-width: 1240px;
-    margin: 0 auto;
+    backdrop-filter: blur(16px);
 }
 
 .footer-element {
@@ -1098,9 +1068,6 @@ setInterval(() => {
     align-items: center;
     flex-wrap: wrap;
     min-width: 0;
-}
-.footer-icon {
-    font-size: 14px;
 }
 .footer-element.right-aligned {
     justify-content: flex-end;
@@ -1125,12 +1092,12 @@ setInterval(() => {
 .footer-link,
 .footer-element a {
     color: var(--ui-footer-text-color);
-    transition: color 0.15s ease;
+    transition: color 0.2s;
     text-decoration: none;
 }
 .footer-link:hover,
 .footer-element a:hover {
-    color: var(--ui-text-color) !important;
+    color: var(--ui-footer-text-color) !important;
 }
 .footer-link:not(:first-child) {
     margin-left: 16px;

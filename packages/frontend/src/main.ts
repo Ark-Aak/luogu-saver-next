@@ -1,5 +1,6 @@
 import { createApp } from 'vue';
 import './styles/global.css';
+import 'vfonts/Lato.css';
 import 'vfonts/FiraCode.css';
 import App from './App.vue';
 

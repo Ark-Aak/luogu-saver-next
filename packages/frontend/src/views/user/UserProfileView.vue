@@ -13,7 +13,13 @@ import {
     useDialog,
     useMessage
 } from 'naive-ui';
-import { IconRefreshCw, IconTrophy, IconBookOpen, IconCircleUser, IconShare2 } from '@/utils/icons';
+import {
+    SyncOutline,
+    TrophyOutline,
+    ReaderOutline,
+    PersonCircleOutline,
+    ShareSocialOutline
+} from '@vicons/ionicons5';
 
 import { getUserProfile, refreshUserProfile } from '@/api/user';
 import type { UserProfile } from '@/types/user';
@@ -196,7 +202,7 @@ async function handleManualRefresh() {
     try {
         const response = await refreshUserProfile(uid.value);
         trackSaveTask(response.data?.taskId);
-        message.info('已请求刷新，稍后将自动更新');
+        message.info('已请求刷新,稍后将自动更新');
     } catch (e: any) {
         message.error(e?.message || '刷新失败');
     } finally {
@@ -252,7 +258,7 @@ onUnmounted(() => {
                     <Card
                         class="profile-card profile-card--intro"
                         title="个人介绍"
-                        :icon="IconBookOpen"
+                        :icon="ReaderOutline"
                     >
                         <MarkdownViewer
                             v-if="profile.renderedIntroduction"
@@ -267,7 +273,7 @@ onUnmounted(() => {
                     <Card
                         class="profile-card profile-card--identity"
                         title="用户主页"
-                        :icon="IconCircleUser"
+                        :icon="PersonCircleOutline"
                     >
                         <template #header-extra>
                             <n-button
@@ -278,7 +284,7 @@ onUnmounted(() => {
                                 target="_blank"
                             >
                                 <template #icon>
-                                    <n-icon><IconShare2 /></n-icon>
+                                    <n-icon><ShareSocialOutline /></n-icon>
                                 </template>
                                 原站
                             </n-button>
@@ -343,7 +349,7 @@ onUnmounted(() => {
                                 @click="handleManualRefresh"
                             >
                                 <template #icon>
-                                    <n-icon><IconRefreshCw /></n-icon>
+                                    <n-icon><SyncOutline /></n-icon>
                                 </template>
                                 刷新
                             </n-button>
@@ -356,14 +362,14 @@ onUnmounted(() => {
                     <Card
                         class="profile-card profile-card--prizes"
                         title="获奖信息"
-                        :icon="IconTrophy"
+                        :icon="TrophyOutline"
                     >
                         <n-empty
                             v-if="orderedPrizes.length === 0"
                             :description="
                                 profile.profileFetchedAt
                                     ? '该用户暂无可见的获奖记录'
-                                    : '正在拉取数据，请稍候...'
+                                    : '正在拉取数据,请稍候...'
                             "
                         />
 
@@ -421,7 +427,7 @@ onUnmounted(() => {
                 @click="triggerRefresh"
             >
                 <template #icon>
-                    <n-icon><IconRefreshCw /></n-icon>
+                    <n-icon><SyncOutline /></n-icon>
                 </template>
             </n-button>
         </div>

@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { NAlert, NButton, NCheckbox, NInput, NProgress, NSpace, NTag, useMessage } from 'naive-ui';
-import { IconMessageCircleMore, IconNewspaper } from '@/utils/icons';
+import { ChatbubbleEllipsesOutline, NewspaperOutline } from '@vicons/ionicons5';
 import CardTitle from '@/components/CardTitle.vue';
 import Card from '@/components/Card.vue';
 import MarkdownViewer from '@/components/MarkdownViewer.vue';
@@ -224,8 +224,8 @@ function getProgressDetail(taskName: string, data?: any) {
 
 <template>
     <div class="rag-page">
-        <CardTitle title="RAG 问答" :icon="IconMessageCircleMore" class="rag-header" chip="RAG">
-            基于已保存文章的检索增强问答
+        <CardTitle title="RAG 问答" :icon="ChatbubbleEllipsesOutline" class="rag-header" chip="RAG">
+            RETRIEVAL AUGMENTED QA
         </CardTitle>
 
         <Card class="question-card">
@@ -299,7 +299,12 @@ function getProgressDetail(taskName: string, data?: any) {
             <MarkdownViewer :content="answerMarkdown" :loading="loading" :pre-rendered="false" />
         </Card>
 
-        <Card v-if="documents.length" title="引用文章" :icon="IconNewspaper" class="sources-card">
+        <Card
+            v-if="documents.length"
+            title="引用文章"
+            :icon="NewspaperOutline"
+            class="sources-card"
+        >
             <div class="sources-grid">
                 <div
                     v-for="doc in documents"
@@ -374,7 +379,7 @@ function getProgressDetail(taskName: string, data?: any) {
     padding: 12px;
     border: 1px solid var(--ui-border-color);
     border-radius: var(--ui-card-radius);
-    background: var(--ui-panel-color);
+    background: linear-gradient(180deg, var(--ui-panel-color), var(--ui-body-gradient-end));
 }
 
 .progress-head {
@@ -403,7 +408,7 @@ function getProgressDetail(taskName: string, data?: any) {
     padding: 10px;
     border: 1px solid var(--ui-border-color);
     border-radius: var(--ui-card-radius);
-    background: var(--ui-card-color);
+    background: var(--ui-translucent-card-color);
 }
 
 .step-dot {

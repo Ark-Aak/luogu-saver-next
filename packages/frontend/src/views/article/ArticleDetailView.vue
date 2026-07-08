@@ -17,17 +17,17 @@ import {
     useDialog
 } from 'naive-ui';
 import {
-    IconShare2,
-    IconCopy,
-    IconRefreshCw,
-    IconTrash2,
-    IconArrowLeft,
-    IconNewspaper,
-    IconCalendar,
-    IconList,
-    IconClock,
-    IconLibrary
-} from '@/utils/icons';
+    ShareSocialOutline,
+    CopyOutline,
+    SyncOutline,
+    TrashOutline,
+    ArrowBackOutline,
+    NewspaperOutline,
+    CalendarOutline,
+    ListOutline,
+    TimeOutline,
+    LibraryOutline
+} from '@vicons/ionicons5';
 
 import { useContentSaver } from '@/composables/useContentSaver';
 import { getArticleById, getRelevant, getArticleHistory, saveArticle } from '@/api/article';
@@ -348,7 +348,7 @@ onMounted(() => {
                 <SidebarWidget
                     v-if="tocItems.length > 0"
                     title="目录"
-                    :icon="IconList"
+                    :icon="ListOutline"
                     class="toc-card"
                 >
                     <n-anchor
@@ -419,11 +419,11 @@ onMounted(() => {
                         </template>
 
                         <div v-if="article">
-                            <Card :title="displayTitle" :icon="IconNewspaper">
+                            <Card :title="displayTitle" :icon="NewspaperOutline">
                                 <div class="meta-row">
                                     <n-tag :bordered="false" size="small">
                                         <template #icon>
-                                            <NIcon :component="IconCalendar" />
+                                            <NIcon :component="CalendarOutline" />
                                         </template>
                                         {{
                                             !isViewingLatest
@@ -463,7 +463,7 @@ onMounted(() => {
                                 <n-space>
                                     <n-button size="small" @click="router.go(-1)">
                                         <template #icon>
-                                            <NIcon :component="IconArrowLeft" />
+                                            <NIcon :component="ArrowBackOutline" />
                                         </template>
                                         返回
                                     </n-button>
@@ -475,19 +475,19 @@ onMounted(() => {
                                         target="_blank"
                                     >
                                         <template #icon>
-                                            <NIcon :component="IconShare2" />
+                                            <NIcon :component="ShareSocialOutline" />
                                         </template>
                                         原站
                                     </n-button>
                                     <n-button size="small" secondary @click="handleCopy">
                                         <template #icon>
-                                            <NIcon :component="IconCopy" />
+                                            <NIcon :component="CopyOutline" />
                                         </template>
                                         源码
                                     </n-button>
                                     <n-button size="small" type="primary" @click="handleUpdate">
                                         <template #icon>
-                                            <NIcon :component="IconRefreshCw" />
+                                            <NIcon :component="SyncOutline" />
                                         </template>
                                         更新
                                     </n-button>
@@ -498,13 +498,13 @@ onMounted(() => {
                                         @click="handleKnowledgeBaseToggle"
                                     >
                                         <template #icon>
-                                            <NIcon :component="IconLibrary" />
+                                            <NIcon :component="LibraryOutline" />
                                         </template>
                                         {{ isInKnowledgeBase ? '移出知识库' : '加入知识库' }}
                                     </n-button>
                                     <n-button size="small" type="error" ghost @click="handleDelete">
                                         <template #icon>
-                                            <NIcon :component="IconTrash2" />
+                                            <NIcon :component="TrashOutline" />
                                         </template>
                                         删除
                                     </n-button>
@@ -566,8 +566,8 @@ onMounted(() => {
                                     >
                                         <Card
                                             :title="it.title"
-                                            :icon="IconNewspaper"
-                                            hoverable
+                                            :icon="NewspaperOutline"
+                                            class="clickable-card"
                                             @click="openArticle(it.id)"
                                         >
                                             <template #title-extra>
@@ -590,7 +590,7 @@ onMounted(() => {
                                             </template>
 
                                             <div class="article-summary">
-                                                {{ it.summary || '暂无预览' }}
+                                                {{ it.summary || '暂无预览...' }}
                                             </div>
 
                                             <n-divider style="margin: 12px 0" />
@@ -641,7 +641,7 @@ onMounted(() => {
                 <SidebarWidget
                     v-if="loading || versionHistory.length > 0"
                     title="历史版本"
-                    :icon="IconClock"
+                    :icon="TimeOutline"
                     class="version-card"
                 >
                     <div v-if="loading" class="version-skeleton">
@@ -669,7 +669,7 @@ onMounted(() => {
     <div v-if="hasUpdate" class="update-floater">
         <n-button type="primary" circle size="large" class="shadow-button" @click="triggerRefresh">
             <template #icon>
-                <NIcon :component="IconRefreshCw" />
+                <NIcon :component="SyncOutline" />
             </template>
         </n-button>
     </div>
@@ -861,7 +861,7 @@ onMounted(() => {
 }
 
 .info-item {
-    background: var(--ui-panel-color);
+    background: linear-gradient(180deg, var(--ui-panel-color), var(--ui-body-gradient-end));
     padding: 10px 12px;
     border-radius: var(--ui-card-radius);
     border: 1px solid var(--ui-border-color);

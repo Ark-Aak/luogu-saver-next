@@ -2,13 +2,13 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { NButton, NIcon, NSpin, NTag, useMessage } from 'naive-ui';
 import {
-    IconCircleCheck,
-    IconChartColumn,
-    IconRefreshCw,
-    IconServer,
-    IconClock,
-    IconTriangleAlert
-} from '@/utils/icons';
+    CheckmarkCircleOutline,
+    PulseOutline,
+    RefreshOutline,
+    ServerOutline,
+    TimeOutline,
+    WarningOutline
+} from '@vicons/ionicons5';
 import Card from '@/components/Card.vue';
 import CardTitle from '@/components/CardTitle.vue';
 import { getQueueStats, type QueueStatsItem, type QueueStatsResponse } from '@/api/statistic.ts';
@@ -95,12 +95,12 @@ onUnmounted(() => {
 
 <template>
     <div class="statistic-page">
-        <CardTitle title="统计数据" :icon="IconChartColumn" chip="QUEUE STATS">
-            任务队列与系统运行状态实时监控
+        <CardTitle title="统计数据" :icon="PulseOutline" chip="QUEUE STATS">
+            REAL-TIME WORKER QUEUES
         </CardTitle>
 
         <div class="summary-grid">
-            <Card title="WebSocket" :icon="IconServer">
+            <Card title="WebSocket" :icon="ServerOutline">
                 <div class="summary-card-body">
                     <n-tag
                         :type="
@@ -121,19 +121,19 @@ onUnmounted(() => {
                     </div>
                 </div>
             </Card>
-            <Card title="等待任务" :icon="IconClock">
+            <Card title="等待任务" :icon="TimeOutline">
                 <div class="summary-card-body">
                     <div class="summary-number">{{ totals.waiting }}</div>
                     <div class="summary-hint">等待 worker 处理的任务数</div>
                 </div>
             </Card>
-            <Card title="运行任务" :icon="IconCircleCheck">
+            <Card title="运行任务" :icon="CheckmarkCircleOutline">
                 <div class="summary-card-body">
                     <div class="summary-number">{{ totals.active }}</div>
                     <div class="summary-hint">当前正在执行的任务数</div>
                 </div>
             </Card>
-            <Card title="失败任务" :icon="IconTriangleAlert">
+            <Card title="失败任务" :icon="WarningOutline">
                 <div class="summary-card-body">
                     <div class="summary-number danger">{{ totals.failed }}</div>
                     <div class="summary-hint">BullMQ 保留的失败任务数</div>
@@ -147,7 +147,7 @@ onUnmounted(() => {
             </div>
             <n-button secondary :loading="loading" @click="refreshQueueStats">
                 <template #icon>
-                    <n-icon :component="IconRefreshCw" />
+                    <n-icon :component="RefreshOutline" />
                 </template>
                 手动刷新
             </n-button>
@@ -240,7 +240,6 @@ onUnmounted(() => {
     color: var(--ui-card-title-color);
     font-size: 32px;
     font-weight: 700;
-    font-variant-numeric: tabular-nums;
 }
 
 .summary-value,
@@ -303,7 +302,6 @@ onUnmounted(() => {
 
 .metric strong {
     color: var(--ui-card-title-color);
-    font-variant-numeric: tabular-nums;
 }
 
 .detail-card,

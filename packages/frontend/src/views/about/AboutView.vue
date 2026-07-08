@@ -2,18 +2,18 @@
 import { onMounted, ref, inject } from 'vue';
 import { NGrid, NGi, NStatistic, NIcon } from 'naive-ui';
 import {
-    IconLayoutGrid,
-    IconList,
-    IconHammer,
-    IconChartColumn,
-    IconGlobe,
-    IconCloudDownload,
-    IconNewspaper,
-    IconClipboard,
-    IconSearch,
-    IconShare2,
-    IconAtSign
-} from '@/utils/icons';
+    AppsOutline,
+    ListOutline,
+    HammerOutline,
+    StatsChartOutline,
+    GlobeOutline,
+    CloudDownloadOutline,
+    Newspaper,
+    Clipboard,
+    SearchOutline,
+    ShareSocialOutline,
+    AtOutline
+} from '@vicons/ionicons5';
 
 import { getArticleCount } from '@/api/article.ts';
 import { getPasteCount } from '@/api/paste.ts';
@@ -34,32 +34,32 @@ const REPO_URL = 'https://github.com/Ark-Aak/luogu-saver-next';
 
 const features = [
     {
-        icon: IconNewspaper,
+        icon: Newspaper,
         label: '内容归档',
-        desc: '抓取并长期保存洛谷的文章与剪贴板，即使原内容被删除也可访问。'
+        desc: '抓取并长期保存洛谷的文章与剪贴板,即使原内容被删除也可访问。'
     },
     {
-        icon: IconSearch,
+        icon: SearchOutline,
         label: '全文检索',
-        desc: '对已保存的内容建立索引，支持按关键词快速检索。'
+        desc: '对已保存的内容建立索引,支持按关键词快速检索。'
     },
     {
-        icon: IconShare2,
+        icon: ShareSocialOutline,
         label: '文章广场',
-        desc: '集中浏览已归档的文章，发现值得阅读的内容。'
+        desc: '集中浏览已归档的文章,发现值得阅读的内容。'
     },
     {
-        icon: IconAtSign,
+        icon: AtOutline,
         label: '用户主页',
         desc: '展示用户的等级认证徽章与获奖记录。'
     },
     {
-        icon: IconChartColumn,
+        icon: StatsChartOutline,
         label: 'RAG 问答',
         desc: '依据文本生成式 AI 检索推荐相关内容。'
     },
     {
-        icon: IconClipboard,
+        icon: Clipboard,
         label: '多类型支持',
         desc: '统一处理多种内容类型，持续扩展中。'
     }
@@ -82,14 +82,14 @@ onMounted(() => {
             <p class="about-subtitle">一个用于归档洛谷用户生成内容的开源 Web 应用 · LGS-NG</p>
         </div>
 
-        <Card :icon="IconLayoutGrid" title="项目简介" class="about-card">
+        <Card :icon="AppsOutline" title="项目简介" class="about-card">
             <p class="about-paragraph">
                 Luogu Saver Next（简称
                 LGS-NG）是一个面向洛谷的内容归档应用。它将洛谷上的文章、剪贴板等用户生成内容抓取并长期保存，使有价值的内容在原始页面被删除或失效后，依然可以被检索与阅读。
             </p>
         </Card>
 
-        <Card :icon="IconChartColumn" title="运行统计" class="about-card">
+        <Card :icon="StatsChartOutline" title="运行统计" class="about-card">
             <n-grid :x-gap="20" :y-gap="20" cols="1 s:3" responsive="screen">
                 <n-gi>
                     <n-statistic label="已运行天数" :value="daysInOperation" />
@@ -103,7 +103,7 @@ onMounted(() => {
             </n-grid>
         </Card>
 
-        <Card :icon="IconList" title="核心功能" class="about-card">
+        <Card :icon="ListOutline" title="核心功能" class="about-card">
             <ul class="feature-list">
                 <li v-for="feature in features" :key="feature.label" class="feature-item">
                     <n-icon
@@ -120,7 +120,7 @@ onMounted(() => {
             </ul>
         </Card>
 
-        <Card :icon="IconHammer" title="技术与架构" class="about-card">
+        <Card :icon="HammerOutline" title="技术与架构" class="about-card">
             <p class="about-paragraph">
                 本项目采用 npm workspaces 组织的 Monorepo 结构。前端基于 Vue 3、Vite 与 Naive UI
                 构建；后端基于 Koa 与 TypeScript；数据库等基础设施通过 Docker Compose 管理。项目以
@@ -128,7 +128,7 @@ onMounted(() => {
             </p>
         </Card>
 
-        <Card :icon="IconGlobe" title="开源与贡献" class="about-card">
+        <Card :icon="GlobeOutline" title="开源与贡献" class="about-card">
             <p class="about-paragraph">
                 本项目在 GitHub 上开源，采用 AGPL-3.0 许可证。欢迎通过提交 Pull Request 参与改进。
             </p>
@@ -139,13 +139,13 @@ onMounted(() => {
                 rel="noopener noreferrer"
                 :style="{ color: themeVars.primaryColor }"
             >
-                <n-icon size="18" :component="IconGlobe" />
+                <n-icon size="18" :component="GlobeOutline" />
                 <span>{{ REPO_URL }}</span>
             </a>
         </Card>
 
         <Card
-            :icon="IconCloudDownload"
+            :icon="CloudDownloadOutline"
             title="数据来源与免责声明"
             class="about-card about-card--faint"
         >

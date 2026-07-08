@@ -1,70 +1,70 @@
 /*fixed from https://cdn.luogu.com.cn/css/luogu3.css?ver=20190102 prefix: lg-fg-* */
 
 :root {
-    --ui-body-color: #f5f5f7;
-    --ui-body-gradient-start: #f5f5f7;
-    --ui-body-gradient-end: #f5f5f7;
+    --ui-body-color: #f6f9fd;
+    --ui-body-gradient-start: #f7fbff;
+    --ui-body-gradient-end: #eef6ff;
     --ui-primary-color: #2f6db5;
-    --ui-primary-color-hover: #3d7cc4;
-    --ui-primary-color-pressed: #275d9e;
-    --ui-primary-color-suppl: #6d9ecf;
+    --ui-primary-color-hover: #4b83c2;
+    --ui-primary-color-pressed: #1f4f8f;
+    --ui-primary-color-suppl: #8ab7dd;
     --ui-card-color: #ffffff;
-    --ui-translucent-card-color: #ffffff;
-    --ui-card-title-color: #18181b;
-    --ui-text-color: #27272a;
-    --ui-secondary-text-color: #52525b;
-    --ui-muted-text-color: #71717a;
-    --ui-border-color: #e8e8ec;
-    --ui-panel-color: #f4f4f5;
+    --ui-translucent-card-color: rgba(255, 255, 255, 0.78);
+    --ui-card-title-color: #10233f;
+    --ui-text-color: #10233f;
+    --ui-secondary-text-color: #475569;
+    --ui-muted-text-color: #64748b;
+    --ui-border-color: rgba(47, 109, 181, 0.1);
+    --ui-panel-color: rgba(47, 109, 181, 0.08);
     --ui-control-color: #ffffff;
     --ui-control-color-focus: #ffffff;
-    --ui-control-color-disabled: #f4f4f5;
-    --ui-control-text-color: #27272a;
-    --ui-control-placeholder-color: #a1a1aa;
-    --ui-control-border-color: #d9d9de;
-    --ui-control-border-hover-color: #a1a1aa;
+    --ui-control-color-disabled: #f1f5f9;
+    --ui-control-text-color: #10233f;
+    --ui-control-placeholder-color: #94a3b8;
+    --ui-control-border-color: rgba(47, 109, 181, 0.18);
+    --ui-control-border-hover-color: rgba(47, 109, 181, 0.36);
     --ui-control-border-focus-color: #2f6db5;
-    --ui-control-tag-color: #f4f4f5;
-    --ui-control-tag-text-color: #3f3f46;
-    --ui-slider-rail-color: #e4e4e7;
-    --ui-slider-rail-hover-color: #d4d4d8;
+    --ui-control-tag-color: rgba(47, 109, 181, 0.1);
+    --ui-control-tag-text-color: #10233f;
+    --ui-slider-rail-color: rgba(47, 109, 181, 0.12);
+    --ui-slider-rail-hover-color: rgba(47, 109, 181, 0.18);
     --ui-slider-fill-color: #2f6db5;
-    --ui-slider-fill-hover-color: #3d7cc4;
+    --ui-slider-fill-hover-color: #4b83c2;
     --ui-slider-handle-color: #ffffff;
-    --ui-back-top-color: #ffffff;
-    --ui-back-top-hover-color: #f4f4f5;
-    --ui-back-top-icon-color: #52525b;
-    --ui-back-top-icon-hover-color: #2f6db5;
-    --ui-code-background-color: #f6f7f9;
-    --ui-code-text-color: #be185d;
-    --ui-inline-code-background-color: #f4f4f5;
-    --ui-inline-code-text-color: #be185d;
-    --ui-mark-background-color: #dcebfb;
-    --ui-table-header-color: #fafafa;
-    --ui-scrollbar-track-color: #f4f4f5;
-    --ui-scrollbar-thumb-color: #d4d4d8;
-    --ui-copy-button-background-color: #ffffff;
-    --ui-copy-button-text-color: #3f3f46;
-    --ui-footer-text-color: #71717a;
+    --ui-back-top-color: rgba(255, 255, 255, 0.9);
+    --ui-back-top-hover-color: #ffffff;
+    --ui-back-top-icon-color: #2f6db5;
+    --ui-back-top-icon-hover-color: #4b83c2;
+    --ui-code-background-color: #f1f5f9;
+    --ui-code-text-color: #e11d48;
+    --ui-inline-code-background-color: #f1f5f9;
+    --ui-inline-code-text-color: #e11d48;
+    --ui-mark-background-color: rgba(47, 109, 181, 0.14);
+    --ui-table-header-color: rgba(47, 109, 181, 0.08);
+    --ui-scrollbar-track-color: #f1f5f9;
+    --ui-scrollbar-thumb-color: #94a3b8;
+    --ui-copy-button-background-color: rgba(255, 255, 255, 0.78);
+    --ui-copy-button-text-color: #10233f;
+    --ui-footer-text-color: #10233f;
     --ui-link-color: #2f6db5;
-    --ui-link-hover-color: #3d7cc4;
-    --ui-info-color: #3f76c9;
-    --ui-success-color: #15803d;
-    --ui-warning-color: #b45309;
-    --ui-error-color: #dc2626;
-    --ui-alert-info-background-color: #eef4fc;
-    --ui-alert-success-background-color: #effaf1;
-    --ui-alert-warning-background-color: #fdf6e8;
-    --ui-alert-error-background-color: #fdf0f0;
-    --ui-orange-color: #ea580c;
-    --ui-cyan-color: #0891b2;
-    --ui-muted-accent-color: #a1a1aa;
-    --ui-card-shadow: 0 1px 2px rgba(24, 24, 27, 0.04);
-    --ui-elevated-shadow: 0 2px 8px rgba(24, 24, 27, 0.06), 0 12px 32px rgba(24, 24, 27, 0.12);
-    --ui-focus-ring-shadow: 0 0 0 3px rgba(47, 109, 181, 0.22);
-    --ui-card-radius: 10px;
+    --ui-link-hover-color: #4b83c2;
+    --ui-info-color: #7da7ff;
+    --ui-success-color: #4dd27a;
+    --ui-warning-color: #ffb454;
+    --ui-error-color: #d03050;
+    --ui-alert-info-background-color: rgba(125, 167, 255, 0.14);
+    --ui-alert-success-background-color: rgba(77, 210, 122, 0.14);
+    --ui-alert-warning-background-color: rgba(255, 180, 84, 0.18);
+    --ui-alert-error-background-color: rgba(208, 48, 80, 0.12);
+    --ui-orange-color: #ff6200;
+    --ui-cyan-color: #00aaff;
+    --ui-muted-accent-color: #94a3b8;
+    --ui-card-shadow: 0 14px 36px rgba(47, 109, 181, 0.08);
+    --ui-elevated-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --ui-focus-ring-shadow: 0 0 0 4px rgba(47, 109, 181, 0.12);
+    --ui-card-radius: 6px;
     --ui-pill-radius: 999px;
-    --ui-icon-color: #52525b;
+    --ui-icon-color: #2f6db5;
     --ui-user-red-color: #e74c3c;
     --ui-user-orange-color: #e67e22;
     --ui-user-purple-color: #8e44ad;
@@ -75,64 +75,17 @@
     --ui-prize-green-color: #52c41a;
     --ui-prize-blue-color: #3498db;
     --ui-prize-gold-color: #ffc116;
-    --ui-category-personal-color: #6366f1;
-    --ui-category-solution-color: #d97706;
-    --ui-category-tech-color: #dc2626;
-    --ui-category-algorithm-color: #2563eb;
-    --ui-category-life-color: #16a34a;
-    --ui-category-study-color: #9333ea;
-    --ui-category-fun-color: #0d9488;
-    --ui-category-chat-color: #64748b;
-    --ui-category-unknown-color: #a1a1aa;
+    --ui-category-personal-color: #667eea;
+    --ui-category-solution-color: #f39c12;
+    --ui-category-tech-color: #e74c3c;
+    --ui-category-algorithm-color: #3498db;
+    --ui-category-life-color: #2ecc71;
+    --ui-category-study-color: #9b59b6;
+    --ui-category-fun-color: #1abc9c;
+    --ui-category-chat-color: #34495e;
+    --ui-category-unknown-color: #95a5a6;
     --article-tag-background-color: transparent;
     --article-tag-color: var(--ui-muted-text-color);
-}
-
-html {
-    font-family:
-        -apple-system, BlinkMacSystemFont, 'SF Pro Text', Inter, 'Segoe UI', Roboto, 'PingFang SC',
-        'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-}
-
-::selection {
-    background: var(--ui-mark-background-color);
-}
-
-/* Visible keyboard focus for non-Naive interactive elements (links, custom
-   controls). Naive components draw their own focus ring via theme tokens. */
-a:focus-visible,
-button:focus-visible,
-[tabindex]:focus-visible {
-    outline: 2px solid var(--ui-primary-color);
-    outline-offset: 2px;
-    border-radius: 4px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-    }
-}
-
-/* Counters and statistics re-render often; tabular figures keep their width
-   stable so surrounding layout never jitters. */
-.n-statistic .n-statistic-value__content,
-.tabular-nums {
-    font-variant-numeric: tabular-nums;
-}
-
-.n-input .n-input__placeholder {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .user-Red {
@@ -168,23 +121,11 @@ button:focus-visible,
     color: var(--ui-inline-code-text-color) !important;
 }
 
-/* Paint the control background on the rounded outer element only — a solid
-   fill on the square inner wrapper bleeds past the border-radius corners. */
-.n-input:not(.n-input--disabled),
-.n-base-selection:not(.n-base-selection--disabled) {
-    background-color: var(--ui-control-color, transparent) !important;
-}
-
-.n-input:not(.n-input--disabled).n-input--focus,
-.n-base-selection:not(.n-base-selection--disabled).n-base-selection--active {
-    background-color: var(--ui-control-color-focus, transparent) !important;
-}
-
 .n-input .n-input-wrapper,
 .n-input .n-input__input-el,
 .n-input .n-input__textarea-el,
 .n-base-selection .n-base-selection-label {
-    background-color: transparent !important;
+    background-color: var(--ui-control-color, transparent) !important;
     color: var(--ui-control-text-color, inherit) !important;
 }
 
@@ -325,17 +266,17 @@ button:focus-visible,
 }
 
 *::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
 }
 
 *::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--ui-scrollbar-track-color, transparent);
 }
 
 *::-webkit-scrollbar-thumb {
     background: var(--ui-scrollbar-thumb-color, currentColor);
-    border-radius: 999px;
+    border-radius: var(--ui-card-radius, 6px);
 }
 
 *::-webkit-scrollbar-thumb:hover {

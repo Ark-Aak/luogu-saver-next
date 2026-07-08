@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch, computed } from 'vue';
 import { NSpin, NEmpty, NButton, NIcon, NTime, useMessage } from 'naive-ui';
-import { IconMessagesSquare, IconRefreshCw } from '@/utils/icons';
+import { ChatbubblesOutline, SyncOutline } from '@vicons/ionicons5';
 
 import { getArticleComments, refreshArticleComments } from '@/api/comment';
 import socket from '@/utils/websocket';
@@ -77,7 +77,7 @@ async function handleRefresh() {
     refreshing.value = true;
     try {
         await refreshArticleComments(props.articleId);
-        message.info('已请求刷新评论，稍后将自动更新');
+        message.info('已请求刷新评论,稍后将自动更新');
     } catch {
         message.error('刷新失败');
     } finally {
@@ -106,11 +106,11 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <Card :icon="IconMessagesSquare" title="评论">
+    <Card :icon="ChatbubblesOutline" title="评论">
         <template #header-extra>
             <n-button size="small" secondary :loading="refreshing" @click="handleRefresh">
                 <template #icon>
-                    <n-icon><IconRefreshCw /></n-icon>
+                    <n-icon><SyncOutline /></n-icon>
                 </template>
                 刷新
             </n-button>

@@ -12,18 +12,16 @@ import {
     useMessage
 } from 'naive-ui';
 import {
-    IconChartLine,
-    IconCloud,
-    IconKeyRound,
-    IconLibrary,
-    IconPalette,
-    IconRefreshCw,
-    IconSettings,
-    IconTrash2
-} from '@/utils/icons';
+    AnalyticsOutline,
+    CloudOutline,
+    KeyOutline,
+    LibraryOutline,
+    RefreshOutline,
+    SettingsOutline,
+    TrashOutline
+} from '@vicons/ionicons5';
 import Card from '@/components/Card.vue';
 import CardTitle from '@/components/CardTitle.vue';
-import ThemeEditor from '@/components/ThemeEditor.vue';
 import {
     clearAuthToken,
     isAuthenticated,
@@ -133,12 +131,12 @@ onMounted(loadCurrentUser);
 
 <template>
     <div class="settings-page">
-        <CardTitle title="设置" :icon="IconSettings" chip="PREFERENCES">
-            账号、缓存与本地偏好管理
+        <CardTitle title="设置" :icon="SettingsOutline" chip="PREFERENCES">
+            ACCOUNT AND LOCAL SETTINGS
         </CardTitle>
 
         <div class="settings-grid">
-            <Card title="账号" :icon="IconKeyRound" class="settings-card">
+            <Card title="账号" :icon="KeyOutline" class="settings-card">
                 <n-space vertical size="large">
                     <n-alert v-if="errorMessage" type="warning" title="账号状态">
                         {{ errorMessage }}
@@ -182,7 +180,7 @@ onMounted(loadCurrentUser);
                         <n-space>
                             <n-button secondary @click="loadCurrentUser">
                                 <template #icon>
-                                    <n-icon :component="IconRefreshCw" />
+                                    <n-icon :component="RefreshOutline" />
                                 </template>
                                 刷新账号信息
                             </n-button>
@@ -201,7 +199,7 @@ onMounted(loadCurrentUser);
                 </n-space>
             </Card>
 
-            <Card title="隐私与数据追踪" :icon="IconChartLine" class="settings-card">
+            <Card title="隐私与数据追踪" :icon="AnalyticsOutline" class="settings-card">
                 <n-space vertical size="large">
                     <div class="setting-row">
                         <div>
@@ -241,7 +239,7 @@ onMounted(loadCurrentUser);
                 </n-space>
             </Card>
 
-            <Card title="本地数据" :icon="IconTrash2" class="settings-card">
+            <Card title="本地数据" :icon="TrashOutline" class="settings-card">
                 <n-space vertical size="large">
                     <div class="setting-row">
                         <div>
@@ -267,11 +265,7 @@ onMounted(loadCurrentUser);
                 </n-space>
             </Card>
 
-            <Card title="主题与外观" :icon="IconPalette" class="settings-card">
-                <ThemeEditor />
-            </Card>
-
-            <Card title="RAG 知识库" :icon="IconLibrary" class="settings-card compact-card">
+            <Card title="RAG 知识库" :icon="LibraryOutline" class="settings-card compact-card">
                 <n-space vertical size="large">
                     <div class="setting-row">
                         <div>
@@ -322,7 +316,7 @@ onMounted(loadCurrentUser);
                 </n-space>
             </Card>
 
-            <Card title="连接信息" :icon="IconCloud" class="settings-card">
+            <Card title="连接信息" :icon="CloudOutline" class="settings-card">
                 <n-space vertical size="large">
                     <div class="setting-row">
                         <div>

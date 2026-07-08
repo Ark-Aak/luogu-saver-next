@@ -63,11 +63,7 @@ const showHeader = computed(() => {
         class="saver-card"
         :class="{ 'is-hoverable': hoverable }"
         :style="cardStyle"
-        :role="hoverable ? 'button' : undefined"
-        :tabindex="hoverable ? 0 : undefined"
         @click="event => emit('click', event)"
-        @keydown.enter.self="event => emit('click', event as unknown as MouseEvent)"
-        @keydown.space.self.prevent="event => emit('click', event as unknown as MouseEvent)"
     >
         <div v-if="showHeader" class="card-header">
             <div class="card-title-wrapper">
@@ -75,7 +71,7 @@ const showHeader = computed(() => {
                     v-if="icon"
                     :component="icon"
                     :color="effectiveIconColor"
-                    size="18"
+                    size="24"
                     :depth="1"
                 />
                 <span
@@ -108,34 +104,23 @@ const showHeader = computed(() => {
     padding: 20px;
     border: 1px solid var(--ui-border-color);
     transition:
-        border-color 0.15s ease,
-        background-color 0.15s ease;
+        transform 0.3s ease,
+        box-shadow 0.3s ease,
+        border-color 0.3s ease;
     display: flex;
     flex-direction: column;
 }
 
-.saver-card.is-hoverable {
-    cursor: pointer;
-}
-
 .saver-card.is-hoverable:hover {
-    border-color: var(--ui-control-border-hover-color);
-}
-
-.saver-card.is-hoverable:active {
-    background-color: var(--ui-panel-color);
-}
-
-.saver-card.is-hoverable:focus-visible {
-    outline: 2px solid var(--ui-primary-color);
-    outline-offset: 2px;
+    transform: translateY(-2px);
+    border-color: var(--ui-primary-color-suppl);
+    box-shadow: var(--ui-card-shadow) !important;
 }
 
 .card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
     margin-bottom: 14px;
 }
 
@@ -143,27 +128,22 @@ const showHeader = computed(() => {
     display: flex;
     align-items: center;
     gap: 10px;
-    min-width: 0;
 }
 
 .card-title-wrapper > .n-icon {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-    border-radius: 8px;
-    background: var(--ui-panel-color);
+    border-radius: var(--ui-card-radius);
+    background: var(--ui-mark-background-color);
 }
 
 .card-title {
-    font-weight: 600;
-    font-size: 16px;
-    line-height: 1.4;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    font-weight: bold;
+    font-size: 18px;
+    line-height: 1.25;
 }
 
 .card-content {

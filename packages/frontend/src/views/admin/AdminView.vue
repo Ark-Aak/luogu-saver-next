@@ -14,7 +14,7 @@ import {
     NTag,
     useMessage
 } from 'naive-ui';
-import { IconShieldCheck } from '@/utils/icons';
+import { ShieldCheckmarkOutline } from '@vicons/ionicons5';
 import CardTitle from '@/components/CardTitle.vue';
 import Card from '@/components/Card.vue';
 import { getCurrentUser } from '@/api/auth.ts';
@@ -491,8 +491,8 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="admin-page">
-        <CardTitle title="后台" :icon="IconShieldCheck" class="admin-header" chip="ADMIN">
-            用户、公告、搜索与爬取管理
+        <CardTitle title="后台" :icon="ShieldCheckmarkOutline" class="admin-header" chip="ADMIN">
+            MANAGEMENT
         </CardTitle>
 
         <n-alert v-if="!isAuthenticated" type="warning" title="需要登录" class="state-alert">
