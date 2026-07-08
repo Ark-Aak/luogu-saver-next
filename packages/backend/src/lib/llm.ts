@@ -27,6 +27,11 @@ export interface RerankResponse {
     raw: any;
 }
 
+export type LLMChatOptions = {
+    tools?: OpenAI.Chat.Completions.ChatCompletionTool[];
+    toolChoice?: OpenAI.Chat.Completions.ChatCompletionToolChoiceOption;
+};
+
 class LLMService {
     private clients: Map<string, OpenAI> = new Map();
 
@@ -126,17 +131,27 @@ class LLMService {
 
     public async chat(
         messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[],
-        scenario: 'chat' | 'summary' | 'answer' | 'censor' = 'chat'
+        scenario: 'chat' | 'summary' | 'answer' | 'censor' = 'chat',
+        options: LLMChatOptions = {}
     ): Promise<LLMResponse> {
         const { providerId, modelId, modelParams } = this.getContext(scenario);
         const client = this.getClient(providerId);
 
-        logger.debug({ providerId, modelId, scenario }, 'Starting LLM chat');
+        logger.debug(
+            { providerId, modelId, scenario, toolCount: options.tools?.length || 0 },
+            'Starting LLM chat'
+        );
 
         try {
             const response = await client.chat.completions.create({
                 model: modelId!,
                 messages,
+                ...(options.tools
+                    ? {
+                          tools: options.tools,
+                          tool_choice: options.toolChoice || 'auto'
+                      }
+                    : {}),
                 ...modelParams
             });
 

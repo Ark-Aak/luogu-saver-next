@@ -227,17 +227,31 @@ const goToDetail = (id: string) => {
 
 .article-item :deep(.saver-card) {
     width: 100%;
+    min-width: 0;
 }
 
 .article-item :deep(.card-content) {
     display: flex;
     flex: 1;
+    min-width: 0;
+}
+
+.article-item :deep(.card-header),
+.article-item :deep(.card-title-wrapper) {
+    min-width: 0;
+}
+
+.article-item :deep(.card-title) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    overflow-wrap: anywhere;
 }
 
 .article-card-body {
     display: flex;
     flex: 1;
     flex-direction: column;
+    min-width: 0;
 }
 
 .article-meta-wrap {
@@ -245,14 +259,16 @@ const goToDetail = (id: string) => {
 }
 
 .article-summary {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
     color: var(--ui-secondary-text-color);
     font-size: 14px;
     line-height: 1.7;
     margin-bottom: 6px;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .article-meta {
