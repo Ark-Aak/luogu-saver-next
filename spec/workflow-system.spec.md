@@ -354,9 +354,28 @@ Task `answer` SHALL ask the LLM to:
 5. Not use `\(...\)` or `\[...\]` math delimiters.
 6. Not write prefatory disclaimers such as `下面根据已有材料` or `需要说明`.
 7. Not invite the user to ask follow-up questions.
-8. If no answer can be determined from the documents, output exactly `现有材料无法确定。`.
+8. If no answer can be determined from the documents or tool results, output exactly `现有材料无法确定。`.
 
 Task `answer` SHALL use the `answer` LLM scenario.
+
+Task `answer` SHALL allow the LLM to call tools before final answer generation.
+
+Tool call behavior:
+
+1. The handler SHALL provide a `keyword_search` tool.
+2. `keyword_search` input schema SHALL be `{ "query": string, "limit"?: integer }`.
+3. `keyword_search.limit` SHALL be normalized to an integer in `[1, 5]`, default `5`.
+4. `keyword_search` SHALL search article title, summary, content, author name, and tags using the article search index.
+5. `keyword_search` result payload SHALL include at most `limit` article summaries and SHALL NOT include full article content.
+6. The handler SHALL provide a `read_article` tool.
+7. `read_article` input schema SHALL be `{ "id": string, "maxChars"?: integer }`.
+8. `read_article.maxChars` SHALL be normalized to an integer in `[500, 3000]`, default `1800`.
+9. `read_article` result payload SHALL include one article title, ID, author name, summary, tags, category, and a content prefix of at most `maxChars` characters.
+10. Tool execution SHALL run for at most 4 LLM tool-call rounds.
+11. Across those rounds, the handler SHALL execute at most 8 tool calls.
+12. If the tool-call round limit is reached while the model still requests tools, the handler SHALL make one final `answer` scenario LLM call without tools.
+13. The final answer SHALL be based only on initial context documents and executed tool results.
+14. The final answer SHALL NOT expose chain-of-thought text. It SHALL contain only the answer content.
 
 Permission: `CREATE_WORKFLOW`.
 
