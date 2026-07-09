@@ -33,10 +33,10 @@ export class DiscoveredArticle extends BaseEntity {
     @Column({ name: 'article_id', type: 'varchar', length: 8 })
     articleId: string;
 
-    @Column()
+    @Column({ type: 'varchar' })
     source: DiscoveredArticleSource;
 
-    @Column({ default: DiscoveredArticleStatus.DISCOVERED })
+    @Column({ type: 'varchar', default: DiscoveredArticleStatus.DISCOVERED })
     status: DiscoveredArticleStatus;
 
     @Column({ name: 'workflow_id', type: 'varchar', length: 36, nullable: true })

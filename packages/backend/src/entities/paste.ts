@@ -38,7 +38,7 @@ export class Paste extends BaseEntity {
     @Type(() => Date)
     updatedAt: Date;
 
-    @Column({ name: 'delete_reason', nullable: true })
+    @Column({ name: 'delete_reason', type: 'varchar', nullable: true })
     deleteReason: string | null;
 
     @Column({ type: 'varchar', name: 'content_hash', nullable: true })
