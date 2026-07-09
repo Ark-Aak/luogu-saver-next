@@ -43,7 +43,7 @@ router.patch(
             return;
         }
 
-        if (uid === ctx.user.id) {
+        if (uid === ctx.user!.id) {
             ctx.fail(400, 'Cannot change your own role');
             return;
         }
@@ -54,7 +54,7 @@ router.patch(
             return;
         }
 
-        if (registeredUser.role === ROLE_ADMIN && ctx.user.role !== ROLE_ADMIN) {
+        if (registeredUser.role === ROLE_ADMIN && ctx.user!.role !== ROLE_ADMIN) {
             ctx.fail(403, 'Only admin can modify admin role');
             return;
         }

@@ -13,8 +13,12 @@ router.post('/create', requiresPermission(Permission.CREATE_TASK), async (ctx: C
         type?: TaskType;
         payload?: any;
     };
+    if (typeof type !== 'string' || typeof payload !== 'object' || !payload) {
+        ctx.fail(400, 'Invalid request body');
+        return;
+    }
     const target = payload.target;
-    if (typeof type !== 'string' || typeof target !== 'string' || typeof payload !== 'object') {
+    if (typeof target !== 'string') {
         ctx.fail(400, 'Invalid request body');
         return;
     }

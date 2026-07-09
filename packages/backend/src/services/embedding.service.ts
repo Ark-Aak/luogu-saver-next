@@ -43,6 +43,10 @@ export class EmbeddingService {
     private static async getCollection(): Promise<Collection> {
         if (this._collection) return this._collection;
 
+        if (!ChromaDataSource) {
+            throw new Error('Chroma is not enabled');
+        }
+
         if (!this._collectionPromise) {
             this._collectionPromise = ChromaDataSource.getOrCreateCollection({
                 name: config.chroma.collectionName

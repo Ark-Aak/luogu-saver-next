@@ -15,7 +15,7 @@ router.get('/query/:id', async (ctx: Context) => {
         }
         await paste.renderContent();
         if (paste.deleted) {
-            ctx.fail(403, paste.deleteReason);
+            ctx.fail(403, paste.deleteReason ?? '');
         } else {
             ctx.success(paste);
         }

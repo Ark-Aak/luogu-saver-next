@@ -34,10 +34,7 @@ router.post(
             });
         } catch (error) {
             logger.error({ error }, 'Failed to start article plaza discovery');
-            ctx.fail(
-                500,
-                error instanceof Error ? error.message : 'Failed to start article plaza discovery'
-            );
+            ctx.fail(500, 'Failed to start article plaza discovery');
         }
     }
 );
@@ -56,10 +53,7 @@ router.post('/user/:uid/articles/start', requiresAdmin, async (ctx: Context) => 
         });
     } catch (error) {
         logger.error({ error, uid: ctx.params.uid }, 'Failed to start user article discovery');
-        ctx.fail(
-            400,
-            error instanceof Error ? error.message : 'Failed to start user article discovery'
-        );
+            ctx.fail(400, 'Failed to start user article discovery');
     }
 });
 

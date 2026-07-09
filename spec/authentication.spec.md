@@ -208,13 +208,36 @@ Complete the CP OAuth authorization code flow.
 14. The callback SHALL NOT write to the `user` table.
 15. Require `registered_user.token` to be non-empty after the upsert.
 16. The callback SHALL NOT read or write the `token` table.
-17. Redirect to `frontendRedirectUri` with query parameters:
-    - `token=registered_user.token`
-    - `uid=registered user ID`
-    - `role=local role`
+17. Generate a random 32-character hex exchange code.
+18. Store `{ token, uid, role, redirect }` in Redis under `auth:cp:exchange:{exchange}` with TTL 60 seconds.
+19. Redirect to `frontendRedirectUri` with query parameters:
+    - `exchange=(the 32-character exchange code)`
     - `redirect=stored redirect`
 
-### 6.4 GET /auth/me
+### 6.4 POST /auth/exchange
+
+Exchange a one-time exchange code for the bearer token.
+
+**Request:**
+
+- Body: `{ exchange: string }` — The 32-character hex exchange code from the callback redirect.
+
+**Behavior:**
+
+1. If `exchange` is not a string of exactly 32 hex characters, return 400.
+2. Atomically read and delete Redis key `auth:cp:exchange:{exchange}`.
+3. If no data exists (expired or already consumed), return 404.
+4. Return `{ token, uid, role }` in the response body.
+5. The exchange code SHALL have a TTL of 60 seconds.
+6. The exchange code SHALL be single-use via `getdel`.
+
+**Response:**
+
+- 200: `{ token: string, uid: number, role: number }`
+- 400: `Invalid exchange code`
+- 404: `Exchange code expired or already used`
+
+### 6.5 GET /auth/me
 
 Return the authenticated local user.
 

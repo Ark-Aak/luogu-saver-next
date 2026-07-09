@@ -38,8 +38,8 @@ export class Paste extends BaseEntity {
     @Type(() => Date)
     updatedAt: Date;
 
-    @Column({ name: 'delete_reason', default: '管理员删除' })
-    deleteReason: string;
+    @Column({ name: 'delete_reason', nullable: true })
+    deleteReason: string | null;
 
     @Column({ type: 'varchar', name: 'content_hash', nullable: true })
     contentHash?: string;

@@ -97,19 +97,14 @@ ${content}
             'censor'
         );
 
+        let parsed: { Rating: number; Category: string; Reason: string; User_Display_Message: string };
         try {
-            JSON.parse(result.content || '');
+            parsed = JSON.parse(result.content || '');
         } catch {
             throw new Error(
                 `Censor LLM response is not valid JSON in job ${job.id}: ${result.content}`
             );
         }
-        const parsed = JSON.parse(result.content || '') as {
-            Rating: number;
-            Category: string;
-            Reason: string;
-            User_Display_Message: string;
-        };
 
         return {
             skipNextStep: false,

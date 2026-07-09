@@ -13,7 +13,7 @@ export class ArticleHistory extends BaseEntity {
     @Column({ type: 'int' })
     version: number;
 
-    @Column({ type: 'varchar' })
+    @Column({ type: 'varchar', length: 255 })
     title: string;
 
     @Column({ type: 'mediumtext' })

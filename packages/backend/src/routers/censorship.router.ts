@@ -14,7 +14,7 @@ router.get('/query/:type/:id', async (ctx: Context) => {
         return;
     }
     const censorships = await CensorshipService.getCensorshipsByTypeAndId(type, id);
-    if (!censorships) {
+    if (!censorships || censorships.length === 0) {
         ctx.fail(404, 'Censorship not found');
         return;
     }

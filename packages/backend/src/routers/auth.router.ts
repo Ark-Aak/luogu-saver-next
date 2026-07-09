@@ -22,7 +22,7 @@ router.get('/cp/login', async (ctx: Context) => {
         ctx.redirect(await AuthService.createAuthorizationUrl(ctx.query.redirect));
     } catch (error) {
         logger.error({ error }, 'Failed to create CP OAuth authorization URL');
-        ctx.fail(500, error instanceof Error ? error.message : 'Failed to start CP OAuth login');
+        ctx.fail(500, 'Failed to start CP OAuth login');
     }
 });
 
@@ -48,11 +48,10 @@ router.get('/cp/callback', async (ctx: Context) => {
 
     try {
         const result = await AuthService.completeCpOAuthLogin(code, state);
+        const exchange = await AuthService.storeExchangeToken(result);
         ctx.redirect(
             getFrontendCallbackUrl({
-                token: result.token,
-                uid: result.uid,
-                role: result.role,
+                exchange,
                 redirect: result.redirect
             })
         );
@@ -78,6 +77,22 @@ router.get('/me', async (ctx: Context) => {
 
     const registeredUser = await RegisteredUserService.getById(ctx.user.id);
     ctx.success({ uid: ctx.user.id, role: ctx.user.role, registeredUser });
+});
+
+router.post('/exchange', async (ctx: Context) => {
+    const { exchange } = ctx.request.body as { exchange?: string };
+    if (!exchange || typeof exchange !== 'string' || exchange.length !== 32) {
+        ctx.fail(400, 'Invalid exchange code');
+        return;
+    }
+
+    const data = await AuthService.consumeExchangeToken(exchange);
+    if (!data) {
+        ctx.fail(404, 'Exchange code expired or already used');
+        return;
+    }
+
+    ctx.success({ token: data.token, uid: data.uid, role: data.role });
 });
 
 export default router;

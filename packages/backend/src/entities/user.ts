@@ -38,10 +38,10 @@ export class User extends BaseEntity {
     profileFetchedAt: Date | null;
 
     @CreateDateColumn({ name: 'created_at' })
-    createdAt: number;
+    createdAt: Date;
 
     @UpdateDateColumn({ name: 'updated_at' })
-    updatedAt: number;
+    updatedAt: Date;
 
     @Cacheable(3600 * 24 * 3, id => `user:${id}`, User)
     static async findById(id: number) {

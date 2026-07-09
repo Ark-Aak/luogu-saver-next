@@ -3,27 +3,38 @@ import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { NAlert, NButton, NSpin } from 'naive-ui';
 import { setAuthToken } from '@/utils/auth.ts';
+import { apiFetch } from '@/utils/request.ts';
 
 const route = useRoute();
 const router = useRouter();
 const errorMessage = ref('');
 
-onMounted(() => {
+onMounted(async () => {
     const error = route.query.error as string | undefined;
     if (error) {
         errorMessage.value = (route.query.message as string | undefined) || error;
         return;
     }
 
-    const token = route.query.token as string | undefined;
-    if (!token) {
-        errorMessage.value = '登录回调缺少 token';
+    const exchange = route.query.exchange as string | undefined;
+    if (!exchange) {
+        errorMessage.value = '登录回调缺少验证码';
         return;
     }
 
-    setAuthToken(token);
-    const redirect = (route.query.redirect as string | undefined) || '/';
-    router.replace(redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/');
+    try {
+        const res = (await apiFetch.post('/auth/exchange', { exchange })) as any;
+        const token = res?.data?.token;
+        if (!token) {
+            errorMessage.value = '登录验证码已过期，请重新登录';
+            return;
+        }
+        setAuthToken(token);
+        const redirect = (route.query.redirect as string | undefined) || '/';
+        router.replace(redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/');
+    } catch {
+        errorMessage.value = '登录验证失败，请重试';
+    }
 });
 </script>
 

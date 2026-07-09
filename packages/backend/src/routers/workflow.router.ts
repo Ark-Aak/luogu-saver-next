@@ -20,7 +20,7 @@ router.post('/create', requiresPermission(Permission.CREATE_WORKFLOW), async (ct
         ctx.success(result);
     } catch (error) {
         logger.error({ error }, 'Failed to create workflow');
-        ctx.fail(500, error instanceof Error ? error.message : 'Unknown error');
+        ctx.fail(500, 'Failed to create workflow');
     }
 });
 
@@ -38,7 +38,7 @@ router.post('/create/template/:name', checkWorkflowPermission, async (ctx: Conte
         ctx.success(result);
     } catch (error) {
         logger.error({ error, name }, 'Failed to create workflow from template');
-        ctx.fail(500, error instanceof Error ? error.message : 'Unknown error');
+        ctx.fail(500, 'Failed to create workflow from template');
     }
 });
 
@@ -59,7 +59,7 @@ router.get('/query/:id', async (ctx: Context) => {
         ctx.success(workflow);
     } catch (error) {
         logger.error({ error, id }, 'Failed to get workflow status');
-        ctx.fail(500, error instanceof Error ? error.message : 'Unknown error');
+        ctx.fail(500, 'Failed to get workflow status');
     }
 });
 

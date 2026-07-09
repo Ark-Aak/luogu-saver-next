@@ -172,15 +172,18 @@ export async function bootstrap() {
         ]);
     };
 
-    process.on('SIGINT', async () => {
-        await closeWorkers();
+    const shutdown = async (signal: string) => {
+        logger.info({ signal }, 'Shutdown signal received');
+        try {
+            await closeWorkers();
+        } catch (error) {
+            logger.error({ error }, 'Error during worker shutdown');
+        }
         process.exit(0);
-    });
+    };
 
-    process.on('SIGTERM', async () => {
-        await closeWorkers();
-        process.exit(0);
-    });
+    process.on('SIGINT', () => void shutdown('SIGINT'));
+    process.on('SIGTERM', () => void shutdown('SIGTERM'));
 
     FlowManager.startRecoveryInBackground();
     WorkflowCleanupService.start();

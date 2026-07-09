@@ -156,10 +156,14 @@ export class DiscoveryService {
     }
 
     static async stopRun(runId: string) {
-        await getServiceRepository<DiscoveryRun>(DiscoveryRun).update(
-            { id: runId },
-            { status: DiscoveryRunStatus.STOPPED, finishedAt: new Date(), pendingPages: 0 }
-        );
+        const run = await findOneServiceEntity<DiscoveryRun>(DiscoveryRun, {
+            where: { id: runId }
+        });
+        if (!run) return;
+        run.status = DiscoveryRunStatus.STOPPED;
+        run.finishedAt = new Date();
+        run.pendingPages = 0;
+        await getServiceRepository<DiscoveryRun>(DiscoveryRun).save(run);
         ArticleDiscoveryBroadcaster.scheduleRunsUpdate();
     }
 

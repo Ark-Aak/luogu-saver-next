@@ -3,6 +3,7 @@ import http from 'http';
 import { logger } from './logger';
 import { RegisteredUserService } from '@/services/registered-user.service';
 import { ROLE_ADMIN } from '@/shared/permission';
+import { config } from '@/config';
 
 let io: Server | null = null;
 
@@ -21,10 +22,13 @@ export function initSocket(
     server: http.Server,
     joinRoomCallback?: (socket: Socket, room: string) => Promise<SocketJoinResult | void>
 ): Server {
+    const corsOrigins = config.corsAllowedOrigins === '*'
+        ? '*'
+        : config.corsAllowedOrigins.split(',').map(s => s.trim());
     io = new Server(server, {
         path: '/websocket',
         cors: {
-            origin: '*',
+            origin: corsOrigins,
             methods: ['GET', 'POST']
         }
     });
