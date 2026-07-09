@@ -30,10 +30,10 @@ onMounted(() => {
 <template>
     <div class="auth-callback">
         <n-alert v-if="errorMessage" type="error" title="登录失败">
-            {{ errorMessage }}
-            <template #action>
+            <div class="alert-content">
+                <span>{{ errorMessage }}</span>
                 <n-button size="small" @click="router.replace('/')">返回首页</n-button>
-            </template>
+            </div>
         </n-alert>
         <div v-else class="loading-state">
             <n-spin size="small" />
@@ -54,5 +54,12 @@ onMounted(() => {
     justify-content: center;
     gap: 12px;
     color: var(--ui-secondary-text-color);
+}
+
+.alert-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
 }
 </style>

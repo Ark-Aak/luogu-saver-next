@@ -82,7 +82,6 @@ const total = ref(0);
 const processingTimeMs = ref(0);
 
 const categoryOptions = computed(() => [
-    { label: '全部分类', value: null },
     ...Object.entries(ARTICLE_CATEGORIES)
         .filter(([key]) => Number(key) !== 9)
         .map(([key, item]) => ({ label: item.label, value: Number(key) }))
@@ -176,7 +175,12 @@ onMounted(loadSearch);
                     </n-input>
                 </n-gi>
                 <n-gi>
-                    <n-select v-model:value="category" :options="categoryOptions" clearable />
+                    <n-select
+                        v-model:value="category"
+                        :options="categoryOptions"
+                        clearable
+                        placeholder="全部分类"
+                    />
                 </n-gi>
                 <n-gi>
                     <n-button type="primary" block @click="handleSearch">搜索</n-button>

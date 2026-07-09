@@ -8,9 +8,9 @@ export interface KnowledgeBaseArticle {
     addedAt: string;
 }
 
-let sharedStorage: Ref<KnowledgeBaseArticle[]> | null = null;
+let sharedStorage: Ref<KnowledgeBaseArticle[] | null> | null = null;
 
-function getStorage() {
+function getStorage(): Ref<KnowledgeBaseArticle[] | null> {
     if (!sharedStorage) {
         sharedStorage = useLocalStorage<KnowledgeBaseArticle[]>(RAG_KNOWLEDGE_BASE_STORAGE_KEY, []);
     }

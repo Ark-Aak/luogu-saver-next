@@ -333,6 +333,7 @@ const closeMobileSider = () => {
 
 const handleTouchStart = (event: TouchEvent) => {
     const touch = event.changedTouches[0];
+    if (!touch) return;
     touchStartX.value = touch.clientX;
     touchStartY.value = touch.clientY;
 };
@@ -354,6 +355,7 @@ const handleSwipeEnd = (clientX: number, clientY: number) => {
 
 const handleTouchEnd = (event: TouchEvent) => {
     const touch = event.changedTouches[0];
+    if (!touch) return;
     handleSwipeEnd(touch.clientX, touch.clientY);
 };
 
