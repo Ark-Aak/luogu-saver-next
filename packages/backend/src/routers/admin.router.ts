@@ -7,6 +7,7 @@ import { WorkflowService } from '@/services/workflow.service';
 import { RegisteredUserService } from '@/services/registered-user.service';
 import { AnnouncementService } from '@/services/announcement.service';
 import { SiteNotificationService } from '@/services/site-notification.service';
+import { DeletionRequestService } from '@/services/deletion-request.service';
 
 const router = new Router<DefaultState, Context>({ prefix: '/admin' });
 
@@ -152,6 +153,51 @@ router.put(
             ctx.request.body || {}
         );
         ctx.success({ notifications });
+    }
+);
+
+router.get(
+    '/deletion-requests',
+    requiresPermission(Permission.MANAGE_CONTENT),
+    async (ctx: Context) => {
+        const result = await DeletionRequestService.listAdminRequests(
+            ctx.query.status ?? 'pending',
+            ctx.query.page,
+            ctx.query.pageSize
+        );
+        ctx.success(result);
+    }
+);
+
+router.post(
+    '/deletion-requests/:id/approve',
+    requiresPermission(Permission.MANAGE_CONTENT),
+    async (ctx: Context) => {
+        const id = Number(ctx.params.id);
+        if (!Number.isInteger(id) || id <= 0) {
+            ctx.fail(400, 'Valid id is required');
+            return;
+        }
+
+        const { comment } = (ctx.request.body || {}) as { comment?: unknown };
+        const result = await DeletionRequestService.approveRequest(id, ctx.user.id, comment);
+        ctx.success(result);
+    }
+);
+
+router.post(
+    '/deletion-requests/:id/reject',
+    requiresPermission(Permission.MANAGE_CONTENT),
+    async (ctx: Context) => {
+        const id = Number(ctx.params.id);
+        if (!Number.isInteger(id) || id <= 0) {
+            ctx.fail(400, 'Valid id is required');
+            return;
+        }
+
+        const { comment } = (ctx.request.body || {}) as { comment?: unknown };
+        const result = await DeletionRequestService.rejectRequest(id, ctx.user.id, comment);
+        ctx.success(result);
     }
 );
 

@@ -29,8 +29,10 @@ import Card from '@/components/Card.vue';
 import LoadingSkeleton from '@/components/LoadingSkeleton.vue';
 import MarkdownViewer from '@/components/MarkdownViewer.vue';
 import UserLink from '@/components/UserLink.vue';
+import DeletionRequestModal from '@/components/DeletionRequestModal.vue';
 import { formatDate } from '@/utils/render';
 import { useLuoguSource } from '@/utils/luogu-source.ts';
+import { isAuthenticated, startCpOAuthLogin } from '@/utils/auth.ts';
 
 const route = useRoute();
 const router = useRouter();
@@ -143,8 +145,20 @@ const handleUpdate = async () => {
     }
 };
 
+const showDeletionModal = ref(false);
+
 const handleDelete = () => {
-    message.info('删除功能暂未开放');
+    if (!isAuthenticated.value) {
+        dialog.warning({
+            title: '需要登录',
+            content: '提交删除申请需要登录，是否前往登录？',
+            positiveText: '去登录',
+            negativeText: '取消',
+            onPositiveClick: () => startCpOAuthLogin(`/paste/${pasteId}`)
+        });
+        return;
+    }
+    showDeletionModal.value = true;
 };
 
 onMounted(() => {
@@ -288,6 +302,12 @@ onMounted(() => {
             </template>
         </n-button>
     </div>
+
+    <DeletionRequestModal
+        v-model:show="showDeletionModal"
+        target-type="paste"
+        :target-id="pasteId"
+    />
 </template>
 
 <style scoped>

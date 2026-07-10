@@ -64,6 +64,7 @@
                                         </template>
                                     </n-button>
                                     <SiteNotificationCenter />
+                                    <UserNotificationCenter />
                                     <n-back-top :right="50" :bottom="200" />
                                     <router-view />
                                 </div>
@@ -272,6 +273,7 @@ import { darkTheme, defaultTheme } from '@/styles/theme/default-theme.ts';
 import TrackingConsent from '@/components/TrackingConsent.vue';
 import LuoguLogo from '@/components/icons/LuoguLogo.vue';
 import SiteNotificationCenter from '@/components/SiteNotificationCenter.vue';
+import UserNotificationCenter from '@/components/UserNotificationCenter.vue';
 import { currentRole, isAuthenticated, setCurrentAuth } from '@/utils/auth.ts';
 import { hasAnyPermission, Permission, ROLE_ADMIN } from '@/utils/permissions.ts';
 import { getCurrentUser } from '@/api/auth.ts';
@@ -373,7 +375,8 @@ const canShowAdminMenu = computed(() =>
         Permission.MANAGE_USERS,
         Permission.MANAGE_SEARCH,
         Permission.MANAGE_ANNOUNCEMENTS,
-        Permission.MANAGE_DISCOVERY
+        Permission.MANAGE_DISCOVERY,
+        Permission.MANAGE_CONTENT
     ])
 );
 

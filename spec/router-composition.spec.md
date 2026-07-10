@@ -32,6 +32,8 @@ The root router SHALL mount feature routers in this exact order:
 14. `announcementRouter` from `packages/backend/src/routers/announcement.router.ts`.
 15. `notificationRouter` from `packages/backend/src/routers/notification.router.ts`.
 16. `discoveryRouter` from `packages/backend/src/routers/discovery.router.ts`.
+17. `deletionRequestRouter` from `packages/backend/src/routers/deletion-request.router.ts`.
+18. `userNotificationRouter` from `packages/backend/src/routers/user-notification.router.ts`.
 
 ## 4. Prefix Ownership
 

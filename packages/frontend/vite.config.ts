@@ -18,7 +18,9 @@ export default defineConfig(({ mode }) => {
             allowedHosts: true,
             proxy: {
                 '/api': {
-                    target: 'http://localhost:3000',
+                    // 127.0.0.1 (not localhost): the backend binds IPv4 only, and
+                    // localhost may resolve to ::1 where an unrelated process can sit.
+                    target: 'http://127.0.0.1:3000',
                     changeOrigin: true,
                     ws: true,
                     rewrite: path => path.replace(/^\/api/, '')

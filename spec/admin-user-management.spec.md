@@ -4,7 +4,7 @@
 
 This specification defines backend registered-user administration endpoints implemented in `packages/backend/src/routers/admin.router.ts`.
 
-Announcement, site notification, search rebuild, summary rebuild, and embedding rebuild admin endpoints are specified by their owning subsystem specs.
+Announcement, site notification, search rebuild, summary rebuild, embedding rebuild, and deletion request review admin endpoints are specified by their owning subsystem specs.
 
 ## 2. Permissions
 

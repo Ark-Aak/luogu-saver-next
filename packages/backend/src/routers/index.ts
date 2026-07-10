@@ -15,6 +15,8 @@ import statsRouter from './stats.router';
 import announcementRouter from './announcement.router';
 import notificationRouter from './notification.router';
 import discoveryRouter from './discovery.router';
+import deletionRequestRouter from './deletion-request.router';
+import userNotificationRouter from './user-notification.router';
 import { DefaultState, Context } from 'koa';
 
 const router = new Router<DefaultState, Context>();
@@ -35,5 +37,7 @@ router.use(statsRouter.routes(), statsRouter.allowedMethods());
 router.use(announcementRouter.routes(), announcementRouter.allowedMethods());
 router.use(notificationRouter.routes(), notificationRouter.allowedMethods());
 router.use(discoveryRouter.routes(), discoveryRouter.allowedMethods());
+router.use(deletionRequestRouter.routes(), deletionRequestRouter.allowedMethods());
+router.use(userNotificationRouter.routes(), userNotificationRouter.allowedMethods());
 
 export default router;

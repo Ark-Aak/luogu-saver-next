@@ -47,6 +47,7 @@ import UserLink from '@/components/UserLink.vue';
 import MarkdownViewer from '@/components/MarkdownViewer.vue';
 import ArticleComments from '@/components/ArticleComments.vue';
 import LoadingSkeleton from '@/components/LoadingSkeleton.vue';
+import DeletionRequestModal from '@/components/DeletionRequestModal.vue';
 import { ARTICLE_CATEGORIES, CACHE_STORAGE_KEY, UNKNOWN_CATEGORY } from '@/utils/constants';
 import { formatDate } from '@/utils/render';
 
@@ -320,8 +321,20 @@ const handleUpdate = async () => {
     }
 };
 
+const showDeletionModal = ref(false);
+
 const handleDelete = () => {
-    message.info('删除功能暂未开放');
+    if (!isAuthenticated.value) {
+        dialog.warning({
+            title: '需要登录',
+            content: '提交删除申请需要登录，是否前往登录？',
+            positiveText: '去登录',
+            negativeText: '取消',
+            onPositiveClick: () => startCpOAuthLogin(`/article/${articleId}`)
+        });
+        return;
+    }
+    showDeletionModal.value = true;
 };
 
 const isInKnowledgeBase = computed(() => knowledgeBase.hasArticle(articleId));
@@ -723,6 +736,12 @@ onMounted(() => {
             </template>
         </n-button>
     </div>
+
+    <DeletionRequestModal
+        v-model:show="showDeletionModal"
+        target-type="article"
+        :target-id="articleId"
+    />
 </template>
 
 <style scoped>
