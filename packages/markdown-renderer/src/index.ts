@@ -11,7 +11,7 @@ import rehypeSanitize, { defaultSchema, type Options } from 'rehype-sanitize';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import type { ElementContent, Root } from 'hast';
-import type { VFile } from 'vfile';
+import { VFile } from 'vfile';
 
 const headingAnchorIcon: ElementContent = {
     type: 'element',
@@ -49,6 +49,193 @@ const headingAnchorIcon: ElementContent = {
 };
 
 let processorPromise: Promise<any> | null = null;
+const markdownStructureParser = unified().use(remarkParse);
+
+type MathNode = {
+    type: 'math';
+    position?: {
+        start: { line: number; offset?: number };
+        end: { line: number; offset?: number };
+    };
+};
+
+type MathFence = { end: number; length: number; offset: number };
+type SourceRange = { end: number; start: number };
+
+function createTextOffsetLookup(src: string) {
+    let ranges: SourceRange[] | undefined;
+
+    return (offset: number) => {
+        if (!ranges) {
+            const textRanges: SourceRange[] = [];
+            visit(markdownStructureParser.parse(src), 'text', node => {
+                const start = node.position?.start.offset;
+                const end = node.position?.end.offset;
+                if (start !== undefined && end !== undefined) textRanges.push({ end, start });
+            });
+            ranges = textRanges.sort((a, b) => a.start - b.start);
+        }
+
+        let low = 0;
+        let high = ranges.length - 1;
+        while (low <= high) {
+            const middle = Math.floor((low + high) / 2);
+            const range = ranges[middle];
+            if (offset < range.start) high = middle - 1;
+            else if (offset >= range.end) low = middle + 1;
+            else return true;
+        }
+
+        return false;
+    };
+}
+
+function findUnclosedMathFences(
+    src: string,
+    tree: unknown,
+    isTextOffset: (offset: number) => boolean
+) {
+    const fences: MathFence[] = [];
+
+    visit(tree as any, 'math', (node: MathNode) => {
+        const start = node.position?.start;
+        const end = node.position?.end;
+        if (start?.offset === undefined || end?.offset === undefined) return;
+
+        const openingLineEnd = Math.min(
+            ...[
+                src.indexOf('\n', start.offset),
+                src.indexOf('\r', start.offset),
+                src.length
+            ].filter(offset => offset >= 0)
+        );
+        const openingFence = /^(\${2,})[ \t]*$/.exec(src.slice(start.offset, openingLineEnd));
+        if (!openingFence) return;
+
+        // remark-math uses the same node shape at EOF, so only the source range reveals closure.
+        const lineBreak = Math.max(
+            src.lastIndexOf('\n', end.offset - 1),
+            src.lastIndexOf('\r', end.offset - 1)
+        );
+        const finalLine = src.slice(lineBreak + 1, end.offset);
+        const closingFence = /^(?:[ \t]*>[ \t]?)*[ \t]*(\${2,})[ \t]*$/.exec(finalLine);
+        const closingFenceOffset =
+            closingFence === null ? -1 : lineBreak + 1 + finalLine.lastIndexOf(closingFence[1]);
+        const isClosed =
+            end.line > start.line &&
+            closingFence !== null &&
+            closingFence[1].length >= openingFence[1].length &&
+            isTextOffset(closingFenceOffset);
+
+        if (!isClosed) {
+            fences.push({ end: end.offset, length: openingFence[1].length, offset: start.offset });
+        }
+    });
+
+    return fences;
+}
+
+function findStandaloneMathFences(
+    src: string,
+    range: MathFence,
+    isTextOffset: (offset: number) => boolean
+) {
+    const fences: Array<{ length: number; offset: number }> = [];
+    let lineStart = Math.max(
+        src.lastIndexOf('\n', range.offset - 1),
+        src.lastIndexOf('\r', range.offset - 1)
+    );
+    lineStart++;
+
+    while (lineStart < range.end) {
+        const lineEnd = Math.min(
+            ...[src.indexOf('\n', lineStart), src.indexOf('\r', lineStart), range.end].filter(
+                offset => offset >= 0 && offset <= range.end
+            )
+        );
+        const line = src.slice(lineStart, lineEnd);
+        const match =
+            /^(?:[ \t]*>[ \t]?)*[ \t]*(?:(?:[-+*]|\d+[.)])[ \t]+)?[ \t]*(\${2,})[ \t]*$/.exec(line);
+
+        if (match) {
+            const offset = lineStart + line.lastIndexOf(match[1]);
+            if (range.offset <= offset && isTextOffset(offset)) {
+                fences.push({ length: match[1].length, offset });
+            }
+        }
+
+        lineStart = lineEnd + (src[lineEnd] === '\r' && src[lineEnd + 1] === '\n' ? 2 : 1);
+    }
+
+    if (!fences.some(fence => fence.offset === range.offset)) {
+        fences.unshift({ length: range.length, offset: range.offset });
+    }
+
+    return fences;
+}
+
+function findFenceOpenersWithoutClosers(fences: Array<{ length: number; offset: number }>) {
+    const nextClosingFence = new Array<number>(fences.length).fill(-1);
+    const stack: number[] = [];
+
+    // The stack gives each opener the nearest later fence with at least the same width.
+    for (let index = fences.length - 1; index >= 0; index--) {
+        while (stack.length > 0 && fences[stack[stack.length - 1]].length < fences[index].length) {
+            stack.pop();
+        }
+        if (stack.length > 0) nextClosingFence[index] = stack[stack.length - 1];
+        stack.push(index);
+    }
+
+    const openers: Array<{ length: number; offset: number }> = [];
+    for (let index = 0; index < fences.length; ) {
+        const closingIndex = nextClosingFence[index];
+        if (closingIndex === -1) {
+            openers.push(fences[index]);
+            index++;
+        } else {
+            index = closingIndex + 1;
+        }
+    }
+
+    return openers;
+}
+
+function escapeMathFences(src: string, fences: Array<{ length: number; offset: number }>) {
+    const uniqueFences = [...new Map(fences.map(fence => [fence.offset, fence])).values()].sort(
+        (a, b) => a.offset - b.offset
+    );
+    const parts: string[] = [];
+    let cursor = 0;
+
+    for (const fence of uniqueFences) {
+        parts.push(src.slice(cursor, fence.offset), '\\$'.repeat(fence.length));
+        cursor = fence.offset + fence.length;
+    }
+    parts.push(src.slice(cursor));
+
+    return parts.join('');
+}
+
+function parseMarkdown(processor: any, src: string) {
+    let protectedSrc = src;
+
+    while (true) {
+        const file = new VFile(protectedSrc);
+        const tree = processor.parse(file);
+        const isTextOffset = createTextOffsetLookup(protectedSrc);
+        const fences = findUnclosedMathFences(protectedSrc, tree, isTextOffset);
+        if (fences.length === 0) return { file, tree };
+
+        const openers = fences.flatMap(fence => {
+            const unclosedOpeners = findFenceOpenersWithoutClosers(
+                findStandaloneMathFences(protectedSrc, fence, isTextOffset)
+            );
+            return unclosedOpeners.length > 0 ? unclosedOpeners : [fence];
+        });
+        protectedSrc = escapeMathFences(protectedSrc, openers);
+    }
+}
 
 function rehypeSafeKatex(options?: Parameters<typeof rehypeKatex>[0]) {
     const transform = rehypeKatex(options);
@@ -613,8 +800,9 @@ export default async function renderMarkdown(src: string) {
     const processor = await getProcessor();
 
     try {
-        const file = await processor.process(src);
-        return replaceUI(String(file));
+        const { file, tree } = parseMarkdown(processor, src);
+        const transformedTree = await processor.run(tree, file);
+        return replaceUI(processor.stringify(transformedTree, file));
     } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Render Error';
         return `<p>渲染失败：${msg}</p>`;

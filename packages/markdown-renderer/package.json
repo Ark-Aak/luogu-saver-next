@@ -10,7 +10,8 @@
     "author": "Federico2903",
     "license": "MIT",
     "scripts": {
-        "build": "tsc"
+        "build": "tsc",
+        "test": "npm run build && node --test test/*.test.mjs"
     },
     "dependencies": {
         "@shikijs/rehype": "^3.20.0",
@@ -28,7 +29,8 @@
         "remark-smartypants": "^3.0.2",
         "shiki": "^3.17.0",
         "unified": "^11.0.5",
-        "unist-util-visit": "^5.0.0"
+        "unist-util-visit": "^5.0.0",
+        "vfile": "^6.0.3"
     },
     "devDependencies": {
         "@types/hast": "^3.0.4",

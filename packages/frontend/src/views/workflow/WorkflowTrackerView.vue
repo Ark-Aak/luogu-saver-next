@@ -29,6 +29,7 @@ import {
     type WorkflowTaskNode
 } from '@/api/workflow';
 import { formatDate } from '@/utils/render';
+import { markStarPromptEligible } from '@/composables/useStarPrompt.ts';
 
 type TaskLayer = {
     index: number;
@@ -142,7 +143,15 @@ async function loadWorkflow(showSpinner = false) {
         if (response.code !== 200 || !response.data) {
             throw new Error(response.message || '工作流不存在');
         }
+        const previousStatus = workflow.value?.status;
         workflow.value = response.data;
+        if (
+            previousStatus &&
+            previousStatus !== 'completed' &&
+            response.data.status === 'completed'
+        ) {
+            markStarPromptEligible();
+        }
         schedulePolling();
     } catch (err: any) {
         errorMessage.value = err.message || '加载失败';

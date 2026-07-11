@@ -52,6 +52,7 @@ import { ARTICLE_CATEGORIES, CACHE_STORAGE_KEY, UNKNOWN_CATEGORY } from '@/utils
 import { formatDate } from '@/utils/render';
 
 import { useLocalStorage } from '@/composables/useLocalStorage.ts';
+import { markStarPromptEligible } from '@/composables/useStarPrompt.ts';
 import { isAuthenticated, startCpOAuthLogin } from '@/utils/auth.ts';
 import { useKnowledgeBase } from '@/utils/knowledge-base.ts';
 import { useLuoguSource } from '@/utils/luogu-source.ts';
@@ -205,6 +206,7 @@ const trackSaveTask = (taskId?: string) => {
         () => {
             stopTaskListener = null;
             message.success('保存任务处理完成');
+            markStarPromptEligible();
         },
         error => {
             stopTaskListener = null;

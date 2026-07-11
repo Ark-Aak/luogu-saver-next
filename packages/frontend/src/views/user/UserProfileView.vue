@@ -28,6 +28,7 @@ import Card from '@/components/Card.vue';
 import MarkdownViewer from '@/components/MarkdownViewer.vue';
 import UserPrizeBadge from '@/components/UserPrizeBadge.vue';
 import { useContentSaver } from '@/composables/useContentSaver';
+import { markStarPromptEligible } from '@/composables/useStarPrompt.ts';
 import { useLuoguSource } from '@/utils/luogu-source.ts';
 
 const route = useRoute();
@@ -131,6 +132,7 @@ function trackSaveTask(taskId?: string) {
         () => {
             stopSaveTaskListener = null;
             message.success('用户主页保存完成');
+            markStarPromptEligible();
             saveDialogShown.value = false;
             void reload();
         },

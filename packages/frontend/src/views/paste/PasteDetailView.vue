@@ -25,6 +25,7 @@ import {
 import { getPasteById, savePaste } from '@/api/paste';
 import type { Paste } from '@/types/paste';
 import { useContentSaver } from '@/composables/useContentSaver';
+import { markStarPromptEligible } from '@/composables/useStarPrompt.ts';
 import Card from '@/components/Card.vue';
 import LoadingSkeleton from '@/components/LoadingSkeleton.vue';
 import MarkdownViewer from '@/components/MarkdownViewer.vue';
@@ -77,6 +78,7 @@ const trackSaveTask = (taskId?: string) => {
         () => {
             stopTaskListener = null;
             message.success('保存任务处理完成');
+            markStarPromptEligible();
         },
         error => {
             stopTaskListener = null;

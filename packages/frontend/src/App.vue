@@ -201,7 +201,8 @@
                             </n-layout-content>
                         </n-layout>
                     </n-dialog-provider>
-                    <TrackingConsent />
+                    <StarPrompt :blocked="trackingConsentBlocking" />
+                    <TrackingConsent @update:blocking="trackingConsentBlocking = $event" />
                 </n-layout>
             </n-space>
         </n-message-provider>
@@ -271,6 +272,7 @@ import {
 } from '@/styles/theme/themeKeys.ts';
 import { darkTheme, defaultTheme } from '@/styles/theme/default-theme.ts';
 import TrackingConsent from '@/components/TrackingConsent.vue';
+import StarPrompt from '@/components/StarPrompt.vue';
 import LuoguLogo from '@/components/icons/LuoguLogo.vue';
 import SiteNotificationCenter from '@/components/SiteNotificationCenter.vue';
 import UserNotificationCenter from '@/components/UserNotificationCenter.vue';
@@ -291,6 +293,7 @@ const activeKey = computed(
 const collapsed = ref(true);
 const manualToggle = ref(false);
 const mobileSiderOpen = ref(false);
+const trackingConsentBlocking = ref(true);
 const touchStartX = ref(0);
 const touchStartY = ref(0);
 

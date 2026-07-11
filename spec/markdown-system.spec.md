@@ -92,7 +92,24 @@ If a supported directive title contains Markdown math syntax, the title SHALL re
 
 For input `::::success[$$\\displaystyle\\sum_{i = 1}^n i$$]`, the rendered title SHALL contain KaTeX HTML and SHALL NOT render the raw TeX text as plain text.
 
-## 6.1 GFM Task Lists
+## 6.1 Unclosed Display Math Fences
+
+A standalone display math fence is unclosed if `remark-math` parses a line containing only an opening sequence of two or more dollar signs and optional whitespace as a `math` node, and the node does not end with a valid closing display math fence.
+
+A dollar-sign sequence located inside an indented code block or fenced code block when the same input is parsed without math syntax SHALL NOT be a valid closing display math fence.
+
+For each unclosed display math fence, the renderer SHALL:
+
+1. Render the opening dollar-sign sequence as literal text.
+2. Parse all content after the opening sequence as normal Markdown.
+3. Render later valid inline math independently.
+4. Not produce one display-math element that contains all content after the opening sequence.
+
+Given input lines `normal text`, an empty line, `$$`, `inline math: $$ a = b $$`, an empty line, and `following text` followed by EOF, the output SHALL contain the literal text `$$`, SHALL render `a = b` through KaTeX, and SHALL contain `following text` outside that KaTeX element.
+
+A display math fence with a valid closing fence SHALL retain normal display-math behavior. Dollar-sign sequences inside indented code or fenced code blocks SHALL retain normal code behavior.
+
+## 6.2 GFM Task Lists
 
 For GFM task list input `- [ ] item` or `- [x] item`, the renderer SHALL preserve checkbox inputs in the output HTML.
 

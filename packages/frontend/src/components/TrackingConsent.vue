@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { NCard, NSpace, NButton, NText, NIcon } from 'naive-ui';
 import { AnalyticsOutline } from '@vicons/ionicons5';
 
 const show = ref(false);
+const emit = defineEmits<{
+    'update:blocking': [blocking: boolean];
+}>();
+let showTimer: number | null = null;
 
 import { CONSENT_TRACKING_STORAGE_KEY } from '@/utils/constants.ts';
 import { useLocalStorage } from '@/composables/useLocalStorage.ts';
@@ -11,21 +15,29 @@ const trackingStorage = useLocalStorage(CONSENT_TRACKING_STORAGE_KEY, 'unset');
 
 onMounted(() => {
     const consent = trackingStorage.value;
+    emit('update:blocking', consent === 'unset');
     if (consent === 'unset') {
-        setTimeout(() => {
+        showTimer = window.setTimeout(() => {
+            showTimer = null;
             show.value = true;
         }, 500);
     }
 });
 
+onUnmounted(() => {
+    if (showTimer !== null) window.clearTimeout(showTimer);
+});
+
 const handleAccept = () => {
     trackingStorage.value = 'allowed';
     show.value = false;
+    emit('update:blocking', false);
 };
 
 const handleReject = () => {
     trackingStorage.value = 'denied';
     show.value = false;
+    emit('update:blocking', false);
 };
 </script>
 

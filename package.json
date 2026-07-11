@@ -13,7 +13,7 @@
         "lint:eslint": "eslint .",
         "format:eslint": "eslint . --fix",
         "format:prettier": "prettier --write .",
-        "test": "echo \"No tests yet!\"",
+        "test": "npm test --workspaces --if-present",
         "prepare": "husky"
     },
     "devDependencies": {
