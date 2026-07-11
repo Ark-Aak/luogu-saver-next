@@ -1,0 +1,52 @@
+name: Publish Markdown Renderer
+
+permissions:
+    contents: read
+    id-token: write
+
+on:
+    push:
+        branches:
+            - master
+        paths:
+            - 'packages/markdown-renderer/**'
+    workflow_dispatch:
+
+concurrency:
+    group: publish-markdown-renderer
+    cancel-in-progress: false
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v6.0.1
+
+            - name: Setup Node
+              uses: actions/setup-node@v6.1.0
+              with:
+                  node-version: 22
+                  cache: npm
+                  registry-url: 'https://registry.npmjs.org'
+
+            - name: Setup npm Trusted Publishing
+              run: npm install --global npm@11
+
+            - name: Install Dependencies
+              run: npm ci
+
+            - name: Test Markdown Renderer
+              run: npm test -w @luogu-saver-next/markdown-renderer
+
+            - name: Select Release Version
+              working-directory: packages/markdown-renderer
+              run: |
+                  SOURCE_VERSION=$(node -p "require('./package.json').version")
+                  PUBLISHED_VERSION=$(npm view @luogu-saver-next/markdown-renderer version)
+                  RELEASE_VERSION=$(node -e 'const parse = (value) => value.split("-")[0].split(".").map(Number); const compare = (a, b) => a.reduce((result, part, index) => result || part - b[index], 0); const source = parse(process.argv[1]); const published = process.argv[2] ? parse(process.argv[2]) : null; const next = !published || compare(source, published) > 0 ? source : [published[0], published[1], published[2] + 1]; process.stdout.write(next.join("."));' "$SOURCE_VERSION" "$PUBLISHED_VERSION")
+                  npm version "$RELEASE_VERSION" --no-git-tag-version --workspaces=false
+                  echo "Publishing @luogu-saver-next/markdown-renderer@$RELEASE_VERSION"
+
+            - name: Publish Package
+              run: npm publish -w @luogu-saver-next/markdown-renderer --access public --provenance

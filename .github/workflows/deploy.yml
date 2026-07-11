@@ -67,13 +67,18 @@ jobs:
                   npm run build -w @luogu-saver-next/markdown-renderer
                   npm run build -w @luogu-saver-next/backend
 
+            - name: Package Markdown Renderer
+              run: |
+                  npm pack -w @luogu-saver-next/markdown-renderer --pack-destination packages/backend
+                  mv packages/backend/luogu-saver-next-markdown-renderer-*.tgz packages/backend/markdown-renderer.tgz
+
             - name: Deploy Backend
               uses: appleboy/scp-action@master
               with:
                   host: ${{ secrets.SERVER_B_HOST }}
                   username: root
                   password: ${{ secrets.SERVER_B_PASSWORD }}
-                  source: 'packages/backend/dist,packages/backend/package.json'
+                  source: 'packages/backend/dist,packages/backend/package.json,packages/backend/markdown-renderer.tgz'
                   target: '/opt/luogu-saver-backend'
                   strip_components: 2
 
@@ -89,7 +94,8 @@ jobs:
 
                       cd /opt/luogu-saver-backend
 
-                      npm install --production
+                      npm install --omit=dev
+                      npm install --omit=dev --no-save ./markdown-renderer.tgz
 
                       pm2 describe luogu-backend > /dev/null
                       if [ $? -eq 0 ]; then
