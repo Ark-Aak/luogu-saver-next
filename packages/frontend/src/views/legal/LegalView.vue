@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { ExclamationCircle, TrashAlt, UserShield } from '@/components/icons/lucide.ts';
 
 import Card from '@/components/Card.vue';
+import CardTitle from '@/components/CardTitle.vue';
 import { LEGAL_DOCUMENTS, type LegalKey } from '@/views/legal/legal-content.ts';
 
 const props = defineProps<{
@@ -22,17 +23,9 @@ const iconComponent = computed(() => ICON_MAP[doc.value.icon]);
 
 <template>
     <div class="legal-view">
-        <Card class="legal-card">
-            <div class="legal-header">
-                <span class="legal-icon">
-                    <component :is="iconComponent" :size="28" />
-                </span>
-                <div class="legal-header-text">
-                    <h1 class="legal-title">{{ doc.title }}</h1>
-                    <p class="legal-updated">最后更新于：{{ doc.updatedAt }}</p>
-                </div>
-            </div>
-        </Card>
+        <CardTitle :title="doc.title" :icon="iconComponent">
+            最后更新于：{{ doc.updatedAt }}
+        </CardTitle>
 
         <Card class="legal-card">
             <section v-for="section in doc.sections" :key="section.heading" class="legal-section">
@@ -63,34 +56,6 @@ const iconComponent = computed(() => ICON_MAP[doc.value.icon]);
     display: flex;
     flex-direction: column;
     gap: var(--ui-section-gap);
-}
-
-.legal-header {
-    display: flex;
-    align-items: center;
-    gap: var(--ui-space-4);
-}
-.legal-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    color: var(--ui-primary-color);
-    flex-shrink: 0;
-}
-.legal-header-text {
-    min-width: 0;
-}
-.legal-title {
-    margin: 0;
-    font-size: 24px;
-    font-weight: 700;
-    line-height: 1.3;
-}
-.legal-updated {
-    margin: 4px 0 0;
-    font-size: 13px;
-    color: var(--ui-muted-text-color);
 }
 
 .legal-section {

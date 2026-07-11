@@ -224,7 +224,7 @@ function getProgressDetail(taskName: string, data?: any) {
 
 <template>
     <div class="rag-page">
-        <CardTitle title="RAG 问答" :icon="ChatbubbleEllipsesOutline" class="rag-header" chip="RAG">
+        <CardTitle title="RAG 问答" :icon="ChatbubbleEllipsesOutline" class="rag-header">
             RETRIEVAL AUGMENTED QA
         </CardTitle>
 

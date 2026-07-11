@@ -36,7 +36,7 @@ async function handleStart() {
 
 <template>
     <div class="user-article-discovery-page">
-        <CardTitle title="用户文章爬取" :icon="CloudDownloadOutline" chip="DISCOVERY">
+        <CardTitle title="用户文章爬取" :icon="CloudDownloadOutline">
             输入洛谷 UID，批量发现并保存该用户公开文章。
         </CardTitle>
 

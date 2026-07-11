@@ -227,12 +227,7 @@ onUnmounted(stopPolling);
 
 <template>
     <div class="workflow-page">
-        <CardTitle
-            title="工作流跟踪"
-            :icon="GitNetworkOutline"
-            class="workflow-title"
-            chip="Workflow"
-        >
+        <CardTitle title="工作流跟踪" :icon="GitNetworkOutline" class="workflow-title">
             DAG TASK TRACKING
         </CardTitle>
 

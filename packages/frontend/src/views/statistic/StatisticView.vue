@@ -95,9 +95,7 @@ onUnmounted(() => {
 
 <template>
     <div class="statistic-page">
-        <CardTitle title="统计数据" :icon="PulseOutline" chip="QUEUE STATS">
-            REAL-TIME WORKER QUEUES
-        </CardTitle>
+        <CardTitle title="统计数据" :icon="PulseOutline"> REAL-TIME WORKER QUEUES </CardTitle>
 
         <div class="summary-grid">
             <Card title="WebSocket" :icon="ServerOutline">

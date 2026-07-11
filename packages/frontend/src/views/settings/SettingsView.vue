@@ -131,9 +131,7 @@ onMounted(loadCurrentUser);
 
 <template>
     <div class="settings-page">
-        <CardTitle title="设置" :icon="SettingsOutline" chip="PREFERENCES">
-            ACCOUNT AND LOCAL SETTINGS
-        </CardTitle>
+        <CardTitle title="设置" :icon="SettingsOutline"> ACCOUNT AND LOCAL SETTINGS </CardTitle>
 
         <div class="settings-grid">
             <Card title="账号" :icon="KeyOutline" class="settings-card">

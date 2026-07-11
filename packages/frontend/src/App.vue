@@ -993,9 +993,7 @@ setInterval(() => {
 }
 
 .app-main {
-    background:
-        radial-gradient(circle at top left, var(--ui-panel-color), transparent 34vw),
-        linear-gradient(180deg, var(--ui-body-gradient-start) 0%, var(--ui-body-gradient-end) 100%);
+    background: var(--ui-card-color);
 }
 
 .app-sider {

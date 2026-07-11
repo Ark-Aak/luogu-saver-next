@@ -51,7 +51,7 @@ onMounted(async () => {
 
 <template>
     <div class="admin-page">
-        <CardTitle title="后台" :icon="ShieldCheckmarkOutline" class="admin-header" chip="ADMIN">
+        <CardTitle title="后台" :icon="ShieldCheckmarkOutline" class="admin-header">
             MANAGEMENT
         </CardTitle>
 

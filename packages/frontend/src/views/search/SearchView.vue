@@ -161,7 +161,7 @@ onMounted(loadSearch);
 
 <template>
     <div class="search-page">
-        <CardTitle title="搜索" :icon="SearchOutline" class="search-header" chip="ARTICLE SEARCH">
+        <CardTitle title="搜索" :icon="SearchOutline" class="search-header">
             SEARCH ARTICLES
         </CardTitle>
 

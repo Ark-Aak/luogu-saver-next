@@ -18,6 +18,7 @@ import {
 import { getArticleCount } from '@/api/article.ts';
 import { getPasteCount } from '@/api/paste.ts';
 import Card from '@/components/Card.vue';
+import CardTitle from '@/components/CardTitle.vue';
 import { uiThemeKey } from '@/styles/theme/themeKeys.ts';
 
 const themeVars = inject(uiThemeKey)!;
@@ -77,10 +78,9 @@ onMounted(() => {
 
 <template>
     <div class="about-view">
-        <div class="about-header">
-            <h1 class="about-title">关于 Luogu Saver Next</h1>
-            <p class="about-subtitle">一个用于归档洛谷用户生成内容的开源 Web 应用 · LGS-NG</p>
-        </div>
+        <CardTitle title="关于 Luogu Saver Next" :icon="GlobeOutline">
+            一个用于归档洛谷用户生成内容的开源 Web 应用 · LGS-NG
+        </CardTitle>
 
         <Card :icon="AppsOutline" title="项目简介" class="about-card">
             <p class="about-paragraph">
@@ -165,21 +165,6 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     gap: var(--ui-section-gap);
-}
-
-.about-header {
-    padding: 8px 4px 0;
-}
-.about-title {
-    margin: 0;
-    font-size: 26px;
-    font-weight: 700;
-    line-height: 1.3;
-}
-.about-subtitle {
-    margin: 6px 0 0;
-    color: var(--ui-muted-text-color);
-    font-size: 14px;
 }
 
 .about-paragraph {
