@@ -244,9 +244,19 @@ function handleSearch() {
 }
 
 .brand-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 48px;
     height: 48px;
     flex: 0 0 48px;
+}
+
+.brand-mark :deep(svg) {
+    display: block;
+    width: calc(100% - 2px);
+    height: calc(100% - 2px);
+    transform: translateY(-1px);
 }
 
 .home-brand h1 {
@@ -254,7 +264,7 @@ function handleSearch() {
     color: var(--ui-card-title-color);
     font-size: 48px;
     font-weight: 700;
-    line-height: 1.1;
+    line-height: 1;
     letter-spacing: 0;
 }
 
@@ -390,6 +400,12 @@ function handleSearch() {
         height: 34px;
         flex-basis: 34px;
         font-size: 34px !important;
+    }
+
+    .brand-mark :deep(svg) {
+        width: calc(100% - 1px);
+        height: calc(100% - 1px);
+        transform: translateY(-0.5px);
     }
 
     .home-brand h1 {
