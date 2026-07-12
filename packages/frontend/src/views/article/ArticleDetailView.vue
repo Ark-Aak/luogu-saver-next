@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import {
     useMessage,
@@ -235,10 +235,12 @@ const submitSaveArticle = async () => {
 };
 
 const loadData = async () => {
+    const id = route.params.id as string;
+    if (!id) return;
     loading.value = true;
     forbiddenReason.value = '';
     try {
-        const res = await getArticleById(articleId);
+        const res = await getArticleById(id);
         if (res.code === 404) {
             handle404(submitSaveArticle);
             return;
@@ -371,6 +373,10 @@ const currentCategory = computed(() => {
 });
 
 onMounted(() => {
+    loadData();
+});
+
+watch(() => route.params.id, () => {
     loadData();
 });
 </script>

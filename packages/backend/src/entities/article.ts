@@ -27,7 +27,7 @@ export class Article extends BaseEntity {
     @PrimaryColumn({ type: 'varchar', length: 8 })
     id: string;
 
-    @Column()
+    @Column({ length: 255 })
     title: string;
 
     @Column({ type: 'mediumtext' })

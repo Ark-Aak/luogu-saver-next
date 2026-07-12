@@ -4,14 +4,14 @@ export const DbSchema = z.object({
     host: z.string().default('localhost'),
     user: z.string().default('root'),
     port: z.number().default(3306),
-    password: z.string().default(''),
+    password: z.string().optional(),
     database: z.string().default('mydatabase')
 });
 
 export const RedisSchema = z.object({
     host: z.string().default('localhost'),
     port: z.number().default(6379),
-    password: z.string().default(''),
+    password: z.string().optional(),
     keyPrefix: z.string().default('')
 });
 

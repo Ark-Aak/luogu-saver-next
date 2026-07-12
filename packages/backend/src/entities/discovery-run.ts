@@ -24,7 +24,7 @@ export class DiscoveryRun extends BaseEntity {
     @Column({ name: 'seed_url' })
     seedUrl: string;
 
-    @Column({ default: DiscoveryRunStatus.ACTIVE })
+    @Column({ type: 'varchar', default: DiscoveryRunStatus.ACTIVE })
     status: DiscoveryRunStatus;
 
     @Column({ name: 'max_pages', default: 50 })

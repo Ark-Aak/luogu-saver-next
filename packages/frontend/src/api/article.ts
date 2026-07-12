@@ -8,7 +8,21 @@ export async function getArticleById(id: string) {
 }
 
 export async function getArticlesByIds(ids: string[]) {
-    return await Promise.all(ids.map(id => getArticleById(id)));
+    if (ids.length === 0) return { code: 200, message: 'OK', data: [] } as ApiResponse<Article[]>;
+    const chunks: string[][] = [];
+    for (let i = 0; i < ids.length; i += 100) {
+        chunks.push(ids.slice(i, i + 100));
+    }
+    const results = await Promise.all(
+        chunks.map(chunk =>
+            apiFetch('/article/query/batch', {
+                method: 'POST',
+                data: { ids: chunk }
+            })
+        )
+    );
+    const allArticles = results.flatMap(r => (r as ApiResponse<Article[]>).data ?? []);
+    return { code: 200, message: 'OK', data: allArticles } as ApiResponse<Article[]>;
 }
 
 export async function getRecentArticles(

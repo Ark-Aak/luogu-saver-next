@@ -41,6 +41,7 @@ type LocalLoginResult = {
 };
 
 const STATE_KEY_PREFIX = 'auth:cp:state:';
+const EXCHANGE_KEY_PREFIX = 'auth:cp:exchange:';
 
 export class AuthService {
     private static discoveryCache: DiscoveryDocument | null = null;
@@ -71,6 +72,34 @@ export class AuthService {
 
     private static getStateKey(state: string): string {
         return `${STATE_KEY_PREFIX}${state}`;
+    }
+
+    private static getExchangeKey(exchange: string): string {
+        return `${EXCHANGE_KEY_PREFIX}${exchange}`;
+    }
+
+    static async storeExchangeToken(data: {
+        token: string;
+        uid: number;
+        role: number;
+        redirect: string;
+    }): Promise<string> {
+        const exchange = crypto.randomBytes(16).toString('hex');
+        await redisClient.set(
+            this.getExchangeKey(exchange),
+            JSON.stringify(data),
+            'EX',
+            60
+        );
+        return exchange;
+    }
+
+    static async consumeExchangeToken(
+        exchange: string
+    ): Promise<{ token: string; uid: number; role: number; redirect: string } | null> {
+        const raw = await redisClient.getdel(this.getExchangeKey(exchange));
+        if (!raw) return null;
+        return JSON.parse(raw);
     }
 
     private static base64url(buffer: Buffer): string {

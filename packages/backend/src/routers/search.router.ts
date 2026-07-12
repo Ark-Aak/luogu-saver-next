@@ -25,7 +25,7 @@ router.get('/articles', async (ctx: Context) => {
         ctx.success(result);
     } catch (error) {
         logger.error({ error }, 'Failed to search articles');
-        ctx.fail(500, error instanceof Error ? error.message : 'Failed to search articles');
+        ctx.fail(500, 'Failed to search articles');
     }
 });
 

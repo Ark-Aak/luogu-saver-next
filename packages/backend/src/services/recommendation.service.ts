@@ -71,7 +71,12 @@ export class RecommendationService {
     }
 
     private static shuffleArticles(articleIds: string[]): string[] {
-        return [...articleIds].sort(() => 0.5 - Math.random());
+        const shuffled = [...articleIds];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
     }
 
     private static getReason(articleId: string, candidatePools: CandidatePools): string {

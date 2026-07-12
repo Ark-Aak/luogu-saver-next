@@ -11,12 +11,13 @@ const router = new Router<DefaultState, Context>({ prefix: '/token' });
 router.post('/verify', async (ctx: Context) => {
     const { uid } = ctx.request.body as any;
 
-    if (!uid) {
-        ctx.fail(400, 'UID is required');
+    const parsedUid = Number(uid);
+    if (!Number.isInteger(parsedUid) || parsedUid <= 0) {
+        ctx.fail(400, 'UID must be a positive integer');
         return;
     }
 
-    const result = await VerificationService.prepareForLuogu(uid);
+    const result = await VerificationService.prepareForLuogu(parsedUid);
     ctx.success(result);
 });
 
@@ -32,33 +33,35 @@ router.post('/permission', async (ctx: Context) => {
 
     const { uid, role } = ctx.request.body as any;
 
-    if (!uid || role === undefined) {
-        ctx.fail(400, 'UID and role are required');
+    const parsedUid = Number(uid);
+    const parsedRole = Number(role);
+    if (!Number.isInteger(parsedUid) || parsedUid <= 0 || role === undefined || !Number.isInteger(parsedRole)) {
+        ctx.fail(400, 'UID and role must be integers');
         return;
     }
 
-    if (uid === ctx.user.id) {
+    if (parsedUid === ctx.user.id) {
         ctx.fail(400, 'Cannot change your own role');
         return;
     }
 
     try {
-        const registeredUser = await RegisteredUser.findOne({ where: { id: uid } });
+        const registeredUser = await RegisteredUser.findOne({ where: { id: parsedUid } });
         if (!registeredUser) {
             ctx.fail(404, 'Registered user not found');
             return;
         }
 
-        await RegisteredUserService.updateRole(uid, role);
-        ctx.success({ uid, role });
+        await RegisteredUserService.updateRole(parsedUid, parsedRole);
+        ctx.success({ uid: parsedUid, role: parsedRole });
     } catch (error) {
-        ctx.fail(500, error instanceof Error ? error.message : 'Unknown error');
+        ctx.fail(500, 'Failed to update permission');
     }
 });
 
 router.get('/inspect', requiresPermission(Permission.LOGIN), async (ctx: Context) => {
     try {
-        const registeredUser = await RegisteredUser.findOne({ where: { id: ctx.user.id } });
+        const registeredUser = await RegisteredUser.findOne({ where: { id: ctx.user!.id } });
         if (!registeredUser) {
             ctx.fail(404, 'Registered user not found');
             return;
@@ -69,7 +72,7 @@ router.get('/inspect', requiresPermission(Permission.LOGIN), async (ctx: Context
             createdAt: registeredUser.createdAt
         });
     } catch (error) {
-        ctx.fail(500, error instanceof Error ? error.message : 'Unknown error');
+        ctx.fail(500, 'Failed to inspect token');
     }
 });
 

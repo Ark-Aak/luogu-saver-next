@@ -13,7 +13,7 @@ export const AppDataSource = new DataSource({
     password: config.db.password,
     database: config.db.database,
 
-    synchronize: true,
+    synchronize: false,
     logging: false,
 
     entities: [path.join(__dirname, '/entities/*.{ts,js}')],
@@ -23,10 +23,17 @@ export const AppDataSource = new DataSource({
     migrations: []
 });
 
-export const ChromaDataSource = new ChromaClient({
-    ssl: config.chroma.ssl,
-    host: config.chroma.host,
-    port: config.chroma.port,
-    tenant: 'default_tenant',
-    database: 'default_database'
-});
+function createChromaClient(): ChromaClient | null {
+    if (!config.chroma.enable) {
+        return null;
+    }
+    return new ChromaClient({
+        ssl: config.chroma.ssl,
+        host: config.chroma.host,
+        port: config.chroma.port,
+        tenant: 'default_tenant',
+        database: 'default_database'
+    });
+}
+
+export const ChromaDataSource = createChromaClient();

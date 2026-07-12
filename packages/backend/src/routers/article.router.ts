@@ -109,6 +109,21 @@ router.get('/count', async (ctx: Context) => {
     }
 });
 
+router.post('/query/batch', async (ctx: Context) => {
+    try {
+        const ids = ctx.request.body?.ids;
+        if (!Array.isArray(ids) || ids.length === 0 || ids.length > 100) {
+            ctx.fail(400, 'Invalid ids array (1-100 items)');
+            return;
+        }
+        const articles = await ArticleService.getArticlesByIds(ids);
+        await Promise.all(articles.map(a => a.renderContent()));
+        ctx.success(articles);
+    } catch {
+        ctx.fail(500, 'Failed to retrieve articles');
+    }
+});
+
 router.get('/comments/:id', async (ctx: Context) => {
     const lid = ctx.params.id;
     if (!/^[A-Za-z0-9]{1,8}$/.test(lid)) {

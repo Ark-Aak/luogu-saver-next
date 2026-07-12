@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import {
     NButton,
@@ -56,7 +56,7 @@ const displayContent = ref('');
 const { buildLuoguUrl } = useLuoguSource();
 let stopTaskListener: (() => void) | null = null;
 
-const title = computed(() => `剪贴板 ${pasteId}`);
+const title = computed(() => `剪贴板 ${route.params.id as string}`);
 
 const triggerRefresh = () => {
     handleRefresh(loadData);
@@ -107,9 +107,11 @@ const submitSavePaste = async () => {
 };
 
 const loadData = async () => {
+    const id = route.params.id as string;
+    if (!id) return;
     loading.value = true;
     try {
-        const res = await getPasteById(pasteId);
+        const res = await getPasteById(id);
         if (res.code === 404) {
             handle404(submitSavePaste);
             return;
@@ -164,6 +166,10 @@ const handleDelete = () => {
 };
 
 onMounted(() => {
+    loadData();
+});
+
+watch(() => route.params.id, () => {
     loadData();
 });
 </script>

@@ -5,7 +5,7 @@ import { logger } from '@/lib/logger';
 
 export const tracking = async (ctx: Context, next: Next) => {
     if (ctx.headers['x-consent-tracking'] === 'true') {
-        if (ctx.userId) {
+        if (ctx.user?.id) {
             // user has logged in so do not use device id
         } else {
             ctx.track = async (event: string, data: string) => {

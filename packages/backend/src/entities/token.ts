@@ -18,7 +18,7 @@ export class Token extends BaseEntity {
     @Type(() => Date)
     createdAt: Date;
 
-    static async validate(token: string): Promise<number[] | null> {
+    static async validate(token: string): Promise<number[]> {
         const tokenRecord = await Token.findOne({ where: { id: token } });
         return tokenRecord ? [tokenRecord.uid, tokenRecord.role] : [];
     }
