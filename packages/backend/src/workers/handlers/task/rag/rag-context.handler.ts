@@ -6,6 +6,7 @@ import { clampInt } from '@/utils/number';
 import { llm } from '@/lib/llm';
 import { logger } from '@/lib/logger';
 import { config } from '@/config';
+import { Article } from '@/entities/article';
 
 type MergedHit = {
     id: string;
@@ -57,24 +58,28 @@ export class RagContextHandler implements TaskHandler<RagTask> {
         const documents: RagDocument[] = [];
         const includedIds = new Set<string>();
 
+        const mergedResult = await this.mergeHits(question, childrenValues, forcedArticleIds);
+
         for (const articleId of forcedArticleIds) {
             if (documents.length >= maxArticles) break;
-            const document = await this.loadArticleDocument(articleId, {
-                score: 100,
-                sources: ['knowledge-base'],
-                queries: []
-            });
+            const document = this.loadArticleDocument(
+                articleId,
+                {
+                    score: 100,
+                    sources: ['knowledge-base'],
+                    queries: []
+                },
+                mergedResult.articles
+            );
             if (!document) continue;
             documents.push(document);
             includedIds.add(document.id);
         }
 
-        const merged = (await this.mergeHits(question, childrenValues)).filter(
-            hit => !includedIds.has(hit.id)
-        );
+        const merged = mergedResult.hits.filter(hit => !includedIds.has(hit.id));
         for (const hit of merged) {
             if (documents.length >= maxArticles) break;
-            const document = await this.loadArticleDocument(hit.id, hit);
+            const document = this.loadArticleDocument(hit.id, hit, mergedResult.articles);
             if (!document) continue;
             documents.push(document);
         }
@@ -104,7 +109,7 @@ ${matchedChunk}<score keyword="${doc.keywordScore ?? 0}" vector="${doc.vectorSco
         };
     }
 
-    private async loadArticleDocument(
+    private loadArticleDocument(
         articleId: string,
         hit: Pick<
             MergedHit,
@@ -117,9 +122,10 @@ ${matchedChunk}<score keyword="${doc.keywordScore ?? 0}" vector="${doc.vectorSco
             | 'rerankScore'
             | 'chunkText'
             | 'chunkIndex'
-        >
-    ): Promise<RagDocument | null> {
-        const article = await ArticleService.getArticleByIdWithAuthorWithoutCache(articleId);
+        >,
+        articles: Map<string, Article>
+    ): RagDocument | null {
+        const article = articles.get(articleId);
         if (!article || article.deleted) return null;
         return {
             id: article.id,
@@ -164,8 +170,9 @@ ${matchedChunk}<score keyword="${doc.keywordScore ?? 0}" vector="${doc.vectorSco
 
     private async mergeHits(
         question: string,
-        childrenValues: ChildrenValues
-    ): Promise<MergedHit[]> {
+        childrenValues: ChildrenValues,
+        additionalArticleIds: string[]
+    ): Promise<{ hits: MergedHit[]; articles: Map<string, Article> }> {
         const merged = new Map<string, MergedHit>();
 
         for (const value of Object.values(childrenValues)) {
@@ -215,7 +222,12 @@ ${matchedChunk}<score keyword="${doc.keywordScore ?? 0}" vector="${doc.vectorSco
             .sort((a, b) => this.baseScore(b) - this.baseScore(a))
             .slice(0, config.rag.candidateArticleLimit);
 
-        await this.applyRerank(question, candidates);
+        const articleIds = [
+            ...new Set([...additionalArticleIds, ...candidates.map(candidate => candidate.id)])
+        ];
+        const articleRows = await ArticleService.getArticlesByIds(articleIds);
+        const articles = new Map(articleRows.map(article => [article.id, article]));
+        await this.applyRerank(question, candidates, articles);
 
         for (const hit of candidates) {
             hit.score =
@@ -227,7 +239,7 @@ ${matchedChunk}<score keyword="${doc.keywordScore ?? 0}" vector="${doc.vectorSco
             if (hit.queries.length > 1) hit.score += (hit.queries.length - 1) * 0.025;
         }
 
-        return candidates.sort((a, b) => b.score - a.score);
+        return { hits: candidates.sort((a, b) => b.score - a.score), articles };
     }
 
     private baseScore(hit: MergedHit) {
@@ -237,23 +249,25 @@ ${matchedChunk}<score keyword="${doc.keywordScore ?? 0}" vector="${doc.vectorSco
         );
     }
 
-    private async applyRerank(question: string, candidates: MergedHit[]) {
+    private async applyRerank(
+        question: string,
+        candidates: MergedHit[],
+        articles: Map<string, Article>
+    ) {
         if (!llm.hasRerank() || candidates.length === 0) return;
 
-        const documents = await Promise.all(
-            candidates.map(async hit => {
-                const article = await ArticleService.getArticleByIdWithAuthorWithoutCache(hit.id);
-                if (!article || article.deleted) return '';
-                return [
-                    `标题：${article.title}`,
-                    `摘要：${article.summary || ''}`,
-                    hit.chunkText ? `命中片段：${hit.chunkText}` : '',
-                    `正文开头：${this.truncate(article.content || '', 900)}`
-                ]
-                    .filter(Boolean)
-                    .join('\n');
-            })
-        );
+        const documents = candidates.map(hit => {
+            const article = articles.get(hit.id);
+            if (!article || article.deleted) return '';
+            return [
+                `标题：${article.title}`,
+                `摘要：${article.summary || ''}`,
+                hit.chunkText ? `命中片段：${hit.chunkText}` : '',
+                `正文开头：${this.truncate(article.content || '', 900)}`
+            ]
+                .filter(Boolean)
+                .join('\n');
+        });
 
         try {
             const response = await llm.rerank(question, documents, candidates.length);

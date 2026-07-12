@@ -137,10 +137,11 @@ Task `reindex-search` SHALL:
 
 1. If `meilisearch.enable=false`, return `{ indexed: 0 }`.
 2. Delete all existing documents from the configured article index and wait for deletion completion.
-3. Load non-deleted articles from the database in ascending `updatedAt` order.
-4. Upsert articles into Meilisearch in batches.
-5. Wait for each Meilisearch document addition task to finish before loading the next batch.
-6. Return `{ indexed: number }` where `number` is the count of documents accepted by Meilisearch.
+3. Load non-deleted articles from the database in ascending `(updatedAt, id)` order.
+4. Use keyset pagination with the last `(updatedAt, id)` pair from the previous batch; do not use SQL `OFFSET`.
+5. Upsert articles into Meilisearch in batches.
+6. Wait for each Meilisearch document addition task to finish before loading the next batch.
+7. Return `{ indexed: number }` where `number` is the count of documents accepted by Meilisearch.
 
 ## 8. Search Task
 
@@ -219,12 +220,12 @@ Behavior:
 6. Score each candidate using keyword score, vector score, and rerank score.
 7. Keyword score SHALL be normalized from rank as `1 / (rank + 1)`.
 8. Vector score SHALL be `max(0, 1 - distance)` from the best summary or chunk hit for the article.
-9. The handler SHALL call standard rerank API through the LLM rerank scenario when configured.
-10. Final score SHALL be `keywordScore * keywordWeight + vectorScore * vectorWeight + rerankScore * rerankWeight`.
-11. If rerank is not configured or fails, rerankScore SHALL be `0` and candidate ordering SHALL still complete.
-12. Include each distinct non-empty query string in the returned document's `queries` array.
-13. Select at most `metadata.maxArticles` articles. If absent, use 10. Clamp to `[1, 10]`.
-14. Load selected articles from the database.
+9. The handler SHALL load all forced and candidate articles with one `WHERE id IN (...)` database query.
+10. The handler SHALL call standard rerank API through the LLM rerank scenario when configured, using the batch-loaded article map.
+11. Final score SHALL be `keywordScore * keywordWeight + vectorScore * vectorWeight + rerankScore * rerankWeight`.
+12. If rerank is not configured or fails, rerankScore SHALL be `0` and candidate ordering SHALL still complete.
+13. Include each distinct non-empty query string in the returned document's `queries` array.
+14. Select at most `metadata.maxArticles` articles. If absent, use 10. Clamp to `[1, 10]`.
 15. Build `data.text` as XML-like context containing the question and selected documents.
 16. The total context text SHALL be at most `metadata.maxChars` characters. If absent, use 20000. Clamp to `[1000, 20000]`.
 17. Return `{ text, documents }`.

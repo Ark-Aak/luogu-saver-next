@@ -4,6 +4,7 @@ import path from 'path';
 import { config } from './config';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { ChromaClient } from 'chromadb';
+import { DatabaseLogger } from '@/lib/database-logger';
 
 export const AppDataSource = new DataSource({
     type: 'mariadb',
@@ -12,9 +13,18 @@ export const AppDataSource = new DataSource({
     username: config.db.user,
     password: config.db.password,
     database: config.db.database,
+    poolSize: config.db.connectionLimit,
+    maxQueryExecutionTime: config.db.maxQueryExecutionTimeMs,
+    extra: {
+        waitForConnections: true,
+        connectionLimit: config.db.connectionLimit,
+        queueLimit: config.db.queueLimit,
+        connectTimeout: config.db.connectTimeoutMs
+    },
 
     synchronize: true,
     logging: false,
+    logger: new DatabaseLogger(),
 
     entities: [path.join(__dirname, '/entities/*.{ts,js}')],
     namingStrategy: new SnakeNamingStrategy(),

@@ -5,7 +5,12 @@ export const DbSchema = z.object({
     user: z.string().default('root'),
     port: z.number().default(3306),
     password: z.string().default(''),
-    database: z.string().default('mydatabase')
+    database: z.string().default('mydatabase'),
+    connectionLimit: z.number().int().positive().default(10),
+    queueLimit: z.number().int().min(0).default(0),
+    connectTimeoutMs: z.number().int().positive().default(10000),
+    maxQueryExecutionTimeMs: z.number().int().positive().default(1000),
+    poolMetricsIntervalMs: z.number().int().positive().default(60000)
 });
 
 export const RedisSchema = z.object({

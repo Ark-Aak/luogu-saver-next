@@ -10,22 +10,37 @@ The backend SHALL create one TypeORM `DataSource` named `AppDataSource`.
 
 Connection options:
 
-| Option           | Value                                         |
-| ---------------- | --------------------------------------------- |
-| `type`           | `mariadb`                                     |
-| `host`           | `config.db.host`                              |
-| `port`           | `config.db.port`                              |
-| `username`       | `config.db.user`                              |
-| `password`       | `config.db.password`                          |
-| `database`       | `config.db.database`                          |
-| `synchronize`    | `true`                                        |
-| `logging`        | `false`                                       |
-| `entities`       | `path.join(__dirname, '/entities/*.{ts,js}')` |
-| `namingStrategy` | `new SnakeNamingStrategy()`                   |
-| `subscribers`    | `[]`                                          |
-| `migrations`     | `[]`                                          |
+| Option                  | Value                                         |
+| ----------------------- | --------------------------------------------- |
+| `type`                  | `mariadb`                                     |
+| `host`                  | `config.db.host`                              |
+| `port`                  | `config.db.port`                              |
+| `username`              | `config.db.user`                              |
+| `password`              | `config.db.password`                          |
+| `database`              | `config.db.database`                          |
+| `poolSize`              | `config.db.connectionLimit`                   |
+| `maxQueryExecutionTime` | `config.db.maxQueryExecutionTimeMs`           |
+| `synchronize`           | `true`                                        |
+| `logging`               | `false`                                       |
+| `logger`                | `new DatabaseLogger()`                        |
+| `entities`              | `path.join(__dirname, '/entities/*.{ts,js}')` |
+| `namingStrategy`        | `new SnakeNamingStrategy()`                   |
+| `subscribers`           | `[]`                                          |
+| `migrations`            | `[]`                                          |
 
 The backend currently uses TypeORM schema synchronization. No tracked migration array is configured in this data source.
+
+The MariaDB driver pool SHALL use `config.db.connectionLimit` as its connection limit,
+`config.db.queueLimit` as its pending acquisition limit, and `config.db.connectTimeoutMs` as its
+connection timeout. The backend SHALL log queries whose execution time exceeds
+`config.db.maxQueryExecutionTimeMs`. Slow-query logs SHALL omit query parameters and SHALL truncate
+the normalized SQL text to at most 1000 characters.
+
+After data-source initialization, the backend SHALL attach a MariaDB pool monitor. Every
+`config.db.poolMetricsIntervalMs`, the monitor SHALL read total, free, and queued connection counts.
+If at least one acquisition was queued during the interval, it SHALL emit a warning containing the
+pool counts and interval queue count. Otherwise it MAY emit the same fields at debug level. The
+monitor SHALL not keep the Node.js process alive.
 
 ## 3. Base Entity Transactions
 
@@ -80,10 +95,10 @@ Behavior:
 6. If `EntityClass` is absent, return the parsed result.
 7. If Redis read or JSON parse throws, log the error and continue to the original method.
 8. Call the original method.
-9. If the original result is truthy, write it as JSON with `EX ttlSeconds`.
+9. If the original result is not `undefined`, write it as JSON with `EX ttlSeconds`.
 10. Redis write failures are not awaited by the caller and do not change the method return value.
 
-Falsy original results are not cached.
+`false`, `0`, the empty string, and `null` SHALL be cached. Only `undefined` SHALL not be cached.
 
 ## 7. CacheEvict Decorator
 
@@ -126,6 +141,19 @@ Behavior:
 3. Retry only when the thrown error satisfies `isDuplicateKeyError(error)` and the current attempt is not the last attempt.
 4. Rethrow the last error when the error is not a duplicate-key error or no attempts remain.
 
+`isRetryableTransactionError(error)` SHALL return true for MariaDB deadlock error 1213
+(`ER_LOCK_DEADLOCK`) and lock-wait timeout error 1205 (`ER_LOCK_WAIT_TIMEOUT`), including errors
+wrapped in `driverError`.
+
+`retryOnTransactionConflict(operation, attempts=3)` SHALL:
+
+1. Call `operation()` at most `max(1, attempts)` times.
+2. Retry only errors accepted by `isRetryableTransactionError`.
+3. Wait for a bounded randomized delay before each retry.
+4. Rethrow the last error when no attempts remain.
+5. Require the caller to create a new database transaction inside each `operation()` invocation.
+6. Log each scheduled retry with the MariaDB error code, error number, current attempt, and maximum attempts; do not log SQL parameters.
+
 ## 10. Error Reason Normalization
 
 `normalizeErrorReason(input)` SHALL:
@@ -143,12 +171,21 @@ Behavior:
 `saveHashedContent(options)` SHALL:
 
 1. Compute SHA-256 hex hash over `options.content`.
-2. Load an existing entity by `options.id` with pessimistic write lock.
-3. Use `options.isUnchanged(entity, hash)` when provided; otherwise compare `entity.contentHash === hash`.
-4. If `forceUpdate` is not true and an existing entity is unchanged, return `{ skipped: true, entity }` without saving.
-5. Merge `options.defaults` only for newly created rows.
-6. Merge `options.incomingData`, `id`, `content`, and `contentHash` into the entity.
-7. Save the entity and return `{ skipped: false, entity }`.
+2. Perform an unlocked existence read using `id`, `contentHash`, and `options.comparisonFields` only.
+3. If no row exists, attempt an insert without first acquiring a gap lock.
+4. If the insert succeeds, return `{ skipped: false, entity }`.
+5. If the insert reports a duplicate key, continue through the existing-row path.
+6. Load the existing row by `options.id` with a pessimistic write lock, selecting only `id`,
+   `contentHash`, and `options.comparisonFields`.
+7. Use `options.isUnchanged(entity, hash)` when provided; otherwise compare `entity.contentHash === hash`.
+8. If `forceUpdate` is not true and the existing entity is unchanged, return `{ skipped: true, entity }` without saving.
+9. Update the row with `options.incomingData`, `id`, `content`, and `contentHash`.
+10. Merge `options.defaults` only into inserted rows.
+11. Return `{ skipped: false, entity }` after an insert or update.
+
+The helper SHALL NOT issue `SELECT ... FOR UPDATE` for a missing row. Concurrent creation of the
+same ID SHALL resolve as one insert followed by the existing-row path, not as symmetric gap-lock
+acquisition.
 
 ## 12. File Locations
 
@@ -159,3 +196,4 @@ Behavior:
 - Hashed content helper: `packages/backend/src/services/helpers/hashed-content.helper.ts`
 - DB error helpers: `packages/backend/src/utils/db-errors.ts`
 - Error reason helper: `packages/backend/src/utils/error-reason.ts`
+- Pool monitor: `packages/backend/src/services/database-pool-monitor.service.ts`

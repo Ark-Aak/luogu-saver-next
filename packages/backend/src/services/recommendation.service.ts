@@ -185,8 +185,8 @@ export class RecommendationService {
         );
         const profile = await this.drawProfile(articleIds);
         const vectorResults = await this.getNearestArticlesByProfile(profile, count * 5);
-        const randomResults = (await ArticleService.getRandomArticles(20)).map(a => a.id);
-        const hotResults = (await ArticleService.getArticlesOrderedByViewCount(50)).map(a => a.id);
+        const randomResults = await ArticleService.getRandomArticleIds(20);
+        const hotResults = await ArticleService.getArticleIdsOrderedByViewCount(50);
         logger.debug(
             {
                 deviceId,
@@ -223,11 +223,9 @@ export class RecommendationService {
     }
 
     static async getPublicRecommendations(count: number = 10, excludedArticles: string[] = []) {
-        const randomResults = (await ArticleService.getRandomArticles(20)).map(a => a.id);
-        const hotResults = (await ArticleService.getArticlesOrderedByViewCount(50)).map(a => a.id);
-        const recentResults = (await ArticleService.getRecentArticlesWithoutCache(count * 5)).map(
-            a => a.id
-        );
+        const randomResults = await ArticleService.getRandomArticleIds(20);
+        const hotResults = await ArticleService.getArticleIdsOrderedByViewCount(50);
+        const recentResults = await ArticleService.getRecentArticleIds(count * 5);
 
         const recommendations = this.shuffleArticles([
             ...randomResults,
@@ -262,10 +260,7 @@ export class RecommendationService {
         const article = await ArticleService.getArticleById(articleId);
         const originTitle = article?.title || '';
         const authorId = article?.authorId || 0;
-        const authorArticles = (await ArticleService.getArticlesByAuthor(authorId)).map(a => ({
-            id: a.id,
-            title: a.title
-        }));
+        const authorArticles = await ArticleService.getArticleTitlesByAuthor(authorId);
         const finalResult = [],
             titleSimilarIds = [];
         for (const article of authorArticles) {

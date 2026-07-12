@@ -23,6 +23,7 @@ import renderMarkdown from '@/lib/markdown';
 @Index('idx_created_at', ['createdAt'])
 @Index('idx_priority', ['priority'])
 @Index('idx_updated_at', ['updatedAt'])
+@Index('idx_articles_deleted_updated_at_id', ['deleted', 'updatedAt', 'id'])
 export class Article extends BaseEntity {
     @PrimaryColumn({ type: 'varchar', length: 8 })
     id: string;

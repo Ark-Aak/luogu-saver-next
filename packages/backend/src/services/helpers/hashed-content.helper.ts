@@ -1,5 +1,14 @@
 import { createHash } from 'crypto';
-import { DeepPartial, EntityManager, EntityTarget, FindOptionsWhere, ObjectLiteral } from 'typeorm';
+import {
+    DeepPartial,
+    EntityManager,
+    EntityTarget,
+    FindOptionsSelect,
+    FindOptionsWhere,
+    ObjectLiteral,
+    QueryDeepPartialEntity
+} from 'typeorm';
+import { isDuplicateKeyError } from '@/utils/db-errors';
 
 type HashedContentEntity = ObjectLiteral & {
     id: string;
@@ -16,6 +25,7 @@ type SaveHashedContentOptions<TEntity extends HashedContentEntity> = {
     incomingData: DeepPartial<TEntity>;
     defaults?: DeepPartial<TEntity>;
     isUnchanged?: (entity: TEntity, hash: string) => boolean;
+    comparisonFields?: Array<keyof TEntity>;
 };
 
 export async function saveHashedContent<TEntity extends HashedContentEntity>(
@@ -23,30 +33,53 @@ export async function saveHashedContent<TEntity extends HashedContentEntity>(
 ): Promise<{ skipped: boolean; entity: TEntity | null }> {
     const repository = options.manager.getRepository<TEntity>(options.entity);
     const hash = createHash('sha256').update(options.content).digest('hex');
-    let entity = await repository.findOne({
-        where: { id: options.id } as FindOptionsWhere<TEntity>,
-        lock: { mode: 'pessimistic_write' }
-    });
-
-    const isUnchanged = options.isUnchanged || ((item: TEntity) => item.contentHash === hash);
-    if (!options.forceUpdate && entity && isUnchanged(entity, hash)) {
-        return { skipped: true, entity };
+    const select = { id: true, contentHash: true } as FindOptionsSelect<TEntity>;
+    for (const field of options.comparisonFields || []) {
+        (select as Record<keyof TEntity, boolean>)[field] = true;
     }
 
-    const data = {
-        ...(entity ? {} : options.defaults),
+    const findExisting = (lock: boolean) =>
+        repository.findOne({
+            where: { id: options.id } as FindOptionsWhere<TEntity>,
+            select,
+            ...(lock ? { lock: { mode: 'pessimistic_write' as const } } : {})
+        });
+
+    const incomingData = {
         ...options.incomingData,
         id: options.id,
         content: options.content,
         contentHash: hash
     } as DeepPartial<TEntity>;
 
-    if (entity) {
-        repository.merge(entity, data);
-    } else {
-        entity = repository.create(data);
+    let entity = await findExisting(false);
+    if (!entity) {
+        const insertData = {
+            ...options.defaults,
+            ...incomingData
+        } as QueryDeepPartialEntity<TEntity>;
+        try {
+            await repository.insert(insertData);
+            return {
+                skipped: false,
+                entity: repository.create(insertData as DeepPartial<TEntity>)
+            };
+        } catch (error) {
+            if (!isDuplicateKeyError(error)) throw error;
+        }
     }
 
-    await repository.save(entity);
-    return { skipped: false, entity };
+    entity = await findExisting(true);
+    if (!entity) throw new Error(`Concurrent row for ${options.id} disappeared before update`);
+
+    const isUnchanged = options.isUnchanged || ((item: TEntity) => item.contentHash === hash);
+    if (!options.forceUpdate && entity && isUnchanged(entity, hash)) {
+        return { skipped: true, entity };
+    }
+
+    await repository.update(
+        { id: options.id } as FindOptionsWhere<TEntity>,
+        incomingData as QueryDeepPartialEntity<TEntity>
+    );
+    return { skipped: false, entity: repository.create({ ...entity, ...incomingData }) };
 }

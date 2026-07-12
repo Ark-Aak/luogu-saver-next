@@ -25,6 +25,17 @@ Table name: `workflow`
 | `created_at`  | DATETIME | NOT NULL          | Creation time                                                |
 | `updated_at`  | DATETIME | NOT NULL          | Last update time                                             |
 
+The workflow table SHALL define these indexes:
+
+1. `idx_workflow_status_created_at_id` over `(status, created_at, id)`.
+2. `idx_workflow_status_updated_at_id` over `(status, updated_at, id)`.
+
+The `workflow_deduplication` table SHALL contain:
+
+1. `key VARCHAR(191)` as its primary key.
+2. `workflow_id VARCHAR(36)` as a unique foreign key to `workflow.id` with `ON DELETE CASCADE`.
+3. `created_at` and `updated_at` timestamps.
+
 ## 3. Workflow Definition
 
 The API accepts exactly this JSON shape:
@@ -94,7 +105,8 @@ Output:
     },
     "trackTaskIds": {
         "<trackTaskName>": "<16_char_task_id>"
-    }
+    },
+    "deduplicated": false
 }
 ```
 
@@ -448,7 +460,7 @@ On worker startup, the backend SHALL start workflow recovery in the background. 
 
 The recovery process SHALL run in batches:
 
-1. Each batch SHALL load at most `config.workflow.recovery.batchSize` workflows whose status is not `completed`, `failed`, or `expired`.
+1. Each batch SHALL load at most `config.workflow.recovery.batchSize` workflows whose status is `pending` or `active`.
 2. At most `config.workflow.recovery.concurrency` workflows SHALL be recovered concurrently.
 3. If another recovery pass is already running, a new recovery pass SHALL NOT start.
 4. If `config.workflow.recovery.enabled = false`, startup recovery SHALL NOT run.
@@ -485,6 +497,20 @@ Each cleanup pass SHALL:
 Cleanup SHALL NOT delete non-terminal workflow rows. Cleanup SHALL NOT delete workflow task rows independently of their owning workflow row.
 
 If one workflow cleanup fails, the cleanup pass SHALL log the error and continue with remaining selected workflows.
+
+### 9.1 Workflow Deduplication
+
+When workflow creation receives a non-empty deduplication key:
+
+1. Workflow row creation, task row creation, and deduplication-row insertion SHALL execute in one transaction.
+2. If the key does not exist, the new deduplication row SHALL reference the new workflow.
+3. If the key already exists, the new workflow transaction SHALL roll back and workflow creation SHALL return the existing workflow descriptor with `deduplicated=true`.
+4. An article save template SHALL use key `article-save:${targetId}`.
+5. A paste save template SHALL use key `paste-save:${targetId}`.
+6. When a workflow reaches `completed`, `failed`, or `expired`, its deduplication row SHALL be deleted.
+7. Deleting a workflow row SHALL delete its deduplication row through the foreign key.
+8. A deduplicated caller SHALL receive the existing `workflowId`, `taskIds`, `reportTaskIds`, and `trackTaskIds`.
+9. A newly created descriptor SHALL contain `deduplicated=false`; an existing descriptor SHALL contain `deduplicated=true`.
 
 ## 10. Debug Logging
 

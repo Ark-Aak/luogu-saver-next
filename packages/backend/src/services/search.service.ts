@@ -211,10 +211,15 @@ export class SearchService {
             .waitTask({ timeout: config.network.timeout, interval: 100 });
 
         let indexed = 0;
-        let skip = 0;
+        let afterUpdatedAt: Date | null = null;
+        let afterId: string | null = null;
 
         while (true) {
-            const articles = await ArticleService.getArticlesForSearchReindex(skip, batchSize);
+            const articles = await ArticleService.getArticlesForSearchReindex(
+                afterUpdatedAt,
+                afterId,
+                batchSize
+            );
             if (articles.length === 0) break;
 
             await index
@@ -226,7 +231,9 @@ export class SearchService {
                 )
                 .waitTask({ timeout: config.network.timeout, interval: 100 });
             indexed += articles.length;
-            skip += articles.length;
+            const lastArticle = articles[articles.length - 1];
+            afterUpdatedAt = lastArticle.updatedAt;
+            afterId = lastArticle.id;
         }
 
         logger.info({ indexed }, 'Reindexed articles into Meilisearch');

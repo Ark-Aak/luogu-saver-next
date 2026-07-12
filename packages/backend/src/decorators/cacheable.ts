@@ -31,7 +31,7 @@ export function Cacheable<T>(
                 logger.error({ err }, 'Error accessing Redis cache');
             }
             const result = await originalMethod.apply(this, args);
-            if (result) {
+            if (result !== undefined) {
                 redisClient
                     .set(cacheKey, JSON.stringify(result), 'EX', ttlSeconds)
                     .catch(console.error);

@@ -32,6 +32,7 @@ export class ArticleHistoryService {
                 Article,
                 {
                     where: { id: articleId },
+                    select: ['id'],
                     lock: { mode: 'pessimistic_write' }
                 },
                 manager
@@ -41,7 +42,8 @@ export class ArticleHistoryService {
                 ArticleHistory,
                 {
                     where: { articleId },
-                    order: { version: 'DESC' }
+                    order: { version: 'DESC' },
+                    select: ['version']
                 },
                 manager
             );

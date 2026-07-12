@@ -28,7 +28,8 @@ function parseExcludedArticles(exclude: unknown): string[] {
 }
 
 router.get('/get', async (ctx: Context) => {
-    const count = parseInt(ctx.query.count as string) || 10;
+    const parsedCount = Number.parseInt(ctx.query.count as string, 10);
+    const count = Math.min(50, Math.max(1, Number.isFinite(parsedCount) ? parsedCount : 10));
     const excludedArticles = parseExcludedArticles(ctx.query.exclude);
     let recommendations: Partial<Article & { reason: string }>[] = [];
     if (ctx.userId) {

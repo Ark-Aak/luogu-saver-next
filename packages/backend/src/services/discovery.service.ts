@@ -286,13 +286,19 @@ export class DiscoveryService {
                 workflowId: workflow.workflowId,
                 reason: null
             });
-            await getServiceRepository<DiscoveryRun>(DiscoveryRun).increment(
-                { id: input.runId },
-                'createdWorkflows',
-                1
-            );
+            if (!workflow.deduplicated) {
+                await getServiceRepository<DiscoveryRun>(DiscoveryRun).increment(
+                    { id: input.runId },
+                    'createdWorkflows',
+                    1
+                );
+            }
             ArticleDiscoveryBroadcaster.scheduleRunsUpdate();
-            return { created: true, workflowId: workflow.workflowId };
+            return {
+                created: !workflow.deduplicated,
+                workflowId: workflow.workflowId,
+                reason: workflow.deduplicated ? 'duplicate_active_workflow' : undefined
+            };
         } catch (error) {
             const message = normalizeErrorReason(error);
             await getServiceRepository<DiscoveredArticle>(DiscoveredArticle).update(row.id, {

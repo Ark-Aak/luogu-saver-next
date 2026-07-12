@@ -118,7 +118,7 @@ Get personalized recommendations for the plaza page.
 
 **Request:**
 
-- Query parameter: `count` (number, optional) - Number of recommendations. The current router parses it with `parseInt(value) || 10` and does not clamp lower or upper bounds.
+- Query parameter: `count` (number, optional) - Number of recommendations. Default 10; clamped to `[1, 50]`.
 - Query parameter: `exclude` (string, optional) - Comma-separated article IDs that must not appear in the response. Empty IDs are ignored. Duplicate IDs are removed in first-seen order. At most the first 200 unique IDs are used.
 - Header: `X-Consent-Tracking` (string, optional) - If the value is exactly `true`, the request may use a device ID for consented anonymous personalization.
 - Header: `X-Device-Id` (string, optional) - Anonymous device identifier. This header is used only when `X-Consent-Tracking` is exactly `true`.
@@ -174,8 +174,8 @@ Get articles relevant to a specific article.
 2. Compute user profile vector from behavior using drawProfile()
 3. Get candidate pools:
    a. vectorResults: count*5 nearest articles to profile vector
-   b. randomResults: 20 random recent articles
-   c. hotResults: 50 articles ordered by view count
+   b. randomResults: 20 random IDs selected from at most 3000 recent article IDs
+   c. hotResults: 50 article IDs ordered by view count
 4. Merge all candidates
 5. Shuffle randomly
 6. Filter out:
@@ -183,7 +183,7 @@ Get articles relevant to a specific article.
     b. Previously recommended articles
     c. Articles in excludedArticles
 7. Take first `count` articles
-8. Fetch full article data
+8. Fetch full article data only for the selected response IDs
 9. Record recommended articles
 10. Add reason field based on source pool
 11. Return filtered fields
@@ -197,14 +197,14 @@ This algorithm is used when `GET /plaza/get` has no consented device ID.
 
 ```
 1. Get candidate pools:
-   a. randomResults: random recent articles
-   b. hotResults: articles ordered by view count
-   c. recentResults: recent articles ordered by priority and update time
+   a. randomResults: random recent article IDs
+   b. hotResults: article IDs ordered by view count
+   c. recentResults: recent article IDs ordered by update time
 2. Merge all candidates.
 3. Shuffle randomly.
 4. Filter out articles in excludedArticles.
 5. Take first `count` articles.
-6. Fetch full article data.
+6. Fetch full article data only for the selected response IDs.
 7. Add reason field based on source pool:
    a. "random" for randomResults
    b. "hot" for hotResults
@@ -261,6 +261,11 @@ No Redis key is read or written by `getPublicRecommendations`.
 6. Public recommendations do not require a device ID.
 7. Public recommendations do not read or write user-specific Redis keys.
 8. `GET /plaza/get` excludes all parsed `exclude` article IDs from both consented anonymous and public recommendation responses.
+9. Recommendation candidate queries SHALL select article IDs only and SHALL NOT load article content.
+10. Random, hot, and recent recommendation ID pools SHALL be cached for 30 seconds. Article writes
+    MAY leave an ID pool unchanged until that bounded TTL expires.
+11. Random, hot, and recent recommendation ID pools SHALL be cached for 30 seconds. Article writes
+    MAY leave an ID pool unchanged until that bounded TTL expires.
 
 ## 9. File Locations
 

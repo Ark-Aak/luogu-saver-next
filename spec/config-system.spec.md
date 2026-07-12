@@ -49,13 +49,18 @@ The top-level sections `db`, `redis`, `chroma`, `recommendation`, `llm`, and `ve
 
 ### 3.2 Database Configuration (`db`)
 
-| Field      | Type   | Default      | Description           |
-| ---------- | ------ | ------------ | --------------------- |
-| `host`     | string | "localhost"  | MySQL server hostname |
-| `port`     | number | 3306         | MySQL server port     |
-| `user`     | string | "root"       | MySQL username        |
-| `password` | string | ""           | MySQL password        |
-| `database` | string | "mydatabase" | MySQL database name   |
+| Field                     | Type   | Default      | Description                              |
+| ------------------------- | ------ | ------------ | ---------------------------------------- |
+| `host`                    | string | "localhost"  | MySQL server hostname                    |
+| `port`                    | number | 3306         | MySQL server port                        |
+| `user`                    | string | "root"       | MySQL username                           |
+| `password`                | string | ""           | MySQL password                           |
+| `database`                | string | "mydatabase" | MySQL database name                      |
+| `connectionLimit`         | number | 10           | Maximum MariaDB connections per backend  |
+| `queueLimit`              | number | 0            | Maximum queued acquisitions; 0 unlimited |
+| `connectTimeoutMs`        | number | 10000        | Connection establishment timeout         |
+| `maxQueryExecutionTimeMs` | number | 1000         | Slow-query logging threshold             |
+| `poolMetricsIntervalMs`   | number | 60000        | Connection-pool metrics interval         |
 
 ### 3.3 Redis Configuration (`redis`)
 

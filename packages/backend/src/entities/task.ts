@@ -1,8 +1,9 @@
-import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 import { BaseEntity } from './base';
 import { TaskStatus, TaskType } from '@/shared/task';
 
 @Entity({ name: 'task' })
+@Index('idx_task_workflow_status_updated_at', ['workflowId', 'status', 'updatedAt'])
 export class Task extends BaseEntity {
     @PrimaryColumn({ type: 'varchar', length: 32 })
     id: string;

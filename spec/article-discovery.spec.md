@@ -137,10 +137,23 @@ If fetching or parsing fails, error handling SHALL match Section 4.
 2. Reject inactive or missing runs.
 3. Insert one `discovered_article` row with source `plaza` or `user_articles`.
 4. If `(run_id, article_id)` already exists, update `last_seen_at` and return duplicate.
-5. Create one `article-save-pipeline` workflow with `targetId = articleId`, `forceUpdate`, and BullMQ job priority `10`.
+5. Request one `article-save-pipeline` workflow with `targetId = articleId`, `forceUpdate`, and BullMQ job priority `10`; workflow deduplication MAY return an active existing workflow.
 6. On workflow creation success, set row status to `workflow_created` and store `workflow_id`.
 7. On workflow creation failure, set row status to `failed` and store the normalized error message.
 8. Normalized workflow creation failure `reason` SHALL follow `task-queue.spec.md` failure reason normalization and have length at most 80 characters.
+
+Article save workflow creation SHALL use workflow deduplication key `article-save:${articleId}`.
+If another active article-save workflow already owns that key, discovery SHALL store the existing
+workflow ID, set the discovered row status to `workflow_created`, and SHALL NOT create another SQL
+workflow or another set of task rows.
+`created_workflows` SHALL increment only when the returned workflow descriptor has
+`deduplicated=false`.
+
+The `discovery_run` table SHALL define indexes over `(created_at)` and `(seed_url, status)` in
+addition to its status index.
+
+The `discovery_run` table SHALL define indexes over `(created_at)` and `(seed_url, status)` in
+addition to its status index.
 
 Discovery SHALL NOT create article-link edges.
 Discovery SHALL NOT recursively create discovery work from saved article content.

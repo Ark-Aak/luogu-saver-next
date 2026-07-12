@@ -9,6 +9,7 @@ import {
 } from '@/services/helpers/repository.helper';
 import { saveHashedContent } from '@/services/helpers/hashed-content.helper';
 import type { Paste as LuoguPaste } from '@/types/luogu-api';
+import { retryOnTransactionConflict } from '@/utils/db-errors';
 
 export class PasteService {
     @Cacheable(600, id => `paste:${id}`, Paste)
@@ -41,31 +42,28 @@ export class PasteService {
         data: LuoguPaste,
         forceUpdate: boolean = false
     ): Promise<{ skipped: boolean; content: string }> {
-        let result = { skipped: false, content: '' };
+        return retryOnTransactionConflict(() =>
+            Paste.transaction(async manager => {
+                const saveResult = await saveHashedContent<Paste>({
+                    manager,
+                    entity: Paste,
+                    id: data.id,
+                    content: data.data,
+                    forceUpdate,
+                    incomingData: {
+                        authorId: data.user.uid
+                    },
+                    defaults: {
+                        deleted: false
+                    }
+                });
 
-        await Paste.transaction(async manager => {
-            const saveResult = await saveHashedContent<Paste>({
-                manager,
-                entity: Paste,
-                id: data.id,
-                content: data.data,
-                forceUpdate,
-                incomingData: {
-                    authorId: data.user.uid
-                },
-                defaults: {
-                    deleted: false
+                if (saveResult.skipped || !saveResult.entity) {
+                    return { skipped: true, content: '' };
                 }
-            });
 
-            if (saveResult.skipped || !saveResult.entity) {
-                result = { skipped: true, content: '' };
-                return;
-            }
-
-            result = { skipped: false, content: saveResult.entity.content };
-        });
-
-        return result;
+                return { skipped: false, content: saveResult.entity.content };
+            })
+        );
     }
 }

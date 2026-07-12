@@ -3,11 +3,14 @@ import {
     PrimaryGeneratedColumn,
     Column,
     CreateDateColumn,
-    UpdateDateColumn
+    UpdateDateColumn,
+    Index
 } from 'typeorm';
 import { BaseEntity } from './base';
 
 @Entity({ name: 'workflow' })
+@Index('idx_workflow_status_created_at_id', ['status', 'createdAt', 'id'])
+@Index('idx_workflow_status_updated_at_id', ['status', 'updatedAt', 'id'])
 export class Workflow extends BaseEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;

@@ -1,6 +1,7 @@
 import { config } from '@/config';
 import { Task } from '@/entities/task';
 import { Workflow } from '@/entities/workflow';
+import { WorkflowDeduplication } from '@/entities/workflow-deduplication';
 import { logger } from '@/lib/logger';
 import { getServiceRepository } from '@/services/helpers/repository.helper';
 import { WorkflowHelper } from '@/services/helpers/workflow.helper';
@@ -123,6 +124,10 @@ export class WorkflowCleanupService {
         await WorkflowHelper.cleanupRuntime(taskIds);
 
         await Workflow.transaction(async manager => {
+            await getServiceRepository<WorkflowDeduplication>(
+                WorkflowDeduplication,
+                manager
+            ).delete({ workflowId });
             await getServiceRepository<Task>(Task, manager).delete({ workflowId });
             await getServiceRepository<Workflow>(Workflow, manager).delete({ id: workflowId });
         });

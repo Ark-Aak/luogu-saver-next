@@ -25,6 +25,9 @@ Table name: `task`
 | `priority`    | INT         | NULLABLE    | BullMQ priority used for workflow dispatch   |
 | `result`      | JSON        | NULLABLE    | Processor return value for workflow recovery |
 
+The task table SHALL define index `idx_task_workflow_status_updated_at` over
+`(workflow_id, status, updated_at)`.
+
 ### 2.2 TaskStatus Enum
 
 | Value | Name       | Description                   |

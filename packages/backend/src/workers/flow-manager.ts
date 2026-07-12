@@ -1,5 +1,6 @@
 import { Task } from '@/entities/task';
 import { Workflow } from '@/entities/workflow';
+import { WorkflowDeduplication } from '@/entities/workflow-deduplication';
 import { config } from '@/config';
 import { getQueueByName } from '@/lib/queue-factory';
 import { logger } from '@/lib/logger';
@@ -157,6 +158,16 @@ export class FlowManager {
                     'Workflow status updated'
                 );
                 if (TERMINAL_WORKFLOW_STATUSES.includes(status)) {
+                    try {
+                        await getServiceRepository<WorkflowDeduplication>(
+                            WorkflowDeduplication
+                        ).delete({ workflowId });
+                    } catch (error) {
+                        logger.error(
+                            { err: error, workflowId, status },
+                            'Failed to release workflow deduplication key'
+                        );
+                    }
                     void WorkflowCleanupService.cleanupRuntimeForWorkflow(workflowId).catch(
                         error => {
                             logger.error(
@@ -213,8 +224,8 @@ export class FlowManager {
             while (true) {
                 const query = getServiceRepository<Workflow>(Workflow)
                     .createQueryBuilder('workflow')
-                    .where('workflow.status NOT IN (:...statuses)', {
-                        statuses: TERMINAL_WORKFLOW_STATUSES
+                    .where('workflow.status IN (:...statuses)', {
+                        statuses: ['pending', 'active']
                     })
                     .orderBy('workflow.createdAt', 'ASC')
                     .addOrderBy('workflow.id', 'ASC')

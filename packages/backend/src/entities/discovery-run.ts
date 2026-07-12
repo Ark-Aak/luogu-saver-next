@@ -17,6 +17,8 @@ export enum DiscoveryRunStatus {
 
 @Entity({ name: 'discovery_run' })
 @Index('idx_discovery_run_status', ['status'])
+@Index('idx_discovery_run_created_at', ['createdAt'])
+@Index('idx_discovery_run_seed_status', ['seedUrl', 'status'])
 export class DiscoveryRun extends BaseEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;

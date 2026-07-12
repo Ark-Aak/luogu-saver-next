@@ -1,5 +1,6 @@
 import { Task } from '@/entities/task';
 import { Workflow } from '@/entities/workflow';
+import { WorkflowDeduplication } from '@/entities/workflow-deduplication';
 import { getQueueByName } from '@/lib/queue-factory';
 import { WORKFLOW_TEMPLATES } from '@/lib/workflow-templates';
 import { logger } from '@/lib/logger';
@@ -9,9 +10,11 @@ import { TaskStatus } from '@/shared/task';
 import { validateFlowStructure, WorkflowDefinition } from '@/utils/flow-validator';
 import { normalizeErrorReason } from '@/utils/error-reason';
 import { randomUUID } from 'node:crypto';
+import { isDuplicateKeyError } from '@/utils/db-errors';
 
 type WorkflowCreateOptions = {
     priority?: number;
+    deduplicationKey?: string;
 };
 
 const USER_WORKFLOW_PRIORITY = 1;
@@ -22,6 +25,11 @@ export class WorkflowService {
         options: WorkflowCreateOptions = {}
     ) {
         validateFlowStructure(definition);
+        const deduplicationKey = options.deduplicationKey?.trim() || null;
+        if (deduplicationKey) {
+            const existing = await this.getDeduplicatedWorkflow(deduplicationKey);
+            if (existing) return existing;
+        }
         await this.ensureWorkflowQueueCapacity(definition);
 
         const priority = options.priority ?? USER_WORKFLOW_PRIORITY;
@@ -49,6 +57,13 @@ export class WorkflowService {
                     result: this.createInitialResult(definition)
                 });
                 await getServiceRepository<Workflow>(Workflow, manager).save(workflow);
+
+                if (deduplicationKey) {
+                    await getServiceRepository<WorkflowDeduplication>(
+                        WorkflowDeduplication,
+                        manager
+                    ).insert({ key: deduplicationKey, workflowId });
+                }
 
                 const tasks = definition.tasks.map(taskDef =>
                     getServiceRepository<Task>(Task, manager).create({
@@ -99,9 +114,14 @@ export class WorkflowService {
                 workflowId,
                 taskIds: runtimePlan.taskIds,
                 reportTaskIds: runtimePlan.reportTaskIds,
-                trackTaskIds: runtimePlan.trackTaskIds
+                trackTaskIds: runtimePlan.trackTaskIds,
+                deduplicated: false
             };
         } catch (error) {
+            if (deduplicationKey && isDuplicateKeyError(error)) {
+                const existing = await this.getDeduplicatedWorkflow(deduplicationKey);
+                if (existing) return existing;
+            }
             logger.error({ error, workflowId }, 'Workflow creation failed');
             await this.cleanupFailedCreate(workflowId, Object.values(taskIds));
             throw error;
@@ -139,7 +159,15 @@ export class WorkflowService {
             'Workflow template built definition'
         );
 
-        return this.createWorkflow(definition, options);
+        const targetId = String(params?.targetId || '').trim();
+        const deduplicationKey =
+            templateName === 'article-save-pipeline'
+                ? `article-save:${targetId}`
+                : templateName === 'paste-save-pipeline'
+                  ? `paste-save:${targetId}`
+                  : options.deduplicationKey;
+
+        return this.createWorkflow(definition, { ...options, deduplicationKey });
     }
 
     static async getWorkflowById(id: string) {
@@ -199,6 +227,51 @@ export class WorkflowService {
         return result;
     }
 
+    private static async getDeduplicatedWorkflow(key: string) {
+        const claim = await getServiceRepository<WorkflowDeduplication>(
+            WorkflowDeduplication
+        ).findOne({ where: { key } });
+        if (!claim) return null;
+
+        const workflow = await findOneServiceEntity<Workflow>(Workflow, {
+            where: { id: claim.workflowId }
+        });
+        if (!workflow) {
+            await getServiceRepository<WorkflowDeduplication>(WorkflowDeduplication).delete({
+                key
+            });
+            return null;
+        }
+        if (['completed', 'failed', 'expired'].includes(workflow.status)) {
+            await getServiceRepository<WorkflowDeduplication>(WorkflowDeduplication).delete({
+                key
+            });
+            return null;
+        }
+
+        const taskRows = await getServiceRepository<Task>(Task).find({
+            where: { workflowId: workflow.id },
+            select: ['id', 'taskName']
+        });
+        const taskIds = Object.fromEntries(
+            taskRows.filter(task => task.taskName).map(task => [task.taskName as string, task.id])
+        );
+        const definition = workflow.definition as WorkflowDefinition;
+        return {
+            workflowId: workflow.id,
+            taskIds,
+            reportTaskIds: WorkflowHelper.pickTaskIds(
+                taskIds,
+                definition.tasks.filter(task => task.report === true).map(task => task.name)
+            ),
+            trackTaskIds: WorkflowHelper.pickTaskIds(
+                taskIds,
+                definition.tasks.filter(task => task.track === true).map(task => task.name)
+            ),
+            deduplicated: true
+        };
+    }
+
     private static async ensureWorkflowQueueCapacity(definition: WorkflowDefinition) {
         const jobsByQueue = new Map<string, number>();
 
@@ -239,6 +312,9 @@ export class WorkflowService {
     private static async cleanupFailedCreate(workflowId: string, taskIds: string[]) {
         try {
             await WorkflowHelper.cleanupRuntime(taskIds);
+            await getServiceRepository<WorkflowDeduplication>(WorkflowDeduplication).delete({
+                workflowId
+            });
             await getServiceRepository<Task>(Task).delete(taskIds);
             await getServiceRepository<Workflow>(Workflow).delete({ id: workflowId });
             logger.info({ workflowId, taskIds }, 'Workflow creation cleanup completed');

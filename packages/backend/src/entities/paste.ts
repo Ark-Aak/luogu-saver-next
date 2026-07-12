@@ -17,6 +17,7 @@ import renderMarkdown from '@/lib/markdown';
 
 @Entity({ name: 'paste' })
 @Index('idx_author_id', ['authorId'])
+@Index('idx_paste_deleted', ['deleted'])
 export class Paste extends BaseEntity {
     @PrimaryColumn({ length: 8 })
     id: string;

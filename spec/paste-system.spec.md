@@ -24,6 +24,7 @@ Table name: `paste`
 ### 2.2 Indexes
 
 - `idx_author_id`: (`author_id`)
+- `idx_paste_deleted`: (`deleted`)
 
 ### 2.3 Relations
 
@@ -72,10 +73,11 @@ Postconditions:
 1. If `targetId` is absent or empty, workflow creation SHALL fail.
 2. The template SHALL be public and require no authentication.
 3. The workflow SHALL contain one reported task named `save` with type `save`, target `paste`, and `targetId` equal to the input `targetId`.
-4. The workflow MAY contain content safety tasks for the saved paste.
-5. The workflow SHALL NOT contain an LLM task with target `summary`.
-6. The workflow SHALL NOT contain an LLM task with target `embedding`.
-7. The workflow SHALL NOT contain an update task with target `search_index`.
+4. Workflow creation SHALL use deduplication key `paste-save:${targetId}` and return the active existing workflow descriptor when that key already exists.
+5. The workflow MAY contain content safety tasks for the saved paste.
+6. The workflow SHALL NOT contain an LLM task with target `summary`.
+7. The workflow SHALL NOT contain an LLM task with target `embedding`.
+8. The workflow SHALL NOT contain an update task with target `search_index`.
 
 ## 4. Service Layer
 
@@ -120,6 +122,8 @@ When a cached read method receives a manager argument, it SHALL bypass Redis cac
 2. If a paste with `id=data.id` exists, `forceUpdate=false`, and `content_hash` equals the computed hash, return `{ skipped: true, content: "" }` without updating the database.
 3. Otherwise upsert a paste row with `id=data.id`, `content=data.data`, `author_id=data.user.uid`, `content_hash` equal to the computed hash, and `deleted=false` for newly inserted rows.
 4. Return `{ skipped: false, content }` where `content` equals the saved paste content.
+5. A missing paste row SHALL be inserted before any pessimistic row lock is requested.
+6. MariaDB deadlock and lock-wait timeout errors SHALL retry the complete paste transaction at most three times.
 
 ## 5. Content Rendering
 

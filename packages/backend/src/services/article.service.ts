@@ -12,6 +12,7 @@ import {
 } from '@/services/helpers/repository.helper';
 import { saveHashedContent } from '@/services/helpers/hashed-content.helper';
 import type { Article as LuoguArticle } from '@/types/luogu-api';
+import { retryOnTransactionConflict } from '@/utils/db-errors';
 
 export class ArticleService {
     /*
@@ -114,6 +115,21 @@ export class ArticleService {
             .getMany();
     }
 
+    @Cacheable(30, (count = 10) => `article:recommendation:hot:${count}`)
+    static async getArticleIdsOrderedByViewCount(
+        count: number = 10,
+        manager?: EntityManager
+    ): Promise<string[]> {
+        const rows = await getServiceRepository<Article>(Article, manager)
+            .createQueryBuilder('article')
+            .select('article.id', 'id')
+            .where('article.deleted = :deleted', { deleted: false })
+            .orderBy('article.viewCount', 'DESC')
+            .limit(count)
+            .getRawMany<{ id: string }>();
+        return rows.map(row => row.id);
+    }
+
     /*
      * Get recent articles without caching
      *
@@ -134,19 +150,47 @@ export class ArticleService {
             .getMany();
     }
 
+    static async getRecentArticleIdsWithoutCache(
+        count: number = 10,
+        manager?: EntityManager
+    ): Promise<string[]> {
+        const rows = await getServiceRepository<Article>(Article, manager)
+            .createQueryBuilder('article')
+            .select('article.id', 'id')
+            .where('article.deleted = :deleted', { deleted: false })
+            .orderBy('article.updatedAt', 'DESC')
+            .addOrderBy('article.id', 'DESC')
+            .limit(count)
+            .getRawMany<{ id: string }>();
+        return rows.map(row => row.id);
+    }
+
+    @Cacheable(30, (count = 10) => `article:recommendation:recent:${count}`)
+    static async getRecentArticleIds(count: number = 10): Promise<string[]> {
+        return this.getRecentArticleIdsWithoutCache(count);
+    }
+
     static async getArticlesForSearchReindex(
-        skip: number,
+        afterUpdatedAt: Date | null,
+        afterId: string | null,
         take: number,
         manager?: EntityManager
     ): Promise<Article[]> {
-        return await getServiceRepository<Article>(Article, manager)
+        const query = getServiceRepository<Article>(Article, manager)
             .createQueryBuilder('article')
             .leftJoinAndSelect('article.author', 'author')
             .where('article.deleted = :deleted', { deleted: false })
             .orderBy('article.updatedAt', 'ASC')
-            .skip(skip)
-            .take(take)
-            .getMany();
+            .addOrderBy('article.id', 'ASC')
+            .take(take);
+
+        if (afterUpdatedAt && afterId) {
+            query.andWhere(
+                '(article.updatedAt > :afterUpdatedAt OR (article.updatedAt = :afterUpdatedAt AND article.id > :afterId))',
+                { afterUpdatedAt, afterId }
+            );
+        }
+        return await query.getMany();
     }
 
     static async getArticlesForSummaryRebuild(
@@ -185,9 +229,13 @@ export class ArticleService {
      * @return List of random articles
      */
     static async getRandomArticles(count: number = 10): Promise<Article[]> {
-        const recentArticles = await this.getRecentArticlesWithoutCache(3000);
-        const shuffled = recentArticles.sort(() => 0.5 - Math.random());
-        return shuffled.slice(0, count);
+        return this.getArticlesByIds(await this.getRandomArticleIds(count));
+    }
+
+    @Cacheable(30, (count = 10) => `article:recommendation:random:${count}`)
+    static async getRandomArticleIds(count: number = 10): Promise<string[]> {
+        const recentIds = await this.getRecentArticleIdsWithoutCache(3000);
+        return recentIds.sort(() => 0.5 - Math.random()).slice(0, count);
     }
 
     /*
@@ -232,6 +280,18 @@ export class ArticleService {
         );
     }
 
+    static async getArticleTitlesByAuthor(
+        authorId: number,
+        manager?: EntityManager
+    ): Promise<Array<{ id: string; title: string }>> {
+        return await getServiceRepository<Article>(Article, manager)
+            .createQueryBuilder('article')
+            .select(['article.id', 'article.title'])
+            .where('article.authorId = :authorId', { authorId })
+            .andWhere('article.deleted = :deleted', { deleted: false })
+            .getMany();
+    }
+
     /*
      * Save an article
      *
@@ -249,49 +309,47 @@ export class ArticleService {
         data: LuoguArticle,
         forceUpdate: boolean = false
     ): Promise<{ skipped: boolean; content: string }> {
-        let result = { skipped: false, content: '' };
+        return retryOnTransactionConflict(() =>
+            Article.transaction(async manager => {
+                const saveResult = await saveHashedContent<Article>({
+                    manager,
+                    entity: Article,
+                    id: data.lid,
+                    content: data.content,
+                    forceUpdate,
+                    incomingData: {
+                        title: data.title,
+                        authorId: data.author.uid,
+                        category: data.category as ArticleCategory,
+                        solutionForPid: data.solutionFor?.pid,
+                        upvote: data.upvote,
+                        favorCount: data.favorCount
+                    },
+                    defaults: {
+                        deleted: false,
+                        viewCount: 0,
+                        tags: [],
+                        priority: 0
+                    },
+                    comparisonFields: ['title'],
+                    isUnchanged: (article, hash) =>
+                        article.title === data.title && article.contentHash === hash
+                });
 
-        await Article.transaction(async manager => {
-            const saveResult = await saveHashedContent<Article>({
-                manager,
-                entity: Article,
-                id: data.lid,
-                content: data.content,
-                forceUpdate,
-                incomingData: {
-                    title: data.title,
-                    authorId: data.author.uid,
-                    category: data.category as ArticleCategory,
-                    solutionForPid: data.solutionFor?.pid,
-                    upvote: data.upvote,
-                    favorCount: data.favorCount
-                },
-                defaults: {
-                    deleted: false,
-                    viewCount: 0,
-                    tags: [],
-                    priority: 0
-                },
-                isUnchanged: (article, hash) =>
-                    article.title === data.title && article.contentHash === hash
-            });
+                if (saveResult.skipped || !saveResult.entity) {
+                    return { skipped: true, content: '' };
+                }
 
-            if (saveResult.skipped || !saveResult.entity) {
-                result = { skipped: true, content: '' };
-                return;
-            }
+                const article = saveResult.entity;
+                await ArticleHistoryService.pushNewVersion(
+                    article.id,
+                    article.title,
+                    article.content,
+                    manager
+                );
 
-            const article = saveResult.entity;
-            await ArticleHistoryService.pushNewVersion(
-                article.id,
-                article.title,
-                article.content,
-                manager
-            );
-
-            result = { skipped: false, content: article.content };
-        });
-
-        return result;
+                return { skipped: false, content: article.content };
+            })
+        );
     }
 }

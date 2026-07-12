@@ -39,6 +39,7 @@ Table name: `article`
 - `idx_created_at`: (`created_at`)
 - `idx_priority`: (`priority`)
 - `idx_updated_at`: (`updated_at`)
+- `idx_articles_deleted_updated_at_id`: (`deleted`, `updated_at`, `id`)
 
 ### 2.3 ArticleCategory Enum
 
@@ -175,10 +176,11 @@ When a cached read method receives a manager argument, it SHALL bypass Redis cac
 
 When `pushNewVersion` is called:
 
-1. Query the latest history entry for the article (ordered by version DESC).
-2. Calculate `newVersion = latestVersion + 1` (or 1 if no history exists).
-3. Create and save a new `ArticleHistory` record.
-4. Evict the history cache.
+1. Lock the owning article row by ID and select only its ID.
+2. Query only the `version` column from the latest history entry for the article, ordered by version DESC.
+3. Calculate `newVersion = latestVersion + 1` (or 1 if no history exists).
+4. Create and save a new `ArticleHistory` record.
+5. Evict the history cache.
 
 If ArticleHistoryService receives an optional `manager` argument, it SHALL use that `EntityManager` for database access.
 When a cached read method receives a manager argument, it SHALL bypass Redis cache reads and writes.
@@ -197,10 +199,17 @@ The `article.renderContent()` method:
 When saving an article:
 
 1. Compute `SHA-256(content)` as hex string.
-2. Compare with existing `contentHash`.
+2. Read only `id`, `title`, and `contentHash` when checking whether an existing article changed.
 3. If hashes match AND titles match, skip the update.
-4. Otherwise, save the new content and update `contentHash`.
-5. After a successful update, delete Redis keys `article:{id}` and `article:count` before returning.
+4. For a missing row, attempt the insert before requesting a pessimistic row lock.
+5. For an existing or concurrently inserted row, acquire a pessimistic row lock before updating.
+6. Retry the complete database transaction at most three times for MariaDB deadlock or lock-wait timeout errors.
+7. Otherwise, save the new content and update `contentHash`.
+8. After a successful update, delete Redis keys `article:{id}` and `article:count` before returning.
+
+Article candidate methods used by recommendation SHALL select article IDs only. They SHALL NOT
+select `content`, `summary`, or author relations. Full article rows SHALL be loaded only for the
+final selected recommendation IDs.
 
 ## 8. Invariants
 

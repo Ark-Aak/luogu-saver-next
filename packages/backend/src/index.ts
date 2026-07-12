@@ -17,6 +17,7 @@ import { initSocket } from './lib/socket';
 import http from 'http';
 import { socketJoinHandler } from '@/socket';
 import { ArticlePlazaDiscoveryScheduler } from '@/services/article-plaza-discovery-scheduler.service';
+import { DatabasePoolMonitor } from '@/services/database-pool-monitor.service';
 
 const app = new Koa({ proxy: true, proxyIpHeader: 'CF-Connecting-IP' });
 const server = http.createServer(app.callback());
@@ -31,6 +32,7 @@ app.use(tracking);
 app.use(router.routes()).use(router.allowedMethods());
 
 AppDataSource.initialize().then(async () => {
+    DatabasePoolMonitor.start(AppDataSource);
     await worker.bootstrap();
     ArticlePlazaDiscoveryScheduler.start();
     server.listen(config.port, config.host, () => {
