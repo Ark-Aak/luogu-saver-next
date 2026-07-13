@@ -1,4 +1,5 @@
 import { useLocalStorage } from '@/composables/useLocalStorage';
+import { CONTENT_BOOKMARK_STORAGE_PREFIX } from '@/utils/constants';
 import { ref, watch } from 'vue';
 
 export interface Bookmark {
@@ -10,7 +11,7 @@ export interface Bookmark {
 }
 
 export function useBookmarks(contentId: string) {
-    const key = `content_bookmarks_${contentId}`;
+    const key = `${CONTENT_BOOKMARK_STORAGE_PREFIX}${contentId}`;
     const stored = useLocalStorage<Bookmark[]>(key, []);
     const bookmarks = ref<Bookmark[]>(stored.value ?? []);
 

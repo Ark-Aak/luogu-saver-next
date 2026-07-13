@@ -33,7 +33,9 @@ import {
     AUTH_TOKEN_STORAGE_KEY,
     CACHE_STORAGE_KEY,
     CONSENT_TRACKING_STORAGE_KEY,
-    DEVICE_ID_STORAGE_KEY
+    CONTENT_BOOKMARK_STORAGE_PREFIX,
+    DEVICE_ID_STORAGE_KEY,
+    JUDGEMENT_DISPLAY_OPTIONS_STORAGE_KEY
 } from '@/utils/constants.ts';
 import { useLocalStorage } from '@/composables/useLocalStorage.ts';
 import { generateDeviceId } from '@/utils/device-id.ts';
@@ -105,6 +107,26 @@ function clearSaveCache() {
         }
     }
     message.success(count ? `已清理 ${count} 项保存缓存` : '没有可清理的保存缓存');
+}
+
+function clearContentBookmarks() {
+    let count = 0;
+    for (const key of Object.keys(localStorage)) {
+        if (key.startsWith(CONTENT_BOOKMARK_STORAGE_PREFIX)) {
+            localStorage.removeItem(key);
+            count += 1;
+        }
+    }
+    message.success(count ? `已删除 ${count} 项段落收藏数据` : '没有可删除的段落收藏');
+}
+
+function clearJudgementDisplayOptions() {
+    if (localStorage.getItem(JUDGEMENT_DISPLAY_OPTIONS_STORAGE_KEY) === null) {
+        message.success('没有可删除的陶片放逐内容显示偏好');
+        return;
+    }
+    localStorage.removeItem(JUDGEMENT_DISPLAY_OPTIONS_STORAGE_KEY);
+    message.success('已删除陶片放逐内容显示偏好');
 }
 
 function removeKnowledgeBaseArticle(articleId: string) {
@@ -248,6 +270,26 @@ onMounted(loadCurrentUser);
                         </div>
                         <n-button secondary type="warning" @click="clearSaveCache">
                             清理缓存
+                        </n-button>
+                    </div>
+
+                    <div class="setting-row">
+                        <div>
+                            <div class="setting-title">文章段落收藏</div>
+                            <div class="setting-desc">删除所有文章和剪贴板内容的段落收藏。</div>
+                        </div>
+                        <n-button secondary type="warning" @click="clearContentBookmarks">
+                            删除收藏
+                        </n-button>
+                    </div>
+
+                    <div class="setting-row">
+                        <div>
+                            <div class="setting-title">陶片放逐内容显示偏好</div>
+                            <div class="setting-desc">删除已保存的表格字段显示选项。</div>
+                        </div>
+                        <n-button secondary type="warning" @click="clearJudgementDisplayOptions">
+                            删除偏好
                         </n-button>
                     </div>
 

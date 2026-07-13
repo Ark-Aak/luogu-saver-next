@@ -22,6 +22,7 @@ import CardTitle from '@/components/CardTitle.vue';
 import UserBadge from '@/components/UserBadge.vue';
 import UserPrizeBadge from '@/components/UserPrizeBadge.vue';
 import { getJudgements, type JudgementItem } from '@/api/judgement.ts';
+import { JUDGEMENT_DISPLAY_OPTIONS_STORAGE_KEY } from '@/utils/constants.ts';
 import { formatDate } from '@/utils/render.ts';
 import { useLocalStorage } from '@/composables/useLocalStorage.ts';
 
@@ -57,7 +58,10 @@ const defaultDisplayOptions = {
     ccf: true,
     xcpc: true
 };
-const savedDisplayOptions = useLocalStorage('judgement-display-options', defaultDisplayOptions);
+const savedDisplayOptions = useLocalStorage(
+    JUDGEMENT_DISPLAY_OPTIONS_STORAGE_KEY,
+    defaultDisplayOptions
+);
 const displayOptions = ref({ ...defaultDisplayOptions, ...(savedDisplayOptions.value ?? {}) });
 
 watch(
