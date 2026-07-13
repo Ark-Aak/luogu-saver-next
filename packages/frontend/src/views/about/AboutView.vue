@@ -31,7 +31,7 @@ const articleCount = ref(0);
 const pasteCount = ref(0);
 const daysInOperation = ref(Math.floor((Date.now() - FOUNDING_DATE) / MS_PER_DAY));
 
-const REPO_URL = 'https://github.com/Ark-Aak/luogu-saver-next';
+const REPO_URL = 'https://github.com/laikit-dev/luogu-saver';
 
 const features = [
     {

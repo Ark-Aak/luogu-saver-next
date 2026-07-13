@@ -3,9 +3,9 @@
     <p>A web application for saving user-generated content (UGC) from www.luogu.com.cn.</p>
     <p>
         <img src="https://img.shields.io/badge/node-v22.18.0-brightgreen" alt="Node Version"/>
-        <img src="https://img.shields.io/github/last-commit/Ark-Aak/luogu-saver-next" alt="Last Commit"/>
-        <img src="https://img.shields.io/github/actions/workflow/status/Ark-Aak/luogu-saver-next/deploy.yml" alt="Build Status">
-        <img src="https://img.shields.io/github/license/Ark-Aak/luogu-saver-next" alt="License"/>
+        <img src="https://img.shields.io/github/last-commit/laikit-dev/luogu-saver" alt="Last Commit"/>
+        <img src="https://img.shields.io/github/actions/workflow/status/laikit-dev/luogu-saver/deploy.yml" alt="Build Status">
+        <img src="https://img.shields.io/github/license/laikit-dev/luogu-saver" alt="License"/>
     </p>
     <p><a href="README.cn.md">简体中文</a> | English</p>
 </div>
@@ -14,7 +14,7 @@
 
 **Luogu Saver Next (LGS-NG)** is a web application designed to help users save and manage user-generated content from [Luogu](https://www.luogu.com.cn/), a popular Chinese competitive programming platform. This tool allows users to archive articles, pastes, and other content types, ensuring that valuable information is preserved and remains easily accessible.
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Ark-Aak/luogu-saver-next)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/laikit-dev/luogu-saver)
 
 ## Features
 
@@ -58,7 +58,7 @@ docker compose up -d
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/Ark-Aak/luogu-saver-next.git
+git clone https://github.com/laikit-dev/luogu-saver.git
 cd luogu-saver-next
 ```
 

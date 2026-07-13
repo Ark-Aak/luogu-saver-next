@@ -53,7 +53,7 @@ Both counts default to `0` before their requests resolve. Request failures are n
 
 ### 3.6 Open Source & Contribution (开源与贡献)
 
-A link to the GitHub repository (`https://github.com/Ark-Aak/luogu-saver-next`), a statement of the AGPL-3.0 license, and a short invitation to contribute via pull request. External links MUST open in a new tab with `rel="noopener noreferrer"`.
+A link to the GitHub repository (`https://github.com/laikit-dev/luogu-saver`), a statement of the AGPL-3.0 license, and a short invitation to contribute via pull request. External links MUST open in a new tab with `rel="noopener noreferrer"`.
 
 ### 3.7 Data Source & Disclaimer (数据来源与免责声明)
 

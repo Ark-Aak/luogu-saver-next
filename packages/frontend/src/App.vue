@@ -84,7 +84,7 @@
                                             </p>
                                             <p class="footer-element">
                                                 <a
-                                                    href="https://github.com/Ark-Aak/luogu-saver-next"
+                                                    href="https://github.com/laikit-dev/luogu-saver"
                                                     class="footer-link"
                                                 >
                                                     <Github :size="14" />

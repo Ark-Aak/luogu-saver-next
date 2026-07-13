@@ -3,9 +3,9 @@
     <p>一个用于保存来自 www.luogu.com.cn 的用户生成内容 (UGC) 的 Web 应用程序。</p>
     <p>
         <img src="https://img.shields.io/badge/node-v22.18.0-brightgreen" alt="Node 版本"/>
-        <img src="https://img.shields.io/github/last-commit/Ark-Aak/luogu-saver-next" alt="最后提交"/>
-        <img src="https://img.shields.io/github/actions/workflow/status/Ark-Aak/luogu-saver-next/deploy.yml" alt="构建状态">
-        <img src="https://img.shields.io/github/license/Ark-Aak/luogu-saver-next" alt="许可证"/>
+        <img src="https://img.shields.io/github/last-commit/laikit-dev/luogu-saver" alt="最后提交"/>
+        <img src="https://img.shields.io/github/actions/workflow/status/laikit-dev/luogu-saver/deploy.yml" alt="构建状态">
+        <img src="https://img.shields.io/github/license/laikit-dev/luogu-saver" alt="许可证"/>
     </p>
     <p>简体中文 | <a href="README.md">English</a></p>
 </div>
@@ -14,7 +14,7 @@
 
 **Luogu Saver Next (LGS-NG)** 是一个 Web 应用程序，旨在帮助用户保存和管理来自 [洛谷](https://www.luogu.com.cn/)（一个流行的中文算法竞赛平台）的用户生成内容。该工具允许用户存档文章、剪贴板内容和其他类型的内容，确保有价值的信息得以保存并易于访问。
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Ark-Aak/luogu-saver-next)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/laikit-dev/luogu-saver)
 
 ## 功能特性
 
@@ -58,7 +58,7 @@ docker compose up -d
 ### 1. 克隆仓库
 
 ```bash
-git clone https://github.com/Ark-Aak/luogu-saver-next.git
+git clone https://github.com/laikit-dev/luogu-saver.git
 cd luogu-saver-next
 ```
 
