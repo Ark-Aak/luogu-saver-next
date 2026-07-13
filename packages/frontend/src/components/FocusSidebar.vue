@@ -1,14 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import {
-    NButton,
-    NIcon,
-    NInput,
-    NPopover,
-    NTimeline,
-    NTimelineItem,
-    useMessage
-} from 'naive-ui';
+import { NButton, NIcon, NInput, NPopover, NTimeline, NTimelineItem, useMessage } from 'naive-ui';
 import {
     ListOutline,
     StarOutline,
@@ -133,35 +125,28 @@ const handleTocCollect = (headingId: string, headingText: string, e: MouseEvent)
                         :time="formatDate(ver.createdAt)"
                         :type="selectedVersion === ver.version ? 'success' : 'default'"
                         class="version-timeline-item"
-                        @click="emit('select-version', ver.version); versionPopoverVisible = false"
+                        @click="
+                            emit('select-version', ver.version);
+                            versionPopoverVisible = false;
+                        "
                     />
                 </n-timeline>
             </n-popover>
         </SidebarWidget>
 
-        <SidebarWidget
-            v-if="tocItems.length > 0"
-            title="目录"
-            :icon="ListOutline"
-            class="toc-card"
-        >
+        <SidebarWidget v-if="tocItems.length > 0" title="目录" :icon="ListOutline" class="toc-card">
             <div class="toc-list">
-                <div
-                    v-for="item in flatToc"
-                    :key="item.href"
-                    class="toc-item"
-                >
-                    <button
-                        class="toc-item-link"
-                        @click="handleScrollTo(item.href.slice(1))"
-                    >
+                <div v-for="item in flatToc" :key="item.href" class="toc-item">
+                    <button class="toc-item-link" @click="handleScrollTo(item.href.slice(1))">
                         {{ item.title }}
                     </button>
                     <n-button
                         text
                         size="tiny"
                         class="toc-collect-btn"
-                        :class="{ 'toc-collect-btn--active': isHeadingBookmarked(item.href.slice(1)) }"
+                        :class="{
+                            'toc-collect-btn--active': isHeadingBookmarked(item.href.slice(1))
+                        }"
                         @click.stop="handleTocCollect(item.href.slice(1), item.title, $event)"
                     >
                         <template #icon>
@@ -172,34 +157,19 @@ const handleTocCollect = (headingId: string, headingText: string, e: MouseEvent)
             </div>
         </SidebarWidget>
 
-        <SidebarWidget
-            title="段落收藏"
-            :icon="StarOutline"
-            class="bookmarks-card"
-        >
+        <SidebarWidget title="段落收藏" :icon="StarOutline" class="bookmarks-card">
             <div v-if="bookmarks.length === 0" class="bookmarks-empty">
                 暂无段落收藏。点击标题旁的星标图标或目录中的收藏按钮即可添加。
             </div>
 
             <div v-else class="bookmarks-list">
-                <div
-                    v-for="bm in bookmarks"
-                    :key="bm.id"
-                    class="bookmark-item"
-                >
+                <div v-for="bm in bookmarks" :key="bm.id" class="bookmark-item">
                     <div v-if="editingBookmarkId !== bm.id" class="bookmark-row">
-                        <button
-                            class="bookmark-link"
-                            @click="handleScrollTo(bm.headingId)"
-                        >
+                        <button class="bookmark-link" @click="handleScrollTo(bm.headingId)">
                             {{ bm.name }}
                         </button>
                         <div class="bookmark-actions">
-                            <n-button
-                                text
-                                size="tiny"
-                                @click.stop="startRename(bm)"
-                            >
+                            <n-button text size="tiny" @click.stop="startRename(bm)">
                                 <template #icon>
                                     <NIcon :component="SettingsOutline" />
                                 </template>
@@ -224,19 +194,10 @@ const handleTocCollect = (headingId: string, headingText: string, e: MouseEvent)
                             @keyup.enter="confirmRename(bm.id)"
                             @keyup.escape="cancelRename"
                         />
-                        <n-button
-                            size="tiny"
-                            type="primary"
-                            @click="confirmRename(bm.id)"
-                        >
+                        <n-button size="tiny" type="primary" @click="confirmRename(bm.id)">
                             确定
                         </n-button>
-                        <n-button
-                            size="tiny"
-                            @click="cancelRename"
-                        >
-                            取消
-                        </n-button>
+                        <n-button size="tiny" @click="cancelRename"> 取消 </n-button>
                     </div>
                 </div>
             </div>
