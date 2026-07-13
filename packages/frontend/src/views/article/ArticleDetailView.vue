@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch, nextTick } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import {
     useMessage,
@@ -15,7 +15,6 @@ import {
     NTimelineItem,
     NSpin,
     NResult,
-    NModal,
     useDialog
 } from 'naive-ui';
 import {
@@ -590,7 +589,12 @@ onMounted(() => {
                                             </template>
                                             {{ isInKnowledgeBase ? '移出知识库' : '加入知识库' }}
                                         </n-button>
-                                        <n-button size="small" type="error" ghost @click="handleDelete">
+                                        <n-button
+                                            size="small"
+                                            type="error"
+                                            ghost
+                                            @click="handleDelete"
+                                        >
                                             <template #icon>
                                                 <NIcon :component="TrashOutline" />
                                             </template>
@@ -694,7 +698,9 @@ onMounted(() => {
                                                     <n-tag
                                                         v-if="it.reason === 'title'"
                                                         class="article-color-tag"
-                                                        :style="getTagStyle('var(--ui-orange-color)')"
+                                                        :style="
+                                                            getTagStyle('var(--ui-orange-color)')
+                                                        "
                                                         size="small"
                                                     >
                                                         标题相关
@@ -720,7 +726,9 @@ onMounted(() => {
                                                         <UserLink :user="it.author" show-avatar />
                                                         <n-tag
                                                             class="article-color-tag"
-                                                            :style="getCategoryTagStyle(it.category)"
+                                                            :style="
+                                                                getCategoryTagStyle(it.category)
+                                                            "
                                                             size="small"
                                                         >
                                                             <template #icon>
@@ -795,9 +803,14 @@ onMounted(() => {
                     :selected-version="selectedVersion"
                     :content-id="articleId"
                     @select-version="handleVersionClick"
-                    @add-bookmark="(headingId: string, headingText: string) => toggleBookmark(headingId, headingText)"
+                    @add-bookmark="
+                        (headingId: string, headingText: string) =>
+                            toggleBookmark(headingId, headingText)
+                    "
                     @remove-bookmark="removeBookmark"
-                    @rename-bookmark="(bookmarkId: string, newName: string) => renameBookmark(bookmarkId, newName)"
+                    @rename-bookmark="
+                        (bookmarkId: string, newName: string) => renameBookmark(bookmarkId, newName)
+                    "
                 />
             </aside>
         </div>
@@ -818,7 +831,10 @@ onMounted(() => {
                 <div class="view-hint-icon">🎉</div>
                 <div class="view-hint-text">
                     <strong>新功能：聚焦视图</strong>
-                    <span>内容更宽、支持段落收藏、目录更紧凑。点击工具栏右侧「综合 · 聚焦」切换。</span>
+                    <span
+                        >内容更宽、支持段落收藏、目录更紧凑。点击工具栏右侧「综合 ·
+                        聚焦」切换。</span
+                    >
                 </div>
                 <n-button
                     quaternary
@@ -1046,7 +1062,6 @@ onMounted(() => {
     .toc-card {
         max-height: none;
     }
-
 }
 
 .meta-row {

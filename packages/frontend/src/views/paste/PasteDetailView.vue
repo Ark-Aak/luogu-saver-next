@@ -9,7 +9,6 @@ import {
     NSpace,
     NSpin,
     NTag,
-    NModal,
     useDialog,
     useMessage
 } from 'naive-ui';
@@ -313,7 +312,12 @@ const handleDelete = () => {
                                             </template>
                                             更新
                                         </n-button>
-                                        <n-button size="small" type="error" ghost @click="handleDelete">
+                                        <n-button
+                                            size="small"
+                                            type="error"
+                                            ghost
+                                            @click="handleDelete"
+                                        >
                                             <template #icon>
                                                 <NIcon :component="TrashOutline" />
                                             </template>
@@ -374,9 +378,14 @@ const handleDelete = () => {
                     :version-history="[]"
                     :selected-version="null"
                     :content-id="pasteId"
-                    @add-bookmark="(headingId: string, headingText: string) => toggleBookmark(headingId, headingText)"
+                    @add-bookmark="
+                        (headingId: string, headingText: string) =>
+                            toggleBookmark(headingId, headingText)
+                    "
                     @remove-bookmark="removeBookmark"
-                    @rename-bookmark="(bookmarkId: string, newName: string) => renameBookmark(bookmarkId, newName)"
+                    @rename-bookmark="
+                        (bookmarkId: string, newName: string) => renameBookmark(bookmarkId, newName)
+                    "
                 />
             </aside>
         </div>
@@ -397,7 +406,10 @@ const handleDelete = () => {
                 <div class="view-hint-icon">🎉</div>
                 <div class="view-hint-text">
                     <strong>新功能：聚焦视图</strong>
-                    <span>内容更宽、支持段落收藏、目录更紧凑。点击工具栏右侧「综合 · 聚焦」切换。</span>
+                    <span
+                        >内容更宽、支持段落收藏、目录更紧凑。点击工具栏右侧「综合 ·
+                        聚焦」切换。</span
+                    >
                 </div>
                 <n-button
                     quaternary
@@ -545,7 +557,6 @@ const handleDelete = () => {
         position: static;
         max-height: none;
     }
-
 }
 
 @media (max-width: 640px) {
