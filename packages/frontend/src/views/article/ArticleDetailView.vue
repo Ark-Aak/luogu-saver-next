@@ -311,7 +311,6 @@ const handleCopy = async () => {
 const handleUpdate = async () => {
     if (!articleId) return;
     try {
-        selectedVersion.value = null;
         router.replace({ query: {} });
         if (article.value?.title) {
             document.title = `${article.value.title} - 洛谷保存站`;
