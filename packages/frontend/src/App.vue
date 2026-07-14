@@ -396,28 +396,11 @@ const menuOptions = computed<MenuOption[]>(() => [
               }
           ]
         : []),
-    // {
-    //     label: '用户动态',
-    //     key: 'benben',
-    //     icon: renderIcon(ShareSocialOutline),
-    //     children: [
-    //         {
-    //             label: '被 at 查询',
-    //             key: 'benben/mentions',
-    //             icon: renderIcon(AtOutline)
-    //         },
-    //         {
-    //             label: '用户历史',
-    //             key: 'benben/history',
-    //             icon: renderIcon(CloudCircleOutline)
-    //         },
-    //         {
-    //             label: '用户抓取',
-    //             key: 'benben/crawl',
-    //             icon: renderIcon(CloudDownloadOutline)
-    //         }
-    //     ]
-    // },
+    {
+        label: '犇犇保存站',
+        key: 'benben',
+        icon: renderIcon(MessagesSquare)
+    },
     // {
     //     label: '冬日绘板',
     //     key: 'paintboard',
@@ -472,6 +455,7 @@ import {
     SIDEBAR_LOGO_NAV_STORAGE_KEY
 } from '@/utils/constants.ts';
 import { useLocalStorage } from '@/composables/useLocalStorage.ts';
+import { MessagesSquare } from 'lucide-vue-next';
 
 const getInitialTheme = (): UiThemeVars => {
     if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
@@ -989,6 +973,8 @@ const handleMenuSelect = (key: string) => {
         router.push('/');
     } else if (key === 'judgement') {
         window.open('https://jdmt.luogu.me', '_blank');
+    } else if (key === 'benben') {
+        window.open('https://benben.sbs', '_blank');
     } else {
         router.push(`/${key}`);
     }
