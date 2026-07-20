@@ -195,7 +195,7 @@ async function main() {
             parsed.data.revokedPermission !== Number(row.revoked_permission) ||
             parsed.data.addedPermission !== Number(row.added_permission) ||
             parsed.data.time !== Number(row.time) ||
-            !jsonEqual(userSnapshot, parsed.data.user)
+            !jsonEqual(userSnapshot, fullRecord.user)
         ) {
             fail(`judgement_records.${row.id} columns do not match its JSON snapshots`);
         }

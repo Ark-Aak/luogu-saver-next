@@ -155,11 +155,11 @@ onMounted(() => void loadData());
         </Card>
 
         <Card class="api-card" title="公开 API">
-            <p>以下接口都走主站同源的 <code>/api</code> 反向代理，不再依赖旧域名。</p>
+            <p>Base URL: https://api.luogu.me/</p>
             <ul>
-                <li><code>GET /api/judgement</code>：权限变更记录与筛选</li>
-                <li><code>GET /api/judgement/logs</code>：同步日志</li>
-                <li><code>GET /api/judgement/stats</code>：记录与抓取统计</li>
+                <li><code>GET /judgement</code>：权限变更记录与筛选</li>
+                <li><code>GET /judgement/logs</code>：同步日志</li>
+                <li><code>GET /judgement/stats</code>：记录与抓取统计</li>
             </ul>
             <p>
                 记录接口支持
