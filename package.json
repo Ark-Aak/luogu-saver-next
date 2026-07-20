@@ -37,5 +37,8 @@
             "prettier --write",
             "eslint --fix"
         ]
+    },
+    "dependencies": {
+        "axios": "^1.18.1"
     }
 }
