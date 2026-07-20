@@ -18,7 +18,6 @@ import { ArticleHandler } from '@/workers/handlers/task/save/article.handler';
 import { PasteHandler } from '@/workers/handlers/task/save/paste.handler';
 import { CommentsHandler } from '@/workers/handlers/task/save/comments.handler';
 import { ProfileHandler } from '@/workers/handlers/task/save/profile.handler';
-import { JudgementHandler } from '@/workers/handlers/task/save/judgement.handler';
 import { SummaryHandler } from '@/workers/handlers/task/llm/summary.handler';
 import { EmbeddingHandler } from '@/workers/handlers/task/llm/embedding.handler';
 import { ChatHandler } from '@/workers/handlers/task/llm/chat.handler';
@@ -76,7 +75,6 @@ export async function bootstrap() {
     saveProcessor.registerHandler(new PasteHandler());
     saveProcessor.registerHandler(new CommentsHandler());
     saveProcessor.registerHandler(new ProfileHandler());
-    saveProcessor.registerHandler(new JudgementHandler());
 
     aiProcessor.registerHandler(new SummaryHandler());
     aiProcessor.registerHandler(new EmbeddingHandler());

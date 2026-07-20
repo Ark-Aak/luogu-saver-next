@@ -4,7 +4,6 @@ import { Context, DefaultState } from 'koa';
 const router = new Router<DefaultState, Context>({ prefix: '/paste' });
 
 import { PasteService } from '@/services/paste.service';
-import { ROLE_ADMIN } from '@/shared/permission';
 
 router.get('/query/:id', async (ctx: Context) => {
     const pasteId = ctx.params.id;
@@ -14,12 +13,12 @@ router.get('/query/:id', async (ctx: Context) => {
             ctx.fail(404, 'Paste not found');
             return;
         }
-        if (paste.deleted && ctx.user?.role !== ROLE_ADMIN) {
-            ctx.fail(403, paste.deleteReason);
-            return;
-        }
         await paste.renderContent();
-        ctx.success(paste);
+        if (paste.deleted) {
+            ctx.fail(403, paste.deleteReason);
+        } else {
+            ctx.success(paste);
+        }
     } catch {
         ctx.fail(500, 'Failed to retrieve paste');
     }

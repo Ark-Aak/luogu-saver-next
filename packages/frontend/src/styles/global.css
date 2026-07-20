@@ -150,28 +150,22 @@
 .user-Red {
     color: var(--ui-user-red-color) !important;
 }
-
 .user-Orange {
     color: var(--ui-user-orange-color) !important;
 }
-
 .user-Purple {
     color: var(--ui-user-purple-color) !important;
 }
-
 .user-Green {
     color: var(--ui-user-green-color) !important;
 }
-
 .user-Blue {
     color: var(--ui-user-blue-color) !important;
     /*note: in luogu homepage, blue using "bluelight"*/
 }
-
 .user-Gray {
     color: var(--ui-user-gray-color) !important;
 }
-
 .user-Cheater {
     color: var(--ui-user-cheater-color) !important;
 }
@@ -388,36 +382,4 @@ html[data-ui-code-theme='dark'] .shiki span,
 html[data-ui-code-theme='dark'] .shiki,
 [data-ui-code-theme='dark'] .shiki {
     background-color: var(--shiki-dark-bg, var(--ui-code-background-color)) !important;
-}
-
-/* Bookmark heading icon button for focus mode */
-/* Bookmark buttons are absolutely positioned inside the heading's padding area.
-   Always visible so users can see and click them. */
-.bookmark-heading-btn {
-    position: absolute;
-    left: 2px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--ui-muted-text-color);
-    padding: 2px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1;
-    width: 18px;
-    height: 18px;
-    transition: color 0.15s ease;
-}
-
-.bookmark-heading-btn:hover {
-    color: var(--ui-primary-color);
-}
-
-.bookmark-heading-btn svg {
-    display: block;
-    width: 100%;
-    height: 100%;
 }

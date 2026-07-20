@@ -222,22 +222,4 @@ router.post(
     }
 );
 
-router.post(
-    '/articles/:id/restore',
-    requiresPermission(Permission.MANAGE_CONTENT),
-    async (ctx: Context) => {
-        const result = await DeletionRequestService.restoreArticle(ctx.params.id);
-        ctx.success(result);
-    }
-);
-
-router.post(
-    '/pastes/:id/restore',
-    requiresPermission(Permission.MANAGE_CONTENT),
-    async (ctx: Context) => {
-        const result = await DeletionRequestService.restorePaste(ctx.params.id);
-        ctx.success(result);
-    }
-);
-
 export default router;

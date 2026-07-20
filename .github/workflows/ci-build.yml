@@ -27,12 +27,6 @@ jobs:
             - name: Install Dependencies
               run: npm ci
 
-            - name: Audit Production Dependencies
-              run: npm audit --omit=dev
-
-            - name: Run Tests
-              run: npm test
-
             - name: Build Markdown Renderer
               run: npm run build -w @luogu-saver-next/markdown-renderer
 

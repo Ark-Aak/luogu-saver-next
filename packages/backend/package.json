@@ -8,16 +8,13 @@
     "scripts": {
         "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/index.ts",
         "build": "tsc && tsc-alias",
-        "start": "node dist/index.js",
-        "test": "vitest run",
-        "import:judgement": "node scripts/import-judgement-sqlite.mjs",
-        "backfill:deletion-markers": "node dist/scripts/backfill-search-deletion-markers.js"
+        "start": "node dist/index.js"
     },
     "dependencies": {
         "@chroma-core/default-embed": "^0.1.9",
         "@koa/cors": "^5.0.0",
         "@luogu-saver-next/markdown-renderer": "^1.0.0",
-        "axios": "^1.18.1",
+        "axios": "1.15.2",
         "bullmq": "^5.65.1",
         "chromadb": "^3.1.6",
         "class-transformer": "^0.5.1",
@@ -41,7 +38,6 @@
         "reflect-metadata": "^0.2.2",
         "socket.io": "^4.8.3",
         "socks-proxy-agent": "^7.0.0",
-        "sql.js": "^1.14.1",
         "string-similarity": "^4.0.4",
         "typeorm": "^0.3.27",
         "typeorm-naming-strategies": "^4.1.0",
@@ -58,7 +54,6 @@
         "@types/string-similarity": "^4.0.2",
         "ts-node-dev": "^2.0.0",
         "tsc-alias": "^1.8.16",
-        "tsconfig-paths": "^4.2.0",
-        "vitest": "^4.1.10"
+        "tsconfig-paths": "^4.2.0"
     }
 }

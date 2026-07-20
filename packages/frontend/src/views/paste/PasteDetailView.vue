@@ -19,32 +19,22 @@ import {
     ClipboardOutline,
     CopyOutline,
     OpenOutline,
-    RestoreOutline,
     SyncOutline,
     TrashOutline
 } from '@/components/icons/lucide.ts';
 
 import { getPasteById, savePaste } from '@/api/paste';
-import { restorePaste } from '@/api/admin';
 import type { Paste } from '@/types/paste';
-import type { TocItem } from '@/types/article';
-import { generateTocAndProcessHtml } from '@/utils/article';
 import { useContentSaver } from '@/composables/useContentSaver';
-import { useViewMode } from '@/composables/useViewMode';
-import { useBookmarks } from '@/composables/useBookmarks';
-import { useBookmarkIcons } from '@/composables/useBookmarkIcons';
 import { markStarPromptEligible } from '@/composables/useStarPrompt.ts';
 import Card from '@/components/Card.vue';
 import LoadingSkeleton from '@/components/LoadingSkeleton.vue';
 import MarkdownViewer from '@/components/MarkdownViewer.vue';
 import UserLink from '@/components/UserLink.vue';
 import DeletionRequestModal from '@/components/DeletionRequestModal.vue';
-import ViewModeSwitch from '@/components/ViewModeSwitch.vue';
-import FocusSidebar from '@/components/FocusSidebar.vue';
 import { formatDate } from '@/utils/render';
 import { useLuoguSource } from '@/utils/luogu-source.ts';
-import { currentRole, isAuthenticated, startCpOAuthLogin } from '@/utils/auth.ts';
-import { ROLE_ADMIN } from '@/utils/permissions.ts';
+import { isAuthenticated, startCpOAuthLogin } from '@/utils/auth.ts';
 
 const route = useRoute();
 const router = useRouter();
@@ -69,41 +59,6 @@ const { buildLuoguUrl } = useLuoguSource();
 let stopTaskListener: (() => void) | null = null;
 
 const title = computed(() => `剪贴板 ${pasteId}`);
-
-// View mode
-const { viewMode, isFocus, setViewMode } = useViewMode();
-
-// Bookmarks
-const { bookmarks, toggleBookmark, removeBookmark, renameBookmark } = useBookmarks(pasteId);
-
-// TOC for focus mode
-const tocItems = ref<TocItem[]>([]);
-
-// Handle markdown rendered for TOC extraction
-const handleRendered = (html: string) => {
-    const result = generateTocAndProcessHtml(html);
-    tocItems.value = result.toc;
-};
-
-// Bookmark heading icons (focus mode only)
-useBookmarkIcons(
-    '.md-body',
-    'h1, h2, h3, h4, h5, h6',
-    viewMode,
-    bookmarks,
-    (headingId: string, headingText: string) => {
-        const result = toggleBookmark(headingId, headingText);
-        if (result === 'added') {
-            message.success(`已收藏段落: ${headingText.slice(0, 30)}`);
-        } else if (result === 'removed') {
-            message.success(`已取消收藏: ${headingText.slice(0, 30)}`);
-        }
-    }
-);
-
-onMounted(() => {
-    loadData();
-});
 
 const triggerRefresh = () => {
     handleRefresh(loadData);
@@ -176,7 +131,6 @@ const loadData = async () => {
 
         paste.value = res.data;
         displayContent.value = paste.value.renderedContent || '';
-        document.title = `${paste.value.deleted ? '[已删除] ' : ''}${title.value} - 洛谷保存站`;
     } catch (err: any) {
         message.error(err.message || '加载失败');
     } finally {
@@ -208,8 +162,6 @@ const handleUpdate = async () => {
 };
 
 const showDeletionModal = ref(false);
-const restoring = ref(false);
-const isAdmin = computed(() => currentRole.value === ROLE_ADMIN);
 
 const handleDelete = () => {
     if (!isAuthenticated.value) {
@@ -225,42 +177,17 @@ const handleDelete = () => {
     showDeletionModal.value = true;
 };
 
-const handleRestore = () => {
-    dialog.warning({
-        title: '恢复剪贴板',
-        content: `确认恢复剪贴板 ${pasteId}？恢复后所有用户都可以重新查看该内容。`,
-        positiveText: '确认恢复',
-        negativeText: '取消',
-        onPositiveClick: async () => {
-            restoring.value = true;
-            try {
-                const response = await restorePaste(pasteId);
-                if (response.code !== 200) {
-                    throw new Error(response.message || '恢复剪贴板失败');
-                }
-                message.success(response.data.restored ? '剪贴板已恢复' : '剪贴板已经处于可见状态');
-                await loadData();
-            } catch (error) {
-                message.error(error instanceof Error ? error.message : '恢复剪贴板失败');
-            } finally {
-                restoring.value = false;
-            }
-        }
-    });
-};
+onMounted(() => {
+    loadData();
+});
 </script>
 
 <template>
     <n-spin :show="isSaving" description="正在保存并处理..." class="saving-spin">
-        <div
-            class="paste-layout"
-            :class="{
-                'is-focus-mode': isFocus
-            }"
-        >
-            <aside v-if="!isFocus" class="sidebar-left"></aside>
+        <div class="paste-layout">
+            <aside class="sidebar-left"></aside>
 
-            <div class="center-column" :class="{ 'focus-center': isFocus }">
+            <div class="center-column">
                 <div class="paste-header">
                     <LoadingSkeleton :loading="loading">
                         <template #skeleton>
@@ -286,21 +213,7 @@ const handleRestore = () => {
                         </template>
 
                         <div v-if="paste">
-                            <Card
-                                :title="title"
-                                :icon="ClipboardOutline"
-                                :class="{ 'deleted-paste-card': paste.deleted }"
-                            >
-                                <template #title-extra>
-                                    <n-tag
-                                        v-if="paste.deleted"
-                                        type="error"
-                                        size="small"
-                                        :bordered="false"
-                                    >
-                                        已删除
-                                    </n-tag>
-                                </template>
+                            <Card :title="title" :icon="ClipboardOutline">
                                 <div class="meta-row">
                                     <n-tag :bordered="false" size="small">
                                         <template #icon>
@@ -322,74 +235,44 @@ const handleRestore = () => {
 
                                 <n-divider style="margin: 12px 0" />
 
-                                <div class="header-toolbar">
-                                    <n-space>
-                                        <n-button size="small" @click="router.go(-1)">
-                                            <template #icon>
-                                                <NIcon :component="ArrowBackOutline" />
-                                            </template>
-                                            返回
-                                        </n-button>
-                                        <n-button
-                                            size="small"
-                                            secondary
-                                            tag="a"
-                                            :href="buildLuoguUrl(`/paste/${paste.id}`)"
-                                            target="_blank"
-                                        >
-                                            <template #icon>
-                                                <NIcon :component="OpenOutline" />
-                                            </template>
-                                            原站
-                                        </n-button>
-                                        <n-button size="small" secondary @click="handleCopy">
-                                            <template #icon>
-                                                <NIcon :component="CopyOutline" />
-                                            </template>
-                                            源码
-                                        </n-button>
-                                        <n-button
-                                            v-if="!paste.deleted"
-                                            size="small"
-                                            type="primary"
-                                            @click="handleUpdate"
-                                        >
-                                            <template #icon>
-                                                <NIcon :component="SyncOutline" />
-                                            </template>
-                                            更新
-                                        </n-button>
-                                        <n-button
-                                            v-if="!paste.deleted"
-                                            size="small"
-                                            type="error"
-                                            ghost
-                                            @click="handleDelete"
-                                        >
-                                            <template #icon>
-                                                <NIcon :component="TrashOutline" />
-                                            </template>
-                                            删除
-                                        </n-button>
-                                        <n-button
-                                            v-if="paste.deleted && isAdmin"
-                                            size="small"
-                                            type="warning"
-                                            secondary
-                                            :loading="restoring"
-                                            @click="handleRestore"
-                                        >
-                                            <template #icon>
-                                                <NIcon :component="RestoreOutline" />
-                                            </template>
-                                            恢复
-                                        </n-button>
-                                        <ViewModeSwitch
-                                            :model-value="viewMode"
-                                            @update:model-value="setViewMode"
-                                        />
-                                    </n-space>
-                                </div>
+                                <n-space>
+                                    <n-button size="small" @click="router.go(-1)">
+                                        <template #icon>
+                                            <NIcon :component="ArrowBackOutline" />
+                                        </template>
+                                        返回
+                                    </n-button>
+                                    <n-button
+                                        size="small"
+                                        secondary
+                                        tag="a"
+                                        :href="buildLuoguUrl(`/paste/${paste.id}`)"
+                                        target="_blank"
+                                    >
+                                        <template #icon>
+                                            <NIcon :component="OpenOutline" />
+                                        </template>
+                                        原站
+                                    </n-button>
+                                    <n-button size="small" secondary @click="handleCopy">
+                                        <template #icon>
+                                            <NIcon :component="CopyOutline" />
+                                        </template>
+                                        源码
+                                    </n-button>
+                                    <n-button size="small" type="primary" @click="handleUpdate">
+                                        <template #icon>
+                                            <NIcon :component="SyncOutline" />
+                                        </template>
+                                        更新
+                                    </n-button>
+                                    <n-button size="small" type="error" ghost @click="handleDelete">
+                                        <template #icon>
+                                            <NIcon :component="TrashOutline" />
+                                        </template>
+                                        删除
+                                    </n-button>
+                                </n-space>
                             </Card>
                         </div>
                         <Card
@@ -442,42 +325,18 @@ const handleRestore = () => {
                             </template>
 
                             <Card v-if="paste">
-                                <MarkdownViewer
-                                    :content="displayContent"
-                                    :pre-rendered="true"
-                                    @rendered="handleRendered"
-                                />
+                                <MarkdownViewer :content="displayContent" :pre-rendered="true" />
                             </Card>
                         </LoadingSkeleton>
                     </div>
                 </main>
             </div>
 
-            <!-- Default mode: empty sidebar-right -->
-            <aside v-if="!isFocus" class="sidebar-right"></aside>
-
-            <!-- Focus mode: sidebar with TOC + bookmarks -->
-            <aside v-if="isFocus" class="sidebar-right focus-sidebar-right">
-                <FocusSidebar
-                    :toc-items="tocItems"
-                    :bookmarks="bookmarks"
-                    :version-history="[]"
-                    :selected-version="null"
-                    :content-id="pasteId"
-                    @add-bookmark="
-                        (headingId: string, headingText: string) =>
-                            toggleBookmark(headingId, headingText)
-                    "
-                    @remove-bookmark="removeBookmark"
-                    @rename-bookmark="
-                        (bookmarkId: string, newName: string) => renameBookmark(bookmarkId, newName)
-                    "
-                />
-            </aside>
+            <aside class="sidebar-right"></aside>
         </div>
     </n-spin>
 
-    <div v-if="hasUpdate && !forbiddenReason && !paste?.deleted" class="update-floater">
+    <div v-if="hasUpdate && !forbiddenReason" class="update-floater">
         <n-button type="primary" circle size="large" class="shadow-button" @click="triggerRefresh">
             <template #icon>
                 <NIcon :component="SyncOutline" />
@@ -508,26 +367,10 @@ const handleRestore = () => {
     align-items: start;
 }
 
-/* Focus mode: wider content, sidebar on right only */
-.paste-layout.is-focus-mode {
-    grid-template-columns: minmax(0, 1fr) 280px;
-}
-
-.paste-layout.is-focus-mode .focus-sidebar-right {
-    min-width: 0;
-    position: sticky;
-    top: 20px;
-    align-self: start;
-}
-
 .sidebar-left,
 .sidebar-right,
 .main-content {
     min-width: 0;
-}
-
-.deleted-paste-card :deep(.card-title) {
-    color: var(--ui-error-color) !important;
 }
 
 .center-column {
@@ -572,14 +415,6 @@ const handleRestore = () => {
     margin-top: 4px;
 }
 
-.header-toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
 .update-floater {
     position: fixed;
     bottom: 32px;
@@ -604,20 +439,13 @@ const handleRestore = () => {
 }
 
 @media (max-width: 1200px) {
-    .paste-layout,
-    .paste-layout.is-focus-mode {
+    .paste-layout {
         grid-template-columns: minmax(0, 1fr);
     }
 
     .sidebar-left,
-    .sidebar-right,
-    .focus-sidebar-right {
+    .sidebar-right {
         min-width: 0;
-    }
-
-    .focus-sidebar-right {
-        position: static;
-        max-height: none;
     }
 }
 

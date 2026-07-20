@@ -33,5 +33,3 @@ The normalized failure `reason` SHALL follow `task-queue.spec.md` failure reason
 LLM provider failure logs SHALL NOT include raw HTTP response bodies, HTML error pages, LLM prompt text, article bodies, paste bodies, or embedding vectors.
 
 After logging, the LLM adapter SHALL throw an `Error` whose message equals the normalized failure `reason`.
-
-Judgement synchronization logs SHALL NOT include raw upstream response bodies, judgement snapshots, cookies, or HTML error pages. They MAY include fetch-log IDs and aggregate record counts.

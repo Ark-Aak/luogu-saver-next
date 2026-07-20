@@ -3,9 +3,9 @@
     <p>A web application for saving user-generated content (UGC) from www.luogu.com.cn.</p>
     <p>
         <img src="https://img.shields.io/badge/node-v22.18.0-brightgreen" alt="Node Version"/>
-        <img src="https://img.shields.io/github/last-commit/quanac-lcx/luogu-saver-next" alt="Last Commit"/>
-        <img src="https://img.shields.io/github/actions/workflow/status/quanac-lcx/luogu-saver-next/deploy.yml" alt="Build Status">
-        <img src="https://img.shields.io/github/license/quanac-lcx/luogu-saver-next" alt="License"/>
+        <img src="https://img.shields.io/github/last-commit/laikit-dev/luogu-saver" alt="Last Commit"/>
+        <img src="https://img.shields.io/github/actions/workflow/status/laikit-dev/luogu-saver/deploy.yml" alt="Build Status">
+        <img src="https://img.shields.io/github/license/laikit-dev/luogu-saver" alt="License"/>
     </p>
     <p><a href="README.cn.md">简体中文</a> | English</p>
 </div>
@@ -13,6 +13,8 @@
 ## Description
 
 **Luogu Saver Next (LGS-NG)** is a web application designed to help users save and manage user-generated content from [Luogu](https://www.luogu.com.cn/), a popular Chinese competitive programming platform. This tool allows users to archive articles, pastes, and other content types, ensuring that valuable information is preserved and remains easily accessible.
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/laikit-dev/luogu-saver)
 
 ## Features
 
@@ -22,7 +24,6 @@
 - **High Performance:** Utilizes client-side rendering for a smooth user experience.
 - **Responsive Design:** Optimized for use on desktops, tablets, and mobile devices.
 - **Intelligent Recommendations:** Suggests related content based on user activity.
-- **Judgement Archive:** Stores and filters Luogu community permission-change history without a separate website or API service.
 
 ## Architecture
 
@@ -31,7 +32,6 @@ This project is a **Monorepo** managed by npm workspaces:
 - **Root:** Manages shared dev-dependencies (Prettier, TypeScript, etc.) and orchestration.
 - **`packages/frontend`:** Vue 3 + Vite application (Naive UI).
 - **`packages/backend`:** Koa + TypeScript API service.
-- **Judgement module:** The backend owns scheduled Luogu fetching, MariaDB persistence, read-only APIs, and the legacy SQLite import adapter; the Vue page uses the same-origin `/api/judgement` endpoint.
 - **Infrastructure:** External services (Database, etc.) managed via Docker Compose.
 
 ## Prerequisites
@@ -58,7 +58,7 @@ docker compose up -d
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/quanac-lcx/luogu-saver-next.git
+git clone https://github.com/laikit-dev/luogu-saver.git
 cd luogu-saver-next
 ```
 
@@ -161,48 +161,6 @@ You need a web server (e.g., **Nginx** or **Caddy**) to serve the static files l
 If you did not set the `VITE_API_URL` variable during the frontend build, the application defaults to sending requests to `/api` on the same domain.
 
 **Crucial Step:** You must configure your web server (Nginx/Caddy) to reverse proxy requests starting with `/api` to the running backend service (e.g., `localhost:3000`).
-
-### 5. Automatic Deployment
-
-The deployment workflow is intentionally disabled until the repository variable `ENABLE_PRODUCTION_DEPLOYMENT` is set to `true` and the `production` environment secrets are configured. Every push to `master` then deploys and health-checks the backend first. The frontend remains gated by `JUDGEMENT_MIGRATION_READY=true` until the historical import has passed; after that, pushes update both parts automatically.
-
-## Judgement Migration
-
-Keep scheduled synchronization disabled for the initial backend deployment:
-
-```yaml
-judgement:
-    enabled: false
-    intervalMs: 1200000
-    runOnStartup: true
-    sourceUrl: https://www.luogu.com.cn/judgement
-```
-
-Back up and stop the legacy `luogu-judgement-saver` scheduler, then import its untracked `data/judgements.db`. The offset must be the old server's local time zone:
-
-```bash
-npm run build -w @luogu-saver-next/backend
-npm run import:judgement -w @luogu-saver-next/backend -- \
-  --db /secure/path/judgements.db \
-  --source-time-zone +08:00
-```
-
-The production deployment already contains the compiled backend and production dependencies. Run the importer there without rebuilding:
-
-```bash
-cd /opt/luogu-saver-backend
-npm run import:judgement -- \
-  --db /secure/path/judgements.db \
-  --source-time-zone +08:00
-```
-
-The importer is idempotent and prints a count/key/time-range audit. After it passes, enable the scheduler and observe a successful `/judgement/logs` entry. Then set `JUDGEMENT_MIGRATION_READY=true` and rerun the deployment workflow to publish the frontend. Keep the old service read-only during a rollback window; never commit the SQLite file or production configuration.
-
-Public read-only endpoints behind the `/api` reverse proxy are:
-
-- `GET /api/judgement`
-- `GET /api/judgement/logs`
-- `GET /api/judgement/stats`
 
 ## Contributing
 

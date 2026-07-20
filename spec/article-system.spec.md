@@ -107,12 +107,7 @@ If `deleted = true`, the frontend article detail view SHALL:
 4. Not request related articles or article history.
 5. Not render article comments.
 6. Not trigger automatic article updates.
-7. Hide update and knowledge-base commands.
-8. For an authenticated administrator, replace the deletion-request command with one command whose
-   label is `恢复` and whose icon is the Lucide `RotateCcw` icon.
-9. The restore command SHALL show a confirmation dialog before calling
-   `POST /admin/articles/:id/restore`. Canceling SHALL make no request. A successful request SHALL
-   reload the current article data.
+7. Hide update, knowledge-base, and deletion-request commands.
 
 The deleted-article administrator exception SHALL NOT apply to relevant-article, history, comment,
 or comment-refresh endpoints.
@@ -301,8 +296,7 @@ The update handler for `article_embedding_rebuild` SHALL:
 4. For each article, split `article.content` into chunks of 4000 characters with 300 characters overlap; call the embedding LLM scenario for each chunk; upsert each chunk vector.
 5. Before inserting chunk vectors for an article, delete existing Chroma chunk vectors with metadata `articleId=article.id` and `kind="chunk"`.
 6. Summary vectors SHALL use ID `article.id`; chunk vectors SHALL use ID `${article.id}:chunk:${index}`.
-7. Vector metadata SHALL include `{ articleId, kind, title, authorId, category, tags, deleted }` where
-   `deleted=article.deleted`; chunk vectors SHALL also include `{ chunkIndex, start, end }`.
+7. Vector metadata SHALL include `{ articleId, kind, title, authorId, category, tags }`; chunk vectors SHALL also include `{ chunkIndex, start, end }`.
 8. The Chroma metadata field `tags` SHALL be a comma-separated string built from `article.tags`.
 9. Continue processing if one article fails and record that article ID in `failedArticleIds`.
 10. Return `{ processed, updated, failed, failedArticleIds }`.

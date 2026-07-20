@@ -10,8 +10,6 @@ import { RegisteredUser } from '@/entities/registered-user';
 import { ArticleService } from '@/services/article.service';
 import { PasteService } from '@/services/paste.service';
 import { UserNotificationService } from '@/services/user-notification.service';
-import { SearchService } from '@/services/search.service';
-import { EmbeddingService } from '@/services/embedding.service';
 import {
     findOneServiceEntity,
     findServiceEntities,
@@ -189,52 +187,9 @@ export class DeletionRequestService {
                 await PasteService.savePaste(target as Paste);
             }
         }
-        if (request.targetType === 'article') {
-            await this.syncArticleDeletionState(target as Article);
-        }
 
         await this.finalizeRequest(request, 'approved', handlerId, resolutionComment);
         return (await this.buildAdminItems([request]))[0];
-    }
-
-    static async restoreArticle(articleId: unknown): Promise<{ id: string; restored: boolean }> {
-        const normalizedId = String(articleId ?? '').trim();
-        if (!normalizedId || normalizedId.length > 8) {
-            throw Object.assign(new Error('Valid article id is required'), { status: 400 });
-        }
-
-        const article = await ArticleService.getArticleByIdWithAuthorWithoutCache(normalizedId);
-        if (!article) {
-            throw Object.assign(new Error('Article not found'), { status: 404 });
-        }
-
-        const restored = Boolean(article.deleted);
-        if (restored) {
-            article.deleted = false;
-            article.deleteReason = null;
-            await ArticleService.saveArticle(article);
-        }
-        await this.syncArticleDeletionState(article);
-        return { id: article.id, restored };
-    }
-
-    static async restorePaste(pasteId: unknown): Promise<{ id: string; restored: boolean }> {
-        const normalizedId = String(pasteId ?? '').trim();
-        if (!normalizedId || normalizedId.length > 8) {
-            throw Object.assign(new Error('Valid paste id is required'), { status: 400 });
-        }
-
-        const paste = await PasteService.getPasteByIdWithoutCache(normalizedId);
-        if (!paste) {
-            throw Object.assign(new Error('Paste not found'), { status: 404 });
-        }
-
-        const restored = Boolean(paste.deleted);
-        if (restored) {
-            paste.deleted = false;
-            await PasteService.savePaste(paste);
-        }
-        return { id: paste.id, restored };
     }
 
     static async rejectRequest(
@@ -321,16 +276,9 @@ export class DeletionRequestService {
         targetId: string
     ): Promise<Article | Paste | null> {
         if (targetType === 'article') {
-            return await ArticleService.getArticleByIdWithAuthorWithoutCache(targetId);
+            return await findOneServiceEntity<Article>(Article, { where: { id: targetId } });
         }
         return await findOneServiceEntity<Paste>(Paste, { where: { id: targetId } });
-    }
-
-    private static async syncArticleDeletionState(article: Article): Promise<void> {
-        await Promise.all([
-            SearchService.upsertArticle(article),
-            EmbeddingService.updateArticleDeletionState(article.id, Boolean(article.deleted))
-        ]);
     }
 
     private static async buildAdminItems(

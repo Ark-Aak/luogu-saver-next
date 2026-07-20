@@ -179,6 +179,7 @@ export class ArticleService {
         const query = getServiceRepository<Article>(Article, manager)
             .createQueryBuilder('article')
             .leftJoinAndSelect('article.author', 'author')
+            .where('article.deleted = :deleted', { deleted: false })
             .orderBy('article.updatedAt', 'ASC')
             .addOrderBy('article.id', 'ASC')
             .take(take);
@@ -190,20 +191,6 @@ export class ArticleService {
             );
         }
         return await query.getMany();
-    }
-
-    static async getArticleDeletionStates(
-        ids: string[],
-        manager?: EntityManager
-    ): Promise<Map<string, boolean>> {
-        const uniqueIds = [...new Set(ids.filter(Boolean))];
-        if (uniqueIds.length === 0) return new Map();
-
-        const articles = await getServiceRepository<Article>(Article, manager).find({
-            select: ['id', 'deleted'],
-            where: { id: In(uniqueIds) }
-        });
-        return new Map(articles.map(article => [article.id, Boolean(article.deleted)]));
     }
 
     static async getArticlesForSummaryRebuild(

@@ -42,15 +42,10 @@ Retrieve a single paste by ID.
 
 **Response:**
 
-- 200: Paste object with rendered content when `deleted = false`
-- 200: Paste object with rendered content when `deleted = true` and `ctx.user.role = ROLE_ADMIN`
-- 403: If `deleted = true` and the requester is not an authenticated administrator, returns
-  `deleteReason` as error message
+- 200: Paste object with rendered content
+- 403: If `deleted = true`, returns `deleteReason` as error message
 - 404: Paste not found
 - 500: Server error
-
-If `deleted = true` and the requester is an authenticated administrator, the endpoint SHALL render
-and return the stored paste content.
 
 When the frontend paste detail request returns code `403`, the frontend SHALL:
 
@@ -61,18 +56,6 @@ When the frontend paste detail request returns code `403`, the frontend SHALL:
 4. Render commands for returning to the previous route and opening the original Luogu paste.
 5. Not render the paste content card.
 
-If `deleted = true` and the backend returns code `200`, the frontend paste detail view SHALL:
-
-1. Render the stored paste content.
-2. Render the title in `--ui-error-color`.
-3. Render one error tag with exact text `已删除` beside the title.
-4. Hide update and deletion-request commands.
-5. For an authenticated administrator, render one command whose label is `恢复` and whose icon is
-   the Lucide `RotateCcw` icon.
-6. The restore command SHALL show a confirmation dialog before calling
-   `POST /admin/pastes/:id/restore`. Canceling SHALL make no request. A successful request SHALL
-   reload the current paste data.
-
 ### 3.2 GET /paste/count
 
 Get total count of non-deleted pastes.
@@ -82,15 +65,7 @@ Get total count of non-deleted pastes.
 - 200: `{ count: number }`
 - 500: Server error
 
-### 3.3 POST /admin/pastes/:id/restore
-
-Restore one soft-deleted paste.
-
-1. The endpoint SHALL require `MANAGE_CONTENT`.
-2. Response data SHALL be `{ id, restored }`.
-3. Detailed service behavior is defined by `deletion-request-system.spec.md`.
-
-### 3.4 POST /workflow/create/template/paste-save-pipeline
+### 3.3 POST /workflow/create/template/paste-save-pipeline
 
 Create a workflow that saves one Luogu paste.
 
@@ -188,8 +163,7 @@ The `save:paste` task SHALL:
 
 - Pastes are never physically deleted from the database.
 - The `deleted` flag marks a paste as removed.
-- When `deleted = true`, the detail API returns 200 only for an authenticated administrator and
-  returns 403 with `deleteReason` for every other requester.
+- When `deleted = true`, the API returns 403 with `deleteReason`.
 
 ### 6.2 Default Delete Reason
 
@@ -199,8 +173,7 @@ The default value for `delete_reason` is `'管理员删除'` (Administrator dele
 
 1. All paste queries include the `author` relation.
 2. Non-deleted pastes (`deleted = false`) are counted in `getPasteCount()`.
-3. Deleted pastes remain queryable. Their detail endpoint returns 200 for an authenticated
-   administrator and 403 for every other requester.
+3. Deleted pastes remain queryable but return 403 status.
 
 ## 8. File Locations
 

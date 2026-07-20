@@ -4,7 +4,7 @@
 
 This specification defines backend process startup behavior implemented by `packages/backend/src/index.ts`.
 
-The runtime creates the Koa application, HTTP server, Socket.IO server, middleware chain, database connection, workers, discovery scheduler, judgement scheduler, and HTTP listener.
+The runtime creates the Koa application, HTTP server, Socket.IO server, middleware chain, database connection, workers, discovery scheduler, and HTTP listener.
 
 ## 2. Koa Application
 
@@ -47,9 +47,8 @@ When `AppDataSource.initialize()` resolves:
 
 1. Await `worker.bootstrap()`.
 2. Call `ArticlePlazaDiscoveryScheduler.start()`.
-3. Call `JudgementSyncScheduler.start()`.
-4. Call `server.listen(config.port, config.host, callback)`.
-5. In the listen callback, write one info log with fields `{ host: config.host, port: config.port }` and message `Server started.`.
+3. Call `server.listen(config.port, config.host, callback)`.
+4. In the listen callback, write one info log with fields `{ host: config.host, port: config.port }` and message `Server started.`.
 
 The HTTP server SHALL NOT start listening before the database initialization and worker bootstrap have completed.
 
@@ -63,8 +62,6 @@ If `worker.bootstrap()` rejects, there is no local catch block in `index.ts`.
 
 If `ArticlePlazaDiscoveryScheduler.start()` throws synchronously, there is no local catch block in `index.ts`.
 
-If `JudgementSyncScheduler.start()` throws synchronously, there is no local catch block in `index.ts`.
-
 These failures are handled by the Node.js unhandled rejection or uncaught exception behavior configured outside this module.
 
 ## 7. File Locations
@@ -74,4 +71,3 @@ These failures are handled by the Node.js unhandled rejection or uncaught except
 - Socket initialization: `packages/backend/src/lib/socket.ts`
 - Worker bootstrap: `packages/backend/src/workers/index.ts`
 - Discovery scheduler: `packages/backend/src/services/article-plaza-discovery-scheduler.service.ts`
-- Judgement scheduler: `packages/backend/src/services/judgement-sync-scheduler.service.ts`

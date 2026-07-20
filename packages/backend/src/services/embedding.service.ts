@@ -7,7 +7,6 @@ import { runWithConcurrency } from '@/utils/concurrency';
 import { llm } from '@/lib/llm';
 import type { Article } from '@/entities/article';
 import type { TaskEmbeddingRecord } from '@/workers/types';
-import { clampInt } from '@/utils/number';
 
 type ChromaWhere = Record<string, any>;
 
@@ -35,12 +34,6 @@ export type ArticleEmbeddingRebuildResult = {
     updated: number;
     failed: number;
     failedArticleIds: string[];
-};
-
-export type EmbeddingDeletionMarkerBackfillResult = {
-    skipped: boolean;
-    processed: number;
-    updated: number;
 };
 
 export class EmbeddingService {
@@ -103,7 +96,7 @@ export class EmbeddingService {
             return await collection.query({
                 queryEmbeddings: [embedding],
                 nResults: n,
-                where: where ? { $and: [{ deleted: false }, where] } : { deleted: false },
+                where,
                 include: ['distances', 'documents', 'metadatas']
             });
         } catch (error) {
@@ -158,11 +151,8 @@ export class EmbeddingService {
     }
 
     static async upsertArticleEmbeddings(article: Article, summary?: string): Promise<number> {
-        const currentArticle =
-            (await ArticleService.getArticleByIdWithoutCache(article.id)) || article;
-        const summaryDocument =
-            summary?.trim() || currentArticle.summary?.trim() || currentArticle.content;
-        const chunks = this.splitArticleContent(currentArticle.content || '');
+        const summaryDocument = summary?.trim() || article.summary?.trim() || article.content;
+        const chunks = this.splitArticleContent(article.content || '');
         const summaryEmbedding = (await llm.embedding(summaryDocument)).embedding;
         const chunkEmbeddings = await Promise.all(
             chunks.map(async chunk => ({
@@ -171,11 +161,11 @@ export class EmbeddingService {
             }))
         );
 
-        await this.deleteArticleChunkVectors(currentArticle.id);
+        await this.deleteArticleChunkVectors(article.id);
         await this.upsertVector(
-            currentArticle.id,
-            this.buildArticleMetadata(currentArticle, {
-                articleId: currentArticle.id,
+            article.id,
+            this.buildArticleMetadata(article, {
+                articleId: article.id,
                 kind: 'summary'
             }),
             summaryDocument,
@@ -184,9 +174,9 @@ export class EmbeddingService {
 
         await this.upsertVectors(
             chunkEmbeddings.map(({ chunk, embedding }) => ({
-                id: this.getChunkVectorId(currentArticle.id, chunk.index),
-                metadata: this.buildArticleMetadata(currentArticle, {
-                    articleId: currentArticle.id,
+                id: this.getChunkVectorId(article.id, chunk.index),
+                metadata: this.buildArticleMetadata(article, {
+                    articleId: article.id,
                     kind: 'chunk',
                     chunkIndex: chunk.index,
                     start: chunk.start,
@@ -197,14 +187,9 @@ export class EmbeddingService {
             }))
         );
 
-        const latestArticle = await ArticleService.getArticleByIdWithoutCache(currentArticle.id);
-        if (latestArticle && latestArticle.deleted !== currentArticle.deleted) {
-            await this.updateArticleDeletionState(latestArticle.id, Boolean(latestArticle.deleted));
-        }
-
         const vectorCount = 1 + chunkEmbeddings.length;
         logger.info(
-            { articleId: currentArticle.id, vectorCount, chunkCount: chunkEmbeddings.length },
+            { articleId: article.id, vectorCount, chunkCount: chunkEmbeddings.length },
             'Rebuilt article embeddings'
         );
 
@@ -215,8 +200,6 @@ export class EmbeddingService {
         article: Article,
         records: TaskEmbeddingRecord[]
     ): Promise<number> {
-        const currentArticle =
-            (await ArticleService.getArticleByIdWithoutCache(article.id)) || article;
         const validRecords = records.filter(
             record =>
                 record.document && Array.isArray(record.embedding) && record.embedding.length > 0
@@ -225,16 +208,16 @@ export class EmbeddingService {
         const chunkRecords = validRecords.filter(record => record.kind === 'chunk');
 
         if (!summaryRecord) {
-            throw new Error(`Missing summary embedding record for article ${currentArticle.id}`);
+            throw new Error(`Missing summary embedding record for article ${article.id}`);
         }
 
-        await this.deleteArticleChunkVectors(currentArticle.id);
+        await this.deleteArticleChunkVectors(article.id);
 
         const vectorRecords = [
             {
-                id: currentArticle.id,
-                metadata: this.buildArticleMetadata(currentArticle, {
-                    articleId: currentArticle.id,
+                id: article.id,
+                metadata: this.buildArticleMetadata(article, {
+                    articleId: article.id,
                     kind: 'summary'
                 }),
                 document: summaryRecord.document,
@@ -243,15 +226,15 @@ export class EmbeddingService {
             ...chunkRecords.map((record, index) => {
                 const chunkIndex = record.chunkIndex ?? index;
                 const chunkMetadata: Metadata = {
-                    articleId: currentArticle.id,
+                    articleId: article.id,
                     kind: 'chunk',
                     chunkIndex
                 };
                 if (record.start !== undefined) chunkMetadata.start = record.start;
                 if (record.end !== undefined) chunkMetadata.end = record.end;
                 return {
-                    id: this.getChunkVectorId(currentArticle.id, chunkIndex),
-                    metadata: this.buildArticleMetadata(currentArticle, chunkMetadata),
+                    id: this.getChunkVectorId(article.id, chunkIndex),
+                    metadata: this.buildArticleMetadata(article, chunkMetadata),
                     document: record.document,
                     embedding: record.embedding
                 };
@@ -259,13 +242,9 @@ export class EmbeddingService {
         ];
 
         await this.upsertVectors(vectorRecords);
-        const latestArticle = await ArticleService.getArticleByIdWithoutCache(currentArticle.id);
-        if (latestArticle && latestArticle.deleted !== currentArticle.deleted) {
-            await this.updateArticleDeletionState(latestArticle.id, Boolean(latestArticle.deleted));
-        }
         logger.info(
             {
-                articleId: currentArticle.id,
+                articleId: article.id,
                 vectorCount: vectorRecords.length,
                 chunkCount: chunkRecords.length
             },
@@ -291,97 +270,6 @@ export class EmbeddingService {
             logger.error({ error }, 'Failed to upsert vectors');
             throw error;
         }
-    }
-
-    static async updateArticleDeletionState(articleId: string, deleted: boolean): Promise<number> {
-        if (!config.chroma.enable) return 0;
-
-        const collection = await this.getCollection();
-        const batchSize = 500;
-        let offset = 0;
-        let vectorCount = 0;
-        const records = new Map<string, Metadata>();
-
-        while (true) {
-            const result = await collection.get({
-                where: { articleId },
-                offset,
-                limit: batchSize,
-                include: ['metadatas']
-            });
-            if (!result.ids.length) break;
-
-            result.ids.forEach((id, index) => {
-                records.set(id, {
-                    ...(result.metadatas?.[index] || {}),
-                    deleted
-                });
-            });
-            offset += result.ids.length;
-            if (result.ids.length < batchSize) break;
-        }
-
-        const legacySummary = await collection.get({ ids: [articleId], include: ['metadatas'] });
-        legacySummary.ids.forEach((id, index) => {
-            records.set(id, {
-                ...(legacySummary.metadatas?.[index] || {}),
-                articleId,
-                deleted
-            });
-        });
-
-        if (records.size > 0) {
-            await collection.update({
-                ids: [...records.keys()],
-                metadatas: [...records.values()]
-            });
-            vectorCount = records.size;
-        }
-
-        logger.info({ articleId, deleted, vectorCount }, 'Updated article vector deletion markers');
-        return vectorCount;
-    }
-
-    static async backfillArticleDeletionMarkers(
-        batchSize: number = 100
-    ): Promise<EmbeddingDeletionMarkerBackfillResult> {
-        if (!config.chroma.enable) return { skipped: true, processed: 0, updated: 0 };
-
-        const normalizedBatchSize = clampInt(batchSize, 100, 1, 1000);
-        const collection = await this.getCollection();
-        const total = await collection.count();
-        let offset = 0;
-        let processed = 0;
-        let updated = 0;
-
-        while (offset < total) {
-            const result = await collection.get({
-                offset,
-                limit: normalizedBatchSize,
-                include: ['metadatas']
-            });
-            if (!result.ids.length) break;
-
-            const articleIds = result.ids.map((vectorId, index) =>
-                this.extractArticleId(vectorId, result.metadatas?.[index] || {})
-            );
-            const deletionStates = await ArticleService.getArticleDeletionStates(articleIds);
-            await collection.update({
-                ids: result.ids,
-                metadatas: result.ids.map((_, index) => ({
-                    ...(result.metadatas?.[index] || {}),
-                    articleId: articleIds[index],
-                    deleted: deletionStates.get(articleIds[index]) ?? true
-                }))
-            });
-
-            processed += result.ids.length;
-            updated += result.ids.length;
-            offset += result.ids.length;
-        }
-
-        logger.info({ processed, updated }, 'Backfilled Chroma article deletion markers');
-        return { skipped: false, processed, updated };
     }
 
     static async deleteArticleChunkVectors(articleId: string) {
@@ -490,8 +378,7 @@ export class EmbeddingService {
             authorId: article.authorId,
             category: article.category,
             tags: article.tags.join(','),
-            ...metadata,
-            deleted: Boolean(article.deleted)
+            ...metadata
         };
     }
 

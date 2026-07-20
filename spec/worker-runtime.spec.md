@@ -18,7 +18,7 @@ Business behavior for individual handlers is defined in each subsystem spec.
 6. RAG.
 7. Discover.
 
-It SHALL register handlers listed in `task-queue.spec.md`, including the `save:judgement` handler in the save processor.
+It SHALL register handlers listed in `task-queue.spec.md`.
 
 It SHALL create worker hosts:
 

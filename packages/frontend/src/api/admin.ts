@@ -92,18 +92,6 @@ export async function rebuildArticleEmbeddings(batchSize: number = 20, concurren
     })) as ApiResponse<CreateWorkflowTemplateResponse>;
 }
 
-export async function restoreArticle(id: string) {
-    return (await apiFetch(`/admin/articles/${id}/restore`, {
-        method: 'POST'
-    })) as ApiResponse<{ id: string; restored: boolean }>;
-}
-
-export async function restorePaste(id: string) {
-    return (await apiFetch(`/admin/pastes/${id}/restore`, {
-        method: 'POST'
-    })) as ApiResponse<{ id: string; restored: boolean }>;
-}
-
 export async function getAdminAnnouncement() {
     return (await apiFetch('/admin/announcement')) as ApiResponse<Announcement>;
 }

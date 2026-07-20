@@ -37,13 +37,6 @@ export type ArticleSearchDocument = {
     updatedAt: number;
     viewCount: number;
     priority: number;
-    deleted: boolean;
-};
-
-export type DeletionMarkerBackfillResult = {
-    skipped: boolean;
-    processed: number;
-    updated: number;
 };
 
 type SearchArticlesParams = {
@@ -119,7 +112,7 @@ export class SearchService {
                 .updateSearchableAttributes(['title', 'summary', 'content', 'authorName', 'tags'])
                 .waitTask(waitOptions),
             index
-                .updateFilterableAttributes(['category', 'authorId', 'tags', 'deleted'])
+                .updateFilterableAttributes(['category', 'authorId', 'tags'])
                 .waitTask(waitOptions),
             index
                 .updateSortableAttributes(['updatedAt', 'viewCount', 'priority'])
@@ -139,8 +132,7 @@ export class SearchService {
             tags: article.tags || [],
             updatedAt: article.updatedAt.getTime(),
             viewCount: article.viewCount,
-            priority: article.priority,
-            deleted: Boolean(article.deleted)
+            priority: article.priority
         };
     }
 
@@ -188,25 +180,25 @@ export class SearchService {
         if (!this.enabled) return false;
         await this.ensureArticleIndex();
 
-        const currentArticle = await ArticleService.getArticleByIdWithAuthorWithoutCache(
-            article.id
-        );
-        if (!currentArticle) return false;
+        if (article.deleted) {
+            await this.deleteArticle(article.id);
+            return false;
+        }
 
         const index = await this.getArticleIndex();
         await index
-            .addDocuments([this.toDocument(currentArticle)], { primaryKey: 'id' })
+            .addDocuments([this.toDocument(article)], { primaryKey: 'id' })
             .waitTask({ timeout: config.network.timeout, interval: 100 });
-
-        // A deletion can commit while the Meilisearch task is queued. Re-read the flag and
-        // repair the document when that race occurs.
-        const latestArticle = await ArticleService.getArticleByIdWithAuthorWithoutCache(article.id);
-        if (latestArticle && latestArticle.deleted !== currentArticle.deleted) {
-            await index
-                .addDocuments([this.toDocument(latestArticle)], { primaryKey: 'id' })
-                .waitTask({ timeout: config.network.timeout, interval: 100 });
-        }
         return true;
+    }
+
+    static async deleteArticle(articleId: string): Promise<void> {
+        if (!this.enabled) return;
+        await this.ensureArticleIndex();
+        const index = await this.getArticleIndex();
+        await index
+            .deleteDocument(articleId)
+            .waitTask({ timeout: config.network.timeout, interval: 100 });
     }
 
     static async reindexArticles(batchSize: number = 100): Promise<number> {
@@ -214,6 +206,10 @@ export class SearchService {
         await this.ensureArticleIndex();
 
         const index = await this.getArticleIndex();
+        await index
+            .deleteAllDocuments()
+            .waitTask({ timeout: config.network.timeout, interval: 100 });
+
         let indexed = 0;
         let afterUpdatedAt: Date | null = null;
         let afterId: string | null = null;
@@ -244,49 +240,6 @@ export class SearchService {
         return indexed;
     }
 
-    static async backfillArticleDeletionMarkers(
-        batchSize: number = 100
-    ): Promise<DeletionMarkerBackfillResult> {
-        if (!this.enabled) return { skipped: true, processed: 0, updated: 0 };
-
-        const normalizedBatchSize = clampInt(batchSize, 100, 1, 1000);
-        await this.ensureArticleIndex();
-        const index = await this.getArticleIndex();
-        const waitOptions = { timeout: config.network.timeout, interval: 100 };
-        let offset = 0;
-        let processed = 0;
-        let updated = 0;
-
-        while (true) {
-            const result = await index.getDocuments({
-                offset,
-                limit: normalizedBatchSize,
-                fields: ['id']
-            });
-            const documents = (result.results || [])
-                .map((document: { id?: unknown }) => ({ id: String(document.id || '').trim() }))
-                .filter((document: { id: string }) => Boolean(document.id));
-            if (documents.length === 0) break;
-
-            const deletionStates = await ArticleService.getArticleDeletionStates(
-                documents.map((document: { id: string }) => document.id)
-            );
-            const updates = documents.map((document: { id: string }) => ({
-                id: document.id,
-                deleted: deletionStates.get(document.id) ?? true
-            }));
-            await index.updateDocuments(updates, { primaryKey: 'id' }).waitTask(waitOptions);
-
-            processed += documents.length;
-            updated += updates.length;
-            offset += documents.length;
-            if (offset >= Number(result.total || 0)) break;
-        }
-
-        logger.info({ processed, updated }, 'Backfilled Meilisearch article deletion markers');
-        return { skipped: false, processed, updated };
-    }
-
     static async searchArticles(params: SearchArticlesParams) {
         const page = clampInt(params.page, 1, 1, Number.MAX_SAFE_INTEGER);
         const limit = clampInt(params.limit, 10, 1, 50);
@@ -297,7 +250,7 @@ export class SearchService {
 
         await this.ensureArticleIndex();
 
-        const filter: string[] = ['deleted = false'];
+        const filter: string[] = [];
         if (params.category !== undefined) filter.push(`category = ${params.category}`);
         if (params.authorId !== undefined) filter.push(`authorId = ${params.authorId}`);
 

@@ -133,15 +133,8 @@ Postconditions:
 
 1. If the target row has `deleted=false`: set `deleted=true` and `delete_reason='应用户申请删除'`, then persist through `ArticleService.saveArticle` (articles) or `PasteService.savePaste` (pastes) so the owning subsystem's cache keys are evicted.
 2. If the target row already has `deleted=true`, do not modify the target row.
-3. For an article target, call the runtime deletion-marker synchronization defined by
-   `search-system.spec.md` after the database row has `deleted=true`. This call SHALL also occur when
-   the target row was already soft-deleted before this approval attempt.
-4. In one database transaction: update the request row (`status='approved'`, `handler_id=handlerId`, `handled_at=now`, `resolution_comment` per precondition 1) and create the approval notification defined in section 5.
-5. Return the request in the item shape of section 3.3.
-
-If article deletion-marker synchronization fails, `approveRequest` SHALL propagate the error and
-SHALL NOT finalize the request. The article row MAY already have `deleted=true`. Retrying approval
-SHALL retry marker synchronization and SHALL remain safe.
+3. In one database transaction: update the request row (`status='approved'`, `handler_id=handlerId`, `handled_at=now`, `resolution_comment` per precondition 1) and create the approval notification defined in section 5.
+4. Return the request in the item shape of section 3.3.
 
 ### 3.5 `rejectRequest(requestId, handlerId, comment)`
 
@@ -151,47 +144,6 @@ Postconditions:
 
 1. In one database transaction: update the request row (`status='rejected'`, `handler_id=handlerId`, `handled_at=now`, `resolution_comment` per section 3.4 precondition 1) and create the rejection notification defined in section 5.
 2. Return the request in the item shape of section 3.3.
-
-### 3.6 `restoreArticle(articleId)`
-
-Preconditions:
-
-1. Normalize `articleId` as `String(articleId ?? '').trim()`. If it is empty or longer than eight
-   characters, throw status `400` with message `Valid article id is required`.
-2. Load the article row by primary key with a direct database read. If absent, throw status `404`
-   with message `Article not found`.
-
-Postconditions:
-
-1. Let `restored` equal the article's `deleted` value before modification.
-2. If `restored=true`, set `deleted=false`, set `delete_reason=NULL`, and persist through
-   `ArticleService.saveArticle` so article cache keys are evicted.
-3. If `restored=false`, do not modify the database row.
-4. Call the runtime deletion-marker synchronization defined by `search-system.spec.md` with the
-   resulting article state, including when `restored=false`.
-5. Return `{ id: article.id, restored }`.
-
-The method SHALL be idempotent. If marker synchronization fails after the database update, the
-method SHALL propagate the error; a retry SHALL repeat synchronization with `deleted=false`.
-
-### 3.7 `restorePaste(pasteId)`
-
-Preconditions:
-
-1. Normalize `pasteId` as `String(pasteId ?? '').trim()`. If it is empty or longer than eight
-   characters, throw status `400` with message `Valid paste id is required`.
-2. Load the paste row by primary key with a direct database read. If absent, throw status `404`
-   with message `Paste not found`.
-
-Postconditions:
-
-1. Let `restored` equal the paste's `deleted` value before modification.
-2. If `restored=true`, set `deleted=false` and persist through `PasteService.savePaste` so paste
-   cache keys are evicted. Do not modify `delete_reason`.
-3. If `restored=false`, do not modify the database row.
-4. Return `{ id: paste.id, restored }`.
-
-The method SHALL be idempotent.
 
 ## 4. API Endpoints
 
@@ -237,24 +189,6 @@ Path parameter and body handling are identical to section 4.4.
 
 Response data is the `rejectRequest` result with `handlerId=ctx.user.id`.
 
-### 4.6 POST `/admin/articles/:id/restore`
-
-Permission: `requiresPermission(Permission.MANAGE_CONTENT)`.
-
-The path parameter `id` is passed to `restoreArticle`. Validation failures use the status and
-message defined by section 3.6.
-
-Response data is `{ id, restored }` from `restoreArticle`.
-
-### 4.7 POST `/admin/pastes/:id/restore`
-
-Permission: `requiresPermission(Permission.MANAGE_CONTENT)`.
-
-The path parameter `id` is passed to `restorePaste`. Validation failures use the status and message
-defined by section 3.7.
-
-Response data is `{ id, restored }` from `restorePaste`.
-
 ## 5. Review Notifications
 
 Each approval or rejection SHALL create exactly one user notification (see `user-notification-system.spec.md`) for `recipient_id = deletion_request.requester_id` inside the same transaction that updates the request row.
@@ -280,12 +214,8 @@ The permission bitmask SHALL include `MANAGE_CONTENT = 1 << 7`.
 
 1. At most one `pending` deletion request exists per (`target_type`, `target_id`, `requester_id`) except under concurrent creation races; the uniqueness check is service-level, not a database constraint.
 2. A non-pending request is immutable through this subsystem's endpoints.
-3. Approving a request whose target is already soft-deleted succeeds without modifying the target row and retries article search-marker synchronization.
+3. Approving a request whose target is already soft-deleted succeeds without modifying the target row.
 4. Cache eviction for soft-deleted targets is delegated to `ArticleService.saveArticle` / `PasteService.savePaste`.
-5. Soft deletion and restoration SHALL NOT physically delete article rows, Meilisearch documents,
-   Chroma vectors, Chroma documents, or embeddings.
-6. Restoring an article SHALL NOT change the terminal state of any deletion request.
-7. Restoring a paste SHALL NOT change the terminal state of any deletion request.
 
 ## 8. File Locations
 

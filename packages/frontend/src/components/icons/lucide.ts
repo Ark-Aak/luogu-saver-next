@@ -58,7 +58,6 @@ export {
     Plus as AddOutline,
     RefreshCw as RefreshOutline,
     RefreshCw as SyncOutline,
-    RotateCcw as RestoreOutline,
     Save as SaveOutline,
     Search,
     Search as SearchOutline,

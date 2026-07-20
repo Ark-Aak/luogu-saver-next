@@ -3,9 +3,9 @@
     <p>一个用于保存来自 www.luogu.com.cn 的用户生成内容 (UGC) 的 Web 应用程序。</p>
     <p>
         <img src="https://img.shields.io/badge/node-v22.18.0-brightgreen" alt="Node 版本"/>
-        <img src="https://img.shields.io/github/last-commit/quanac-lcx/luogu-saver-next" alt="最后提交"/>
-        <img src="https://img.shields.io/github/actions/workflow/status/quanac-lcx/luogu-saver-next/deploy.yml" alt="构建状态">
-        <img src="https://img.shields.io/github/license/quanac-lcx/luogu-saver-next" alt="许可证"/>
+        <img src="https://img.shields.io/github/last-commit/laikit-dev/luogu-saver" alt="最后提交"/>
+        <img src="https://img.shields.io/github/actions/workflow/status/laikit-dev/luogu-saver/deploy.yml" alt="构建状态">
+        <img src="https://img.shields.io/github/license/laikit-dev/luogu-saver" alt="许可证"/>
     </p>
     <p>简体中文 | <a href="README.md">English</a></p>
 </div>
@@ -13,6 +13,8 @@
 ## 项目描述
 
 **Luogu Saver Next (LGS-NG)** 是一个 Web 应用程序，旨在帮助用户保存和管理来自 [洛谷](https://www.luogu.com.cn/)（一个流行的中文算法竞赛平台）的用户生成内容。该工具允许用户存档文章、剪贴板内容和其他类型的内容，确保有价值的信息得以保存并易于访问。
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/laikit-dev/luogu-saver)
 
 ## 功能特性
 
@@ -22,7 +24,6 @@
 - **高性能：** 利用客户端渲染提供流畅的用户体验。
 - **响应式设计：** 针对桌面、平板和移动设备进行优化。
 - **智能推荐：** 根据用户活动推荐相关内容。
-- **陶片放逐存档：** 无需单独的网站或 API 服务，即可保存和筛选洛谷社区用户权限变更记录。
 
 ## 架构
 
@@ -31,7 +32,6 @@
 - **根目录：** 管理共享的开发依赖（Prettier、TypeScript 等）和编排。
 - **`packages/frontend`：** Vue 3 + Vite 应用程序（Naive UI）。
 - **`packages/backend`：** Koa + TypeScript API 服务。
-- **陶片放逐模块：** 后端统一负责定时抓取、MariaDB 存储、只读 API 和旧 SQLite 导入；Vue 页面只访问同源 `/api/judgement`。
 - **基础设施：** 外部服务（数据库等）通过 Docker Compose 管理。
 
 ## 前置要求
@@ -43,9 +43,9 @@
 
 ## 基础设施设置
 
-在本地构建或运行应用程序之前，需要初始化底层基础设施。根目录 `docker-compose.yml` 是开发和单机测试配置，所有服务端口仅绑定到 `127.0.0.1`。
+在构建或运行应用程序之前，需要初始化底层基础设施（例如数据库）。根目录中提供了一个 `docker-compose.yml` 文件来启动这些外部服务。
 
-> **注意：** 此 Compose 文件 **仅** 管理外部基础设施，Node.js 应用程序在主机上单独运行。生产环境不得直接使用这份 Compose 配置。
+> **注意：** 此 Compose 文件 **仅** 管理外部基础设施。Node.js 应用程序本身在主机上单独运行。
 
 在后台启动基础设施：
 
@@ -58,7 +58,7 @@ docker compose up -d
 ### 1. 克隆仓库
 
 ```bash
-git clone https://github.com/quanac-lcx/luogu-saver-next.git
+git clone https://github.com/laikit-dev/luogu-saver.git
 cd luogu-saver-next
 ```
 
@@ -128,7 +128,11 @@ npm run dev
 
 ### 1. 准备基础设施
 
-使用托管服务、生产专用 Compose 或 Kubernetes 部署 MariaDB、Redis、Chroma 和 Meilisearch。不要把仓库根目录的 `docker-compose.yml` 当作生产方案。依赖服务必须只允许后端主机或私有网络访问，并在启动后端前更换所有默认凭据。
+在生产服务器上，启动所需的外部服务：
+
+```bash
+docker compose up -d
+```
 
 ### 2. 运行后端服务器
 
@@ -154,38 +158,6 @@ node dist/index.js
 如果在构建前端时未设置 `VITE_API_URL` 变量，应用程序默认将请求发送到同一域名的 `/api`。
 
 **关键步骤：** 必须配置 Web 服务器（Nginx/Caddy）将以 `/api` 开头的请求反向代理到正在运行的后端服务（例如 `localhost:3000`）。
-
-### 5. 自动部署
-
-部署工作流默认关闭。配置好 `production` 环境 Secrets，并把仓库变量 `ENABLE_PRODUCTION_DEPLOYMENT` 设为 `true` 后，每次推送到 `master` 才会先部署并健康检查后端。历史数据迁移完成前，前端还会被 `JUDGEMENT_MIGRATION_READY=true` 单独拦住；迁移完成后，后续推送会自动更新前后端。
-
-## 陶片放逐迁移
-
-第一次部署合并后的后端时，先关闭定时同步：
-
-```yaml
-judgement:
-    enabled: false
-    intervalMs: 1200000
-    runOnStartup: true
-    sourceUrl: https://www.luogu.com.cn/judgement
-```
-
-备份并停止旧 `luogu-judgement-saver` 的定时任务，再导入未纳入 Git 的 `data/judgements.db`。时区偏移必须填写旧服务器的本地时区：
-
-```bash
-npm run import:judgement -w @luogu-saver-next/backend -- \
-  --db /secure/path/judgements.db \
-  --source-time-zone +08:00
-```
-
-导入器可安全重复运行，并会输出数量、去重键和时间范围审计。审计通过后再开启定时同步，确认 `/judgement/logs` 中出现一次成功抓取。随后把 `JUDGEMENT_MIGRATION_READY` 设为 `true`，重新运行部署工作流来发布前端。旧服务应在回滚窗口内保持只读；不要提交 SQLite 文件或生产配置。
-
-经 `/api` 反向代理公开的只读接口为：
-
-- `GET /api/judgement`
-- `GET /api/judgement/logs`
-- `GET /api/judgement/stats`
 
 ## 贡献
 

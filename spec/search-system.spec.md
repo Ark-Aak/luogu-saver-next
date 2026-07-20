@@ -38,11 +38,8 @@ Each indexed document SHALL have this shape:
 | `updatedAt`  | number   | `article.updatedAt.getTime()`         |
 | `viewCount`  | number   | `article.viewCount`                   |
 | `priority`   | number   | `article.priority`                    |
-| `deleted`    | boolean  | `article.deleted`                     |
 
-Soft-deleted articles SHALL remain indexed with `deleted=true`. Restored and active articles SHALL
-be indexed with `deleted=false`. Soft deletion and restoration SHALL NOT delete a Meilisearch
-document.
+Deleted articles SHALL NOT be indexed.
 
 ## 4. Index Settings
 
@@ -50,7 +47,7 @@ When `SearchService.ensureArticleIndex()` is called and `enable=true`, the servi
 
 1. Primary key: `id`.
 2. Searchable attributes in order: `title`, `summary`, `content`, `authorName`, `tags`.
-3. Filterable attributes: `category`, `authorId`, `tags`, `deleted`.
+3. Filterable attributes: `category`, `authorId`, `tags`.
 4. Sortable attributes: `updatedAt`, `viewCount`, `priority`.
 
 ## 5. Search API
@@ -82,12 +79,11 @@ Response data shape:
 Postconditions:
 
 1. If `meilisearch.enable=false`, return `hits=[]`, `total=0`, `processingTimeMs=0`.
-2. Every search SHALL include the filter `deleted = false` in addition to caller-provided filters.
-3. If `q` is empty and filters are absent, return recent non-deleted indexed articles sorted by `updatedAt:desc`.
-4. If `q` is non-empty, search non-deleted indexed articles by Meilisearch default ranking.
-5. The response SHALL not include raw `content`.
-6. Every returned `summary` string SHALL be at most 220 Unicode code points. If truncation occurs, append `...`.
-7. Every returned `formatted.summary` string SHALL be at most 260 Unicode code points excluding `<mark>` and `</mark>` tags. If truncation occurs, append `...` after any open mark tag is closed.
+2. If `q` is empty and filters are absent, return recent indexed articles sorted by `updatedAt:desc`.
+3. If `q` is non-empty, search indexed articles by Meilisearch default ranking.
+4. The response SHALL not include raw `content`.
+5. Every returned `summary` string SHALL be at most 220 Unicode code points. If truncation occurs, append `...`.
+6. Every returned `formatted.summary` string SHALL be at most 260 Unicode code points excluding `<mark>` and `</mark>` tags. If truncation occurs, append `...` after any open mark tag is closed.
 
 ## 6. Workflow Integration
 
@@ -132,24 +128,20 @@ Task `reindex-search` SHALL:
 
 1. Load the article by `targetId` with author relation.
 2. If the article does not exist, fail permanently.
-3. Before writing, read the current article row by ID without cache. Upsert one article search
-   document with `deleted=currentArticle.deleted`; a stale task input SHALL NOT override the current
-   database deletion state.
-4. After writing, read the article row again. If `deleted` changed during the Meilisearch write,
-   upsert the latest state before returning.
-5. Return `{ indexed: true, articleId }` when the upsert is executed.
-6. Return `{ indexed: false, articleId }` only when `meilisearch.enable=false`.
+3. If the article is deleted, delete the document with the same ID from Meilisearch and complete.
+4. If the article exists and is not deleted, upsert one article search document.
+5. Return `{ indexed: true, articleId }` when an upsert is executed.
+6. Return `{ indexed: false, articleId }` when `meilisearch.enable=false` or the article is deleted.
 
 ### 7.2 `update:search_reindex`
 
 1. If `meilisearch.enable=false`, return `{ indexed: 0 }`.
-2. Do not delete any existing document from the configured article index.
-3. Load all articles, including soft-deleted articles, from the database in ascending `(updatedAt, id)` order.
+2. Delete all existing documents from the configured article index and wait for deletion completion.
+3. Load non-deleted articles from the database in ascending `(updatedAt, id)` order.
 4. Use keyset pagination with the last `(updatedAt, id)` pair from the previous batch; do not use SQL `OFFSET`.
 5. Upsert articles into Meilisearch in batches.
 6. Wait for each Meilisearch document addition task to finish before loading the next batch.
 7. Return `{ indexed: number }` where `number` is the count of documents accepted by Meilisearch.
-8. Existing Meilisearch documents whose IDs have no database row SHALL remain unchanged.
 
 ## 8. Search Task
 
@@ -205,7 +197,7 @@ Behavior:
 
 1. Read `embedding` from the first father task whose result has `data.embedding` as an array.
 2. Use `metadata.limit` as the number of distinct article hits. If absent, use 10. Clamp the value to `[1, 100]`.
-3. Query Chroma by `EmbeddingService.getNearestArticleCandidates(embedding, limit, rawLimit)` where `rawLimit` defaults to 500 and the Chroma query filter is `deleted=false`.
+3. Query Chroma by `EmbeddingService.getNearestArticleCandidates(embedding, limit, rawLimit)` where `rawLimit` defaults to 500.
 4. Return `{ hits, total }` where each hit has `{ id, distance, score, source, vectorId, vectorKind }` and may include chunk metadata.
 5. Set `source` to `vector`.
 6. Set `score=max(0, 1 - distance)`.
@@ -272,65 +264,7 @@ Load an article by `payload.targetId` and return `{ id, title, summary, content,
 
 Load a paste by `payload.targetId` and return `{ id, content, text }`.
 
-## 11. Deletion Marker Synchronization
-
-### 11.1 Runtime Synchronization
-
-For an article row `article`, runtime deletion-state synchronization SHALL:
-
-1. Call `SearchService.upsertArticle(article)`. The complete Meilisearch document SHALL be retained
-   and its `deleted` field SHALL equal `article.deleted`.
-2. Call `EmbeddingService.updateArticleDeletionState(article.id, article.deleted)`.
-3. Load every existing Chroma vector whose metadata has `articleId=article.id`.
-4. Preserve every existing metadata field and set only `deleted=article.deleted`.
-5. Not delete a Meilisearch document, Chroma vector, Chroma document, or embedding.
-6. Not generate a new embedding. If the article has no Chroma vectors, the Chroma operation is a
-   successful no-op.
-
-Any article embedding upsert SHALL read the current article deletion state immediately before
-writing metadata. After writing, it SHALL re-read the deletion state and repair metadata when a
-concurrent state change is detected. A stale embedding task SHALL NOT leave `deleted=false` after
-the database row has become deleted.
-
-Every newly generated Chroma article vector SHALL include boolean metadata
-`deleted=article.deleted`.
-
-### 11.2 Production Backfill Script
-
-The repository SHALL provide the compiled script
-`packages/backend/dist/scripts/backfill-search-deletion-markers.js`, built from
-`packages/backend/src/scripts/backfill-search-deletion-markers.ts`.
-
-The script SHALL:
-
-1. Initialize the configured MariaDB data source without starting the HTTP server or workers.
-2. Accept optional argument `--batch-size=N`; normalize `N` to an integer in `[1, 1000]`, default
-   `100`.
-3. Page through existing Meilisearch documents. For each document, read the corresponding database
-   article's `deleted` value. If no database row exists, use `deleted=true`.
-4. Partially update each existing Meilisearch document with only `{ id, deleted }` and wait for each
-   batch task to finish.
-5. Page through existing Chroma vectors. Resolve the article ID from metadata `articleId`, or from
-   the vector ID for legacy records. For each vector, read the corresponding database article's
-   `deleted` value. If no database row exists, use `deleted=true`.
-6. Preserve every existing Chroma metadata field and set `deleted` to the resolved value. If a
-   legacy vector has no `articleId` metadata, add `articleId` using the ID parsed in step 5.
-7. Not insert a missing Meilisearch document or Chroma vector.
-8. Not delete any record, document, vector, or embedding.
-9. Not invoke an embedding provider.
-10. Be idempotent: running the script multiple times against unchanged inputs produces the same
-    marker values.
-11. Skip a disabled Meilisearch or Chroma subsystem and report that subsystem as skipped.
-12. Print one final JSON result containing processed and updated counts for both subsystems.
-13. Destroy the MariaDB data source before exit. On failure, print the error and exit with status 1.
-
-### 11.3 Query Enforcement
-
-All public Meilisearch searches, RAG keyword searches, RAG vector searches, and other Chroma vector
-searches SHALL exclude records with `deleted=true`. `rag:context` and `rag:answer` article loading
-SHALL additionally reject database rows with `deleted=true`.
-
-## 12. File Locations
+## 11. File Locations
 
 - Search service: `packages/backend/src/services/search.service.ts`
 - Search router: `packages/backend/src/routers/search.router.ts`
@@ -340,4 +274,3 @@ SHALL additionally reject database rows with `deleted=true`.
 - Read handlers: `packages/backend/src/workers/handlers/task/read/*.handler.ts`
 - Workflow templates: `packages/backend/src/lib/workflow-templates.ts`
 - Search configuration: `packages/backend/src/config/schemas/infrastructure.ts`
-- Backfill script: `packages/backend/src/scripts/backfill-search-deletion-markers.ts`
