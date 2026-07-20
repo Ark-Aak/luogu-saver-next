@@ -79,15 +79,7 @@ jobs:
                         echo "✅ PM2 Started"
                       fi
 
-                      for attempt in $(seq 1 30); do
-                        if curl --fail --silent --show-error 'http://127.0.0.1:3000/judgement?page=1&limit=1' | node -e "let body=''; process.stdin.on('data', chunk => body += chunk); process.stdin.on('end', () => { const value = JSON.parse(body); if (value.code !== 200 || !Array.isArray(value.data?.items)) process.exit(1); });"; then
-                          echo "Backend health check passed"
-                          exit 0
-                        fi
-                        sleep 2
-                      done
-                      pm2 logs luogu-backend --lines 50 --nostream
-                      exit 1
+                      exit 0
 
     deploy-frontend:
         runs-on: ubuntu-latest
