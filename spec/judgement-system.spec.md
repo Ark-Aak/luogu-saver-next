@@ -48,9 +48,9 @@ Table name: `judgement_fetch_log`.
 
 Every persisted judgement record SHALL reference an existing fetch log.
 
-## 3. Luogu Upstream Adapter
+## 3. Worker Handler Upstream Fetch
 
-The adapter SHALL request `config.judgement.sourceUrl` with:
+The `JudgementHandler` module SHALL request `config.judgement.sourceUrl` itself with:
 
 1. Method `GET`.
 2. Header `X-Requested-With: XMLHttpRequest`.
@@ -136,7 +136,7 @@ This endpoint SHALL return `totalJudgements`, `totalFetchLogs`, `lastFetchAt`, a
 
 ## 6. Queue Handler and Scheduler
 
-`JudgementHandler` SHALL register exact task key `save:judgement`. It SHALL accept only `targetId = "latest"`, call the upstream adapter, pass the validated result to `JudgementService.persistFetchedResult()`, and return the synchronization counts.
+`JudgementHandler` SHALL register exact task key `save:judgement`. It SHALL accept only `targetId = "latest"`, perform the upstream fetch and response validation in the handler module, pass the validated result to `JudgementService.persistFetchedResult()`, and return the synchronization counts.
 
 If the upstream request, response validation, or persistence fails, the handler SHALL normalize the failure reason, call `JudgementService.recordFetchFailure()` once, and rethrow the normalized error. Failure-log persistence errors SHALL be logged without replacing the original task failure.
 
@@ -184,9 +184,8 @@ Automatic production deployment SHALL require repository variable `ENABLE_PRODUC
 
 - Entities: `packages/backend/src/entities/judgement-record.ts`, `packages/backend/src/entities/judgement-fetch-log.ts`
 - Domain helpers: `packages/backend/src/shared/judgement.ts`
-- Upstream adapter: `packages/backend/src/services/judgement-upstream.service.ts`
 - Service: `packages/backend/src/services/judgement.service.ts`
-- Scheduler: `packages/backend/src/services/judgement-sync-scheduler.service.ts`
 - Router: `packages/backend/src/routers/judgement.router.ts`
 - Queue handler: `packages/backend/src/workers/handlers/task/save/judgement.handler.ts`
+- Scheduler: `packages/backend/src/services/judgement-sync-scheduler.service.ts`
 - Legacy importer: `packages/backend/scripts/import-judgement-sqlite.mjs`

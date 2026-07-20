@@ -7,10 +7,10 @@ import {
     escapeLikeLiteral,
     type JudgementPaginationQuery,
     type JudgementQuery,
-    type LuoguJudgementRecord
+    type LuoguJudgementRecord,
+    type LuoguJudgementResponse
 } from '@/shared/judgement';
 import { normalizeErrorReason } from '@/utils/error-reason';
-import type { JudgementUpstreamResult } from './judgement-upstream.service';
 import { In } from 'typeorm';
 
 export interface JudgementSyncResult {
@@ -18,6 +18,11 @@ export interface JudgementSyncResult {
     fetchedCount: number;
     newRecordCount: number;
     skippedCount: number;
+}
+
+export interface JudgementFetchedResult {
+    data: LuoguJudgementResponse;
+    rawResponse: string;
 }
 
 function recordValues(record: LuoguJudgementRecord, fetchLogId: number) {
@@ -43,7 +48,7 @@ function recordValues(record: LuoguJudgementRecord, fetchLogId: number) {
 
 export class JudgementService {
     static async persistFetchedResult(
-        upstream: JudgementUpstreamResult
+        upstream: JudgementFetchedResult
     ): Promise<JudgementSyncResult> {
         const result = await AppDataSource.transaction(async manager => {
             const logRepository = manager.getRepository(JudgementFetchLog);
