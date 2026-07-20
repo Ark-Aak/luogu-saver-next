@@ -301,6 +301,11 @@ The repository SHALL provide the compiled script
 `packages/backend/dist/scripts/backfill-search-deletion-markers.js`, built from
 `packages/backend/src/scripts/backfill-search-deletion-markers.ts`.
 
+The TypeScript source SHALL remain under `packages/backend/src/scripts` so the backend
+TypeScript build emits its JavaScript output under `packages/backend/dist/scripts`. The
+top-level `packages/backend/scripts` directory SHALL contain only directly executable
+deployment scripts such as `.mjs` files and SHALL NOT contain the TypeScript build output.
+
 The script SHALL:
 
 1. Initialize the configured MariaDB data source without starting the HTTP server or workers.

@@ -1,8 +1,8 @@
-import { AppDataSource } from 'packages/backend/src/data-source';
-import { EmbeddingService } from 'packages/backend/src/services/embedding.service';
-import { SearchService } from 'packages/backend/src/services/search.service';
-import { clampInt } from 'packages/backend/src/utils/number';
-import { redisClient } from 'packages/backend/src/lib/redis';
+import { AppDataSource } from '@/data-source';
+import { EmbeddingService } from '@/services/embedding.service';
+import { SearchService } from '@/services/search.service';
+import { clampInt } from '@/utils/number';
+import { redisClient } from '@/lib/redis';
 
 function readBatchSize(): number {
     const argument = process.argv.find(value => value.startsWith('--batch-size='));
