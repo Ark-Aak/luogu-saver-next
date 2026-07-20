@@ -14,7 +14,6 @@ concurrency:
 
 jobs:
     deploy-backend:
-        if: vars.ENABLE_PRODUCTION_DEPLOYMENT == 'true'
         runs-on: ubuntu-latest
         environment: production
         steps:
@@ -91,7 +90,6 @@ jobs:
                       exit 1
 
     deploy-frontend:
-        if: vars.ENABLE_PRODUCTION_DEPLOYMENT == 'true' && vars.JUDGEMENT_MIGRATION_READY == 'true'
         runs-on: ubuntu-latest
         environment: production
         needs: deploy-backend
