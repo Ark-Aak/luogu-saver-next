@@ -28,7 +28,6 @@ import {
     ListOutline,
     TimeOutline,
     LibraryOutline,
-    CloseOutline,
     RestoreOutline
 } from '@/components/icons/lucide.ts';
 
@@ -103,28 +102,10 @@ const versionHistory = ref<VersionItem[]>([]);
 const selectedVersion = ref<number | null>(null);
 
 // View mode
-const { viewMode, isFocus, setViewMode, dismissHint, hintDismissed } = useViewMode();
-const showViewModeHint = ref(false);
+const { viewMode, isFocus, setViewMode } = useViewMode();
 
 // Bookmarks (only for articles)
 const { bookmarks, toggleBookmark, removeBookmark, renameBookmark } = useBookmarks(articleId);
-
-// Check if we should show the new view hint
-const hintShown = ref(false);
-onMounted(() => {
-    if (!hintDismissed.value && !hintShown.value) {
-        // Show hint after a short delay
-        setTimeout(() => {
-            showViewModeHint.value = true;
-            hintShown.value = true;
-        }, 1500);
-    }
-});
-
-const handleDismissHint = () => {
-    showViewModeHint.value = false;
-    dismissHint();
-};
 
 // Bookmark heading icons
 useBookmarkIcons(
@@ -891,34 +872,6 @@ onMounted(() => {
         </n-button>
     </div>
 
-    <!-- New view mode hint floating card -->
-    <Transition name="view-hint">
-        <aside v-if="showViewModeHint" class="view-hint-card" aria-label="聚焦视图新功能提示">
-            <div class="view-hint-body">
-                <div class="view-hint-icon">🎉</div>
-                <div class="view-hint-text">
-                    <strong>新功能：聚焦视图</strong>
-                    <span
-                        >内容更宽、支持段落收藏、目录更紧凑。点击工具栏右侧「综合 ·
-                        聚焦」切换。</span
-                    >
-                </div>
-                <n-button
-                    quaternary
-                    circle
-                    size="small"
-                    class="view-hint-dismiss"
-                    aria-label="不再显示"
-                    @click="handleDismissHint"
-                >
-                    <template #icon>
-                        <NIcon :component="CloseOutline" />
-                    </template>
-                </n-button>
-            </div>
-        </aside>
-    </Transition>
-
     <DeletionRequestModal
         v-model:show="showDeletionModal"
         target-type="article"
@@ -1250,116 +1203,5 @@ onMounted(() => {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-}
-
-/* View mode hint floating card */
-.view-hint-card {
-    position: fixed;
-    right: 24px;
-    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
-    z-index: 1100;
-    width: min(360px, calc(100vw - 48px));
-}
-
-.view-hint-body {
-    display: grid;
-    grid-template-columns: 38px minmax(0, 1fr) 28px;
-    gap: 10px;
-    align-items: start;
-    color: var(--ui-text-color);
-    background: var(--ui-translucent-card-color);
-    border: 1px solid var(--ui-border-color);
-    border-radius: var(--ui-card-radius);
-    box-shadow: var(--ui-elevated-shadow);
-    backdrop-filter: blur(14px);
-    padding: 14px;
-    position: relative;
-    overflow: hidden;
-}
-
-.view-hint-body::before {
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 3px;
-    content: '';
-    background: var(--ui-primary-color);
-}
-
-.view-hint-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 38px;
-    height: 38px;
-    font-size: 20px;
-    background: var(--ui-panel-color);
-    border: 1px solid var(--ui-border-color);
-    border-radius: var(--ui-card-radius);
-}
-
-.view-hint-text {
-    display: flex;
-    min-width: 0;
-    flex-direction: column;
-    gap: 3px;
-    padding-top: 1px;
-}
-
-.view-hint-text strong {
-    color: var(--ui-card-title-color);
-    font-size: 14px;
-    line-height: 1.4;
-    letter-spacing: 0;
-}
-
-.view-hint-text span {
-    color: var(--ui-muted-text-color);
-    font-size: 12px;
-    line-height: 1.5;
-    overflow-wrap: anywhere;
-}
-
-.view-hint-dismiss {
-    width: 28px;
-    height: 28px;
-    min-width: 28px;
-    color: var(--ui-muted-text-color);
-}
-
-.view-hint-enter-active,
-.view-hint-leave-active {
-    transition:
-        opacity 0.22s ease,
-        transform 0.22s ease;
-}
-
-.view-hint-enter-from,
-.view-hint-leave-to {
-    opacity: 0;
-    transform: translateY(12px);
-}
-
-@media (max-width: 600px) {
-    .view-hint-card {
-        right: 12px;
-        bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-        left: 12px;
-        width: auto;
-    }
-
-    .view-hint-body {
-        grid-template-columns: minmax(0, 1fr) 28px;
-    }
-
-    .view-hint-icon {
-        display: none;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .view-hint-enter-active,
-    .view-hint-leave-active {
-        transition: none;
-    }
 }
 </style>
