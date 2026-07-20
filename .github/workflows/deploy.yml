@@ -119,7 +119,7 @@ jobs:
             - name: Build Frontend
               run: npm run build -w @luogu-saver-next/frontend
               env:
-                  VITE_API_URL: /api
+                  VITE_API_URL: https://api.luogu.me
                   VITE_CDN_URL: ${{ secrets.OSS_DOMAIN }}/luogu-saver/
 
             - name: Upload Assets to S3
