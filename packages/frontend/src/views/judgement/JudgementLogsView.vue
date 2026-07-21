@@ -3,13 +3,7 @@ import { computed, h, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { NAlert, NButton, NDataTable, NEmpty, NIcon, NPagination, NSpin, NTag } from 'naive-ui';
 import type { DataTableColumns } from 'naive-ui';
-import {
-    ArrowBackOutline,
-    CheckmarkCircleOutline,
-    HammerOutline,
-    RefreshOutline,
-    TimeOutline
-} from '@/components/icons/lucide.ts';
+import { ArrowLeft, CircleCheck, Hammer, RefreshCw, Clock3 } from 'lucide-vue-next';
 import Card from '@/components/Card.vue';
 import CardTitle from '@/components/CardTitle.vue';
 import {
@@ -94,22 +88,22 @@ onMounted(() => void loadData());
 
 <template>
     <div class="judgement-logs-page">
-        <CardTitle title="陶片放逐同步日志" :icon="HammerOutline">
+        <CardTitle title="陶片放逐同步日志" :icon="Hammer">
             抓取状态、数据量与公开 API
             <RouterLink class="back-link" to="/judgement">
-                <n-icon :component="ArrowBackOutline" />
+                <n-icon :component="ArrowLeft" />
                 返回记录页
             </RouterLink>
         </CardTitle>
 
         <div class="summary-grid">
-            <Card title="权限记录" :icon="CheckmarkCircleOutline">
+            <Card title="权限记录" :icon="CircleCheck">
                 <strong class="summary-number">{{ stats?.totalJudgements ?? '—' }}</strong>
             </Card>
-            <Card title="抓取次数" :icon="RefreshOutline">
+            <Card title="抓取次数" :icon="RefreshCw">
                 <strong class="summary-number">{{ stats?.totalFetchLogs ?? '—' }}</strong>
             </Card>
-            <Card title="最近抓取" :icon="TimeOutline">
+            <Card title="最近抓取" :icon="Clock3">
                 <strong class="summary-text">{{ lastFetchLabel }}</strong>
                 <n-tag
                     v-if="stats?.lastFetchStatus"
@@ -124,7 +118,7 @@ onMounted(() => void loadData());
         <Card class="logs-card" title="同步日志">
             <template #header-extra>
                 <n-button secondary :loading="loading" @click="loadData">
-                    <template #icon><n-icon :component="RefreshOutline" /></template>
+                    <template #icon><n-icon :component="RefreshCw" /></template>
                     刷新
                 </n-button>
             </template>

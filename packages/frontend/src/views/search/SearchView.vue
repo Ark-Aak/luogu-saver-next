@@ -15,12 +15,7 @@ import {
     NTag,
     useMessage
 } from 'naive-ui';
-import {
-    CalendarOutline,
-    NewspaperOutline,
-    PersonOutline,
-    SearchOutline
-} from '@/components/icons/lucide.ts';
+import { CalendarDays, Newspaper, User, Search } from 'lucide-vue-next';
 import CardTitle from '@/components/CardTitle.vue';
 import Card from '@/components/Card.vue';
 import { searchArticles, type ArticleSearchHit } from '@/api/search.ts';
@@ -161,9 +156,7 @@ onMounted(loadSearch);
 
 <template>
     <div class="search-page">
-        <CardTitle title="搜索" :icon="SearchOutline" class="search-header">
-            SEARCH ARTICLES
-        </CardTitle>
+        <CardTitle title="搜索" :icon="Search" class="search-header"> SEARCH ARTICLES </CardTitle>
 
         <Card class="search-controls">
             <n-grid :x-gap="12" :y-gap="12" cols="1 m:4" responsive="screen">
@@ -175,7 +168,7 @@ onMounted(loadSearch);
                         @keydown.enter="handleSearch"
                     >
                         <template #prefix>
-                            <n-icon :component="SearchOutline" />
+                            <n-icon :component="Search" />
                         </template>
                     </n-input>
                 </n-gi>
@@ -204,7 +197,7 @@ onMounted(loadSearch);
                     v-for="item in hits"
                     :key="item.id"
                     :title-html="renderSafeMarkedHtml(item.formatted?.title, item.title)"
-                    :icon="NewspaperOutline"
+                    :icon="Newspaper"
                     class="result-card"
                     hoverable
                     @click="openArticle(item.id)"
@@ -233,7 +226,7 @@ onMounted(loadSearch);
                                 {{ getCategory(item.category).label }}
                             </n-tag>
                             <span class="meta-item">
-                                <n-icon :component="PersonOutline" />
+                                <n-icon :component="User" />
                                 <span
                                     v-html="
                                         renderSafeMarkedHtml(
@@ -245,7 +238,7 @@ onMounted(loadSearch);
                             </span>
                         </n-space>
                         <span class="meta-item">
-                            <n-icon :component="CalendarOutline" />
+                            <n-icon :component="CalendarDays" />
                             {{ formatDate(item.updatedAt) }}
                         </span>
                     </n-space>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import { NCard, NSpace, NButton, NText, NIcon } from 'naive-ui';
-import { AnalyticsOutline } from '@/components/icons/lucide.ts';
+import { ChartNoAxesCombined } from 'lucide-vue-next';
 
 const show = ref(false);
 const emit = defineEmits<{
@@ -49,7 +49,7 @@ const handleReject = () => {
                     <div class="text-section">
                         <div class="icon-wrapper">
                             <n-icon size="24" color="var(--ui-primary-color)">
-                                <AnalyticsOutline />
+                                <ChartNoAxesCombined />
                             </n-icon>
                         </div>
                         <div class="text-content">

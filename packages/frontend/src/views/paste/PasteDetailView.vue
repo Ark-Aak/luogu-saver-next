@@ -14,15 +14,15 @@ import {
     useMessage
 } from 'naive-ui';
 import {
-    ArrowBackOutline,
-    CalendarOutline,
-    ClipboardOutline,
-    CopyOutline,
-    OpenOutline,
-    RestoreOutline,
-    SyncOutline,
-    TrashOutline
-} from '@/components/icons/lucide.ts';
+    ArrowLeft,
+    CalendarDays,
+    Clipboard,
+    Copy,
+    ExternalLink,
+    RotateCcw,
+    RefreshCw,
+    Trash2
+} from 'lucide-vue-next';
 
 import { getPasteById, savePaste } from '@/api/paste';
 import { restorePaste } from '@/api/admin';
@@ -288,7 +288,7 @@ const handleRestore = () => {
                         <div v-if="paste">
                             <Card
                                 :title="title"
-                                :icon="ClipboardOutline"
+                                :icon="Clipboard"
                                 :class="{ 'deleted-paste-card': paste.deleted }"
                             >
                                 <template #title-extra>
@@ -304,7 +304,7 @@ const handleRestore = () => {
                                 <div class="meta-row">
                                     <n-tag :bordered="false" size="small">
                                         <template #icon>
-                                            <NIcon :component="CalendarOutline" />
+                                            <NIcon :component="CalendarDays" />
                                         </template>
                                         更新于 {{ formatDate(paste.updatedAt) }}
                                     </n-tag>
@@ -326,7 +326,7 @@ const handleRestore = () => {
                                     <n-space>
                                         <n-button size="small" @click="router.go(-1)">
                                             <template #icon>
-                                                <NIcon :component="ArrowBackOutline" />
+                                                <NIcon :component="ArrowLeft" />
                                             </template>
                                             返回
                                         </n-button>
@@ -338,13 +338,13 @@ const handleRestore = () => {
                                             target="_blank"
                                         >
                                             <template #icon>
-                                                <NIcon :component="OpenOutline" />
+                                                <NIcon :component="ExternalLink" />
                                             </template>
                                             原站
                                         </n-button>
                                         <n-button size="small" secondary @click="handleCopy">
                                             <template #icon>
-                                                <NIcon :component="CopyOutline" />
+                                                <NIcon :component="Copy" />
                                             </template>
                                             源码
                                         </n-button>
@@ -355,7 +355,7 @@ const handleRestore = () => {
                                             @click="handleUpdate"
                                         >
                                             <template #icon>
-                                                <NIcon :component="SyncOutline" />
+                                                <NIcon :component="RefreshCw" />
                                             </template>
                                             更新
                                         </n-button>
@@ -367,7 +367,7 @@ const handleRestore = () => {
                                             @click="handleDelete"
                                         >
                                             <template #icon>
-                                                <NIcon :component="TrashOutline" />
+                                                <NIcon :component="Trash2" />
                                             </template>
                                             删除
                                         </n-button>
@@ -380,7 +380,7 @@ const handleRestore = () => {
                                             @click="handleRestore"
                                         >
                                             <template #icon>
-                                                <NIcon :component="RestoreOutline" />
+                                                <NIcon :component="RotateCcw" />
                                             </template>
                                             恢复
                                         </n-button>
@@ -392,11 +392,7 @@ const handleRestore = () => {
                                 </div>
                             </Card>
                         </div>
-                        <Card
-                            v-else-if="forbiddenReason"
-                            title="剪贴板不可查看"
-                            :icon="ClipboardOutline"
-                        >
+                        <Card v-else-if="forbiddenReason" title="剪贴板不可查看" :icon="Clipboard">
                             <n-result
                                 status="403"
                                 title="剪贴板不可查看"
@@ -480,7 +476,7 @@ const handleRestore = () => {
     <div v-if="hasUpdate && !forbiddenReason && !paste?.deleted" class="update-floater">
         <n-button type="primary" circle size="large" class="shadow-button" @click="triggerRefresh">
             <template #icon>
-                <NIcon :component="SyncOutline" />
+                <NIcon :component="RefreshCw" />
             </template>
         </n-button>
     </div>

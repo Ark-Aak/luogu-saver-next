@@ -1,34 +1,34 @@
 import {
-    PersonOutline,
-    BulbOutline,
-    ConstructOutline,
-    HardwareChipOutline,
-    CameraOutline,
-    SchoolOutline,
-    GameControllerOutline,
-    ChatbubblesOutline,
-    HelpCircleOutline
-} from '@/components/icons/lucide.ts';
+    User,
+    Lightbulb,
+    Wrench,
+    Cpu,
+    Camera,
+    GraduationCap,
+    Gamepad2,
+    MessagesSquare,
+    CircleHelp
+} from 'lucide-vue-next';
 
 export const ARTICLE_CATEGORIES: Record<number, { label: string; icon: any; color: string }> = {
-    1: { label: '个人记录', icon: PersonOutline, color: 'var(--ui-category-personal-color)' },
-    2: { label: '题解', icon: BulbOutline, color: 'var(--ui-category-solution-color)' },
-    3: { label: '科技·工程', icon: ConstructOutline, color: 'var(--ui-category-tech-color)' },
+    1: { label: '个人记录', icon: User, color: 'var(--ui-category-personal-color)' },
+    2: { label: '题解', icon: Lightbulb, color: 'var(--ui-category-solution-color)' },
+    3: { label: '科技·工程', icon: Wrench, color: 'var(--ui-category-tech-color)' },
     4: {
         label: '算法·理论',
-        icon: HardwareChipOutline,
+        icon: Cpu,
         color: 'var(--ui-category-algorithm-color)'
     },
-    5: { label: '生活·游记', icon: CameraOutline, color: 'var(--ui-category-life-color)' },
-    6: { label: '学习·文化课', icon: SchoolOutline, color: 'var(--ui-category-study-color)' },
-    7: { label: '休闲·娱乐', icon: GameControllerOutline, color: 'var(--ui-category-fun-color)' },
-    8: { label: '闲话', icon: ChatbubblesOutline, color: 'var(--ui-category-chat-color)' },
-    9: { label: '未知', icon: HelpCircleOutline, color: 'var(--ui-category-unknown-color)' }
+    5: { label: '生活·游记', icon: Camera, color: 'var(--ui-category-life-color)' },
+    6: { label: '学习·文化课', icon: GraduationCap, color: 'var(--ui-category-study-color)' },
+    7: { label: '休闲·娱乐', icon: Gamepad2, color: 'var(--ui-category-fun-color)' },
+    8: { label: '闲话', icon: MessagesSquare, color: 'var(--ui-category-chat-color)' },
+    9: { label: '未知', icon: CircleHelp, color: 'var(--ui-category-unknown-color)' }
 };
 
 export const UNKNOWN_CATEGORY = {
     label: '未知分类',
-    icon: HelpCircleOutline,
+    icon: CircleHelp,
     color: 'var(--ui-category-unknown-color)'
 };
 

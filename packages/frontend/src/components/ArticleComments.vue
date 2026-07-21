@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch, computed } from 'vue';
 import { NSpin, NEmpty, NButton, NIcon, NTime, useMessage } from 'naive-ui';
-import { ChatbubblesOutline, SyncOutline } from '@/components/icons/lucide.ts';
+import { MessagesSquare, RefreshCw } from 'lucide-vue-next';
 
 import { getArticleComments, refreshArticleComments } from '@/api/comment';
 import socket from '@/utils/websocket';
@@ -106,11 +106,11 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <Card :icon="ChatbubblesOutline" title="评论">
+    <Card :icon="MessagesSquare" title="评论">
         <template #header-extra>
             <n-button size="small" secondary :loading="refreshing" @click="handleRefresh">
                 <template #icon>
-                    <n-icon><SyncOutline /></n-icon>
+                    <n-icon><RefreshCw /></n-icon>
                 </template>
                 刷新
             </n-button>

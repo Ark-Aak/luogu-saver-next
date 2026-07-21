@@ -13,14 +13,14 @@ import {
     useMessage
 } from 'naive-ui';
 import {
-    CheckmarkCircleOutline,
-    CloseCircleOutline,
-    CopyOutline,
-    GitNetworkOutline,
-    PlayCircleOutline,
-    SyncOutline,
-    TimeOutline
-} from '@/components/icons/lucide.ts';
+    CircleCheck,
+    CircleX,
+    Copy,
+    Network,
+    CirclePlay,
+    RefreshCw,
+    Clock3
+} from 'lucide-vue-next';
 import Card from '@/components/Card.vue';
 import CardTitle from '@/components/CardTitle.vue';
 import {
@@ -196,11 +196,10 @@ function statusTagType(status: string) {
 }
 
 function statusIcon(status: string) {
-    if (status === 'completed') return CheckmarkCircleOutline;
-    if (status === 'failed' || status === 'missing' || status === 'expired')
-        return CloseCircleOutline;
-    if (status === 'processing' || status === 'active') return PlayCircleOutline;
-    return TimeOutline;
+    if (status === 'completed') return CircleCheck;
+    if (status === 'failed' || status === 'missing' || status === 'expired') return CircleX;
+    if (status === 'processing' || status === 'active') return CirclePlay;
+    return Clock3;
 }
 
 function childNames(taskName: string) {
@@ -227,7 +226,7 @@ onUnmounted(stopPolling);
 
 <template>
     <div class="workflow-page">
-        <CardTitle title="工作流跟踪" :icon="GitNetworkOutline" class="workflow-title">
+        <CardTitle title="工作流跟踪" :icon="Network" class="workflow-title">
             DAG TASK TRACKING
         </CardTitle>
 
@@ -240,7 +239,7 @@ onUnmounted(stopPolling);
                             <code>{{ workflow.workflowId }}</code>
                             <n-button size="tiny" quaternary @click="copyWorkflowId">
                                 <template #icon>
-                                    <n-icon :component="CopyOutline" />
+                                    <n-icon :component="Copy" />
                                 </template>
                             </n-button>
                         </div>
@@ -256,7 +255,7 @@ onUnmounted(stopPolling);
                     <div class="overview-actions">
                         <n-button size="small" :loading="refreshing" @click="loadWorkflow(false)">
                             <template #icon>
-                                <n-icon :component="SyncOutline" />
+                                <n-icon :component="RefreshCw" />
                             </template>
                             刷新
                         </n-button>

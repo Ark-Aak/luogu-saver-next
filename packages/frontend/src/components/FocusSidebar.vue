@@ -1,13 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { NButton, NIcon, NInput, NPopover, NTimeline, NTimelineItem, useMessage } from 'naive-ui';
-import {
-    ListOutline,
-    StarOutline,
-    TimeOutline,
-    TrashOutline,
-    SettingsOutline
-} from '@/components/icons/lucide.ts';
+import { List, Star, Clock3, Trash2, Settings } from 'lucide-vue-next';
 import SidebarWidget from '@/components/SidebarWidget.vue';
 import type { TocItem } from '@/types/article';
 import type { Bookmark } from '@/composables/useBookmarks';
@@ -99,7 +93,7 @@ const handleTocCollect = (headingId: string, headingText: string, e: MouseEvent)
         <SidebarWidget
             v-if="versionHistory.length > 0"
             title="历史版本"
-            :icon="TimeOutline"
+            :icon="Clock3"
             class="version-card"
         >
             <n-popover
@@ -111,7 +105,7 @@ const handleTocCollect = (headingId: string, headingText: string, e: MouseEvent)
                 <template #trigger>
                     <n-button size="small" secondary block>
                         <template #icon>
-                            <NIcon :component="TimeOutline" />
+                            <NIcon :component="Clock3" />
                         </template>
                         {{ selectedVersion ? `版本 ${selectedVersion}` : '选择版本' }}
                     </n-button>
@@ -134,7 +128,7 @@ const handleTocCollect = (headingId: string, headingText: string, e: MouseEvent)
             </n-popover>
         </SidebarWidget>
 
-        <SidebarWidget v-if="tocItems.length > 0" title="目录" :icon="ListOutline" class="toc-card">
+        <SidebarWidget v-if="tocItems.length > 0" title="目录" :icon="List" class="toc-card">
             <div class="toc-list">
                 <div v-for="item in flatToc" :key="item.href" class="toc-item">
                     <button class="toc-item-link" @click="handleScrollTo(item.href.slice(1))">
@@ -150,14 +144,14 @@ const handleTocCollect = (headingId: string, headingText: string, e: MouseEvent)
                         @click.stop="handleTocCollect(item.href.slice(1), item.title, $event)"
                     >
                         <template #icon>
-                            <NIcon :component="StarOutline" />
+                            <NIcon :component="Star" />
                         </template>
                     </n-button>
                 </div>
             </div>
         </SidebarWidget>
 
-        <SidebarWidget title="段落收藏" :icon="StarOutline" class="bookmarks-card">
+        <SidebarWidget title="段落收藏" :icon="Star" class="bookmarks-card">
             <div v-if="bookmarks.length === 0" class="bookmarks-empty">
                 暂无段落收藏。点击标题旁的星标图标或目录中的收藏按钮即可添加。
             </div>
@@ -171,7 +165,7 @@ const handleTocCollect = (headingId: string, headingText: string, e: MouseEvent)
                         <div class="bookmark-actions">
                             <n-button text size="tiny" @click.stop="startRename(bm)">
                                 <template #icon>
-                                    <NIcon :component="SettingsOutline" />
+                                    <NIcon :component="Settings" />
                                 </template>
                             </n-button>
                             <n-button
@@ -181,7 +175,7 @@ const handleTocCollect = (headingId: string, headingText: string, e: MouseEvent)
                                 @click.stop="emit('remove-bookmark', bm.id)"
                             >
                                 <template #icon>
-                                    <NIcon :component="TrashOutline" />
+                                    <NIcon :component="Trash2" />
                                 </template>
                             </n-button>
                         </div>

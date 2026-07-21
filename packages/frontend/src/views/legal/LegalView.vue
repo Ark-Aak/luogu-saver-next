@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { ExclamationCircle, TrashAlt, UserShield } from '@/components/icons/lucide.ts';
+import { CircleAlert, Trash2, ShieldUser } from 'lucide-vue-next';
 
 import Card from '@/components/Card.vue';
 import CardTitle from '@/components/CardTitle.vue';
@@ -13,9 +13,9 @@ const props = defineProps<{
 const doc = computed(() => LEGAL_DOCUMENTS[props.docKey]);
 
 const ICON_MAP = {
-    privacy: UserShield,
-    disclaimer: ExclamationCircle,
-    deletion: TrashAlt
+    privacy: ShieldUser,
+    disclaimer: CircleAlert,
+    deletion: Trash2
 } as const;
 
 const iconComponent = computed(() => ICON_MAP[doc.value.icon]);

@@ -16,7 +16,7 @@ import {
     NSpace,
     useMessage
 } from 'naive-ui';
-import { Settings } from '@/components/icons/lucide.ts';
+import { Settings } from 'lucide-vue-next';
 import { uiThemeKey, uiThemeModeKey, type UiThemeVars } from '@/styles/theme/themeKeys.ts';
 import { defaultTheme, darkTheme } from '@/styles/theme/default-theme.ts';
 

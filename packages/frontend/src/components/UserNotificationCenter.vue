@@ -10,7 +10,7 @@ import {
     NSpin,
     useMessage
 } from 'naive-ui';
-import { NotificationsOutline } from '@/components/icons/lucide.ts';
+import { Bell } from 'lucide-vue-next';
 import {
     getUnreadNotificationCount,
     getUserNotifications,
@@ -140,7 +140,7 @@ onBeforeUnmount(() => {
                     @click="openDrawer"
                 >
                     <template #icon>
-                        <n-icon :component="NotificationsOutline" />
+                        <n-icon :component="Bell" />
                     </template>
                 </n-button>
             </n-badge>

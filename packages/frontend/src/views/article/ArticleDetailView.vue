@@ -18,18 +18,18 @@ import {
     useDialog
 } from 'naive-ui';
 import {
-    ShareSocialOutline,
-    CopyOutline,
-    SyncOutline,
-    TrashOutline,
-    ArrowBackOutline,
-    NewspaperOutline,
-    CalendarOutline,
-    ListOutline,
-    TimeOutline,
-    LibraryOutline,
-    RestoreOutline
-} from '@/components/icons/lucide.ts';
+    Share2,
+    Copy,
+    RefreshCw,
+    Trash2,
+    ArrowLeft,
+    Newspaper,
+    CalendarDays,
+    List,
+    Clock3,
+    Library,
+    RotateCcw
+} from 'lucide-vue-next';
 
 import { useContentSaver } from '@/composables/useContentSaver';
 import { getArticleById, getRelevant, getArticleHistory, saveArticle } from '@/api/article';
@@ -448,7 +448,7 @@ onMounted(() => {
                 <SidebarWidget
                     v-if="tocItems.length > 0"
                     title="目录"
-                    :icon="ListOutline"
+                    :icon="List"
                     class="toc-card"
                 >
                     <n-anchor
@@ -521,7 +521,7 @@ onMounted(() => {
                         <div v-if="article">
                             <Card
                                 :title="displayTitle"
-                                :icon="NewspaperOutline"
+                                :icon="Newspaper"
                                 :class="{ 'deleted-article-card': article.deleted }"
                             >
                                 <template #title-extra>
@@ -537,7 +537,7 @@ onMounted(() => {
                                 <div class="meta-row">
                                     <n-tag :bordered="false" size="small">
                                         <template #icon>
-                                            <NIcon :component="CalendarOutline" />
+                                            <NIcon :component="CalendarDays" />
                                         </template>
                                         {{
                                             !isViewingLatest
@@ -578,7 +578,7 @@ onMounted(() => {
                                     <n-space>
                                         <n-button size="small" @click="router.go(-1)">
                                             <template #icon>
-                                                <NIcon :component="ArrowBackOutline" />
+                                                <NIcon :component="ArrowLeft" />
                                             </template>
                                             返回
                                         </n-button>
@@ -590,13 +590,13 @@ onMounted(() => {
                                             target="_blank"
                                         >
                                             <template #icon>
-                                                <NIcon :component="ShareSocialOutline" />
+                                                <NIcon :component="Share2" />
                                             </template>
                                             原站
                                         </n-button>
                                         <n-button size="small" secondary @click="handleCopy">
                                             <template #icon>
-                                                <NIcon :component="CopyOutline" />
+                                                <NIcon :component="Copy" />
                                             </template>
                                             源码
                                         </n-button>
@@ -607,7 +607,7 @@ onMounted(() => {
                                             @click="handleUpdate"
                                         >
                                             <template #icon>
-                                                <NIcon :component="SyncOutline" />
+                                                <NIcon :component="RefreshCw" />
                                             </template>
                                             更新
                                         </n-button>
@@ -619,7 +619,7 @@ onMounted(() => {
                                             @click="handleKnowledgeBaseToggle"
                                         >
                                             <template #icon>
-                                                <NIcon :component="LibraryOutline" />
+                                                <NIcon :component="Library" />
                                             </template>
                                             {{ isInKnowledgeBase ? '移出知识库' : '加入知识库' }}
                                         </n-button>
@@ -631,7 +631,7 @@ onMounted(() => {
                                             @click="handleDelete"
                                         >
                                             <template #icon>
-                                                <NIcon :component="TrashOutline" />
+                                                <NIcon :component="Trash2" />
                                             </template>
                                             删除
                                         </n-button>
@@ -644,7 +644,7 @@ onMounted(() => {
                                             @click="handleRestore"
                                         >
                                             <template #icon>
-                                                <NIcon :component="RestoreOutline" />
+                                                <NIcon :component="RotateCcw" />
                                             </template>
                                             恢复
                                         </n-button>
@@ -656,11 +656,7 @@ onMounted(() => {
                                 </div>
                             </Card>
                         </div>
-                        <Card
-                            v-else-if="forbiddenReason"
-                            title="文章不可查看"
-                            :icon="NewspaperOutline"
-                        >
+                        <Card v-else-if="forbiddenReason" title="文章不可查看" :icon="Newspaper">
                             <n-result
                                 status="403"
                                 title="文章不可查看"
@@ -738,7 +734,7 @@ onMounted(() => {
                                         >
                                             <Card
                                                 :title="it.title"
-                                                :icon="NewspaperOutline"
+                                                :icon="Newspaper"
                                                 class="clickable-card"
                                                 @click="openArticle(it.id)"
                                             >
@@ -819,7 +815,7 @@ onMounted(() => {
                 <SidebarWidget
                     v-if="loading || versionHistory.length > 0"
                     title="历史版本"
-                    :icon="TimeOutline"
+                    :icon="Clock3"
                     class="version-card"
                 >
                     <div v-if="loading" class="version-skeleton">
@@ -867,7 +863,7 @@ onMounted(() => {
     <div v-if="hasUpdate && !article?.deleted" class="update-floater">
         <n-button type="primary" circle size="large" class="shadow-button" @click="triggerRefresh">
             <template #icon>
-                <NIcon :component="SyncOutline" />
+                <NIcon :component="RefreshCw" />
             </template>
         </n-button>
     </div>

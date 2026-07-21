@@ -18,7 +18,7 @@ import {
     useMessage
 } from 'naive-ui';
 import type { DataTableColumns } from 'naive-ui';
-import { HammerOutline, OpenOutline, RefreshOutline, Search } from '@/components/icons/lucide.ts';
+import { Hammer, ExternalLink, RefreshCw, Search } from 'lucide-vue-next';
 import Card from '@/components/Card.vue';
 import CardTitle from '@/components/CardTitle.vue';
 import UserBadge from '@/components/UserBadge.vue';
@@ -297,11 +297,11 @@ onMounted(() => {
 
 <template>
     <div class="judgement-page">
-        <CardTitle title="陶片放逐" :icon="HammerOutline">
+        <CardTitle title="陶片放逐" :icon="Hammer">
             洛谷社区用户权限变更记录
             <RouterLink class="detail-link" to="/judgement/logs">
                 同步日志与 API
-                <n-icon :component="OpenOutline" />
+                <n-icon :component="ExternalLink" />
             </RouterLink>
         </CardTitle>
 
@@ -337,7 +337,7 @@ onMounted(() => {
                         查询
                     </n-button>
                     <n-button secondary @click="handleReset">
-                        <template #icon><n-icon :component="RefreshOutline" /></template>
+                        <template #icon><n-icon :component="RefreshCw" /></template>
                         重置
                     </n-button>
                 </div>
@@ -394,7 +394,7 @@ onMounted(() => {
             <div class="table-toolbar">
                 <span>共 {{ total }} 条记录</span>
                 <n-button secondary :loading="loading" @click="loadJudgements">
-                    <template #icon><n-icon :component="RefreshOutline" /></template>
+                    <template #icon><n-icon :component="RefreshCw" /></template>
                     刷新
                 </n-button>
             </div>

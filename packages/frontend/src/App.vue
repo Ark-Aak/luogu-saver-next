@@ -67,7 +67,7 @@
                                         @click.stop="openMobileSider"
                                     >
                                         <template #icon>
-                                            <n-icon :component="MenuOutline" />
+                                            <n-icon :component="Menu" />
                                         </template>
                                     </n-button>
                                     <SiteNotificationCenter />
@@ -94,7 +94,7 @@
                                                     <span> GitHub </span>
                                                 </a>
                                                 <a href="https://help.luogu.me" class="footer-link">
-                                                    <Book :size="14" />
+                                                    <BookOpen :size="14" />
                                                     <span> 帮助文档 </span>
                                                 </a>
                                                 <a
@@ -106,7 +106,7 @@
                                                 </a>
                                             </p>
                                             <p class="footer-element">
-                                                <Clock :size="14" />
+                                                <Clock3 :size="14" />
                                                 <span>
                                                     本网站已运行
                                                     {{ timeSinceFound }} 秒
@@ -124,7 +124,7 @@
                                         </n-gi>
                                         <n-gi>
                                             <p class="footer-element right-aligned">
-                                                <Code :size="14" />
+                                                <Code2 :size="14" />
                                                 <span>
                                                     开发者：Federico2903 & Murasame & quanac-lcx &
                                                     <a
@@ -140,7 +140,7 @@
                                                     target="_blank"
                                                     class="footer-link"
                                                 >
-                                                    <Qq :size="14" />
+                                                    <MessagesSquare :size="14" />
                                                     <span
                                                         >洛谷保存站用户群：1017248143（点击加入）</span
                                                     >
@@ -148,15 +148,15 @@
                                             </p>
                                             <p class="footer-element right-aligned">
                                                 <router-link to="/privacy" class="footer-link">
-                                                    <UserShield :size="14" />
+                                                    <ShieldUser :size="14" />
                                                     <span>隐私协议</span>
                                                 </router-link>
                                                 <router-link to="/disclaimer" class="footer-link">
-                                                    <ExclamationCircle :size="14" />
+                                                    <CircleAlert :size="14" />
                                                     <span>免责声明</span>
                                                 </router-link>
                                                 <router-link to="/deletion" class="footer-link">
-                                                    <TrashAlt :size="14" />
+                                                    <Trash2 :size="14" />
                                                     <span>数据移除政策</span>
                                                 </router-link>
                                             </p>
@@ -207,33 +207,30 @@ import {
 } from 'naive-ui';
 
 import {
-    HomeOutline,
-    AppsOutline,
-    SearchOutline,
-    StatsChartOutline,
-    GlobeOutline,
-    SettingsOutline,
-    ShieldCheckmarkOutline,
-    ChatbubbleEllipsesOutline,
-    CloudDownloadOutline,
-    MenuOutline,
-    HammerOutline
-} from '@/components/icons/lucide.ts';
-
-import {
+    BookOpen,
+    ChartNoAxesColumnIncreasing,
+    CircleAlert,
+    Clock3,
+    CloudDownload,
+    Code2,
     Copyright,
-    Code,
-    UserShield,
-    ExclamationCircle,
-    TrashAlt,
-    Qq,
-    Server,
+    Globe2,
     Github,
-    Clock,
-    Book,
+    Hammer,
     History,
+    House,
+    LayoutGrid,
+    Menu,
+    MessageCircleMore,
+    MessagesSquare,
+    Search,
+    Server,
+    Settings,
+    ShieldCheck,
+    ShieldUser,
+    Trash2,
     Users
-} from '@/components/icons/lucide.ts';
+} from 'lucide-vue-next';
 
 import { renderIcon } from '@/utils/render';
 
@@ -335,34 +332,34 @@ const menuOptions = computed<MenuOption[]>(() => [
     {
         label: '主页',
         key: 'home',
-        icon: renderIcon(HomeOutline)
+        icon: renderIcon(House)
     },
     {
         label: '搜索',
         key: 'search',
-        icon: renderIcon(SearchOutline)
+        icon: renderIcon(Search)
     },
     {
         label: 'RAG 问答',
         key: 'rag',
-        icon: renderIcon(ChatbubbleEllipsesOutline)
+        icon: renderIcon(MessageCircleMore)
     },
     // {
     //     label: '题目',
     //     key: 'problem',
-    //     icon: renderIcon(ListOutline)
+    //     icon: renderIcon(List)
     // },
     {
         label: '文章广场',
         key: 'plaza',
-        icon: renderIcon(GlobeOutline)
+        icon: renderIcon(Globe2)
     },
     ...(canShowDiscoveryMenu.value
         ? [
               {
                   label: '用户文章爬取',
                   key: 'discovery/user-articles',
-                  icon: renderIcon(CloudDownloadOutline)
+                  icon: renderIcon(CloudDownload)
               }
           ]
         : []),
@@ -384,36 +381,36 @@ const menuOptions = computed<MenuOption[]>(() => [
     //         {
     //             label: '申请凭据',
     //             key: 'paintboard/token',
-    //             icon: renderIcon(KeyOutline)
+    //             icon: renderIcon(KeyRound)
     //         }
     //     ]
     // },
     {
         label: '陶片放逐',
         key: 'judgement',
-        icon: renderIcon(HammerOutline)
+        icon: renderIcon(Hammer)
     },
     {
         label: '统计数据',
         key: 'statistic',
-        icon: renderIcon(StatsChartOutline)
+        icon: renderIcon(ChartNoAxesColumnIncreasing)
     },
     {
         label: '关于',
         key: 'about',
-        icon: renderIcon(AppsOutline)
+        icon: renderIcon(LayoutGrid)
     },
     {
         label: '设置',
         key: 'settings',
-        icon: renderIcon(SettingsOutline)
+        icon: renderIcon(Settings)
     },
     ...(canShowAdminMenu.value
         ? [
               {
                   label: '后台',
                   key: 'admin',
-                  icon: renderIcon(ShieldCheckmarkOutline)
+                  icon: renderIcon(ShieldCheck)
               }
           ]
         : [])
@@ -425,7 +422,6 @@ import {
     SIDEBAR_LOGO_NAV_STORAGE_KEY
 } from '@/utils/constants.ts';
 import { useLocalStorage } from '@/composables/useLocalStorage.ts';
-import { MessagesSquare } from 'lucide-vue-next';
 
 const getInitialTheme = (): UiThemeVars => {
     if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) {

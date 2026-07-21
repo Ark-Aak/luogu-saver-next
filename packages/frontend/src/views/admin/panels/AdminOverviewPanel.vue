@@ -2,12 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { NBadge, NIcon, NSpace, NTag } from 'naive-ui';
-import {
-    CheckmarkCircleOutline,
-    ConstructOutline,
-    MegaphoneOutline,
-    PeopleOutline
-} from '@/components/icons/lucide.ts';
+import { CircleCheck, Wrench, Megaphone, Users } from 'lucide-vue-next';
 import Card from '@/components/Card.vue';
 import { getAdminDeletionRequests } from '@/api/deletion-request.ts';
 import { currentAuth } from '@/utils/auth.ts';
@@ -46,28 +41,28 @@ const entries = computed(() => [
         name: 'admin-review',
         title: '内容审核',
         description: '审核用户提交的文章/剪贴板删除申请。',
-        icon: CheckmarkCircleOutline,
+        icon: CircleCheck,
         badge: pendingReviewCount.value ?? 0
     },
     {
         name: 'admin-site',
         title: '公告与通知',
         description: '管理站点公告以及 Banner / Popup 通知。',
-        icon: MegaphoneOutline,
+        icon: Megaphone,
         badge: 0
     },
     {
         name: 'admin-users',
         title: '用户管理',
         description: '查看注册用户并调整权限位。',
-        icon: PeopleOutline,
+        icon: Users,
         badge: 0
     },
     {
         name: 'admin-ops',
         title: '系统运维',
         description: '搜索索引、Embedding 重建与文章发现。',
-        icon: ConstructOutline,
+        icon: Wrench,
         badge: 0
     }
 ]);

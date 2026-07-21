@@ -2,7 +2,7 @@
 import { computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { NAlert, NButton, NTabPane, NTabs } from 'naive-ui';
-import { ShieldCheckmarkOutline } from '@/components/icons/lucide.ts';
+import { ShieldCheck } from 'lucide-vue-next';
 import CardTitle from '@/components/CardTitle.vue';
 import { getCurrentUser } from '@/api/auth.ts';
 import { currentAuth, isAuthenticated, setCurrentAuth, startCpOAuthLogin } from '@/utils/auth.ts';
@@ -51,9 +51,7 @@ onMounted(async () => {
 
 <template>
     <div class="admin-page">
-        <CardTitle title="后台" :icon="ShieldCheckmarkOutline" class="admin-header">
-            MANAGEMENT
-        </CardTitle>
+        <CardTitle title="后台" :icon="ShieldCheck" class="admin-header"> MANAGEMENT </CardTitle>
 
         <n-alert v-if="!isAuthenticated" type="warning" title="需要登录" class="state-alert">
             <div class="state-alert-content">

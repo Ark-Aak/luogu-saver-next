@@ -12,15 +12,15 @@ import {
     useMessage
 } from 'naive-ui';
 import {
-    AnalyticsOutline,
-    CloudOutline,
-    KeyOutline,
-    LibraryOutline,
-    NavigationOutline,
-    RefreshOutline,
-    SettingsOutline,
-    TrashOutline
-} from '@/components/icons/lucide.ts';
+    ChartNoAxesCombined,
+    Cloud,
+    KeyRound,
+    Library,
+    Navigation,
+    RefreshCw,
+    Settings,
+    Trash2
+} from 'lucide-vue-next';
 import Card from '@/components/Card.vue';
 import CardTitle from '@/components/CardTitle.vue';
 import {
@@ -161,10 +161,10 @@ onMounted(loadCurrentUser);
 
 <template>
     <div class="settings-page">
-        <CardTitle title="设置" :icon="SettingsOutline"> ACCOUNT AND LOCAL SETTINGS </CardTitle>
+        <CardTitle title="设置" :icon="Settings"> ACCOUNT AND LOCAL SETTINGS </CardTitle>
 
         <div class="settings-grid">
-            <Card title="账号" :icon="KeyOutline" class="settings-card">
+            <Card title="账号" :icon="KeyRound" class="settings-card">
                 <n-space vertical size="large">
                     <n-alert v-if="errorMessage" type="warning" title="账号状态">
                         {{ errorMessage }}
@@ -208,7 +208,7 @@ onMounted(loadCurrentUser);
                         <n-space>
                             <n-button secondary @click="loadCurrentUser">
                                 <template #icon>
-                                    <n-icon :component="RefreshOutline" />
+                                    <n-icon :component="RefreshCw" />
                                 </template>
                                 刷新账号信息
                             </n-button>
@@ -227,7 +227,7 @@ onMounted(loadCurrentUser);
                 </n-space>
             </Card>
 
-            <Card title="隐私与数据追踪" :icon="AnalyticsOutline" class="settings-card">
+            <Card title="隐私与数据追踪" :icon="ChartNoAxesCombined" class="settings-card">
                 <n-space vertical size="large">
                     <div class="setting-row">
                         <div>
@@ -267,7 +267,7 @@ onMounted(loadCurrentUser);
                 </n-space>
             </Card>
 
-            <Card title="本地数据" :icon="TrashOutline" class="settings-card">
+            <Card title="本地数据" :icon="Trash2" class="settings-card">
                 <n-space vertical size="large">
                     <div class="setting-row">
                         <div>
@@ -313,7 +313,7 @@ onMounted(loadCurrentUser);
                 </n-space>
             </Card>
 
-            <Card title="RAG 知识库" :icon="LibraryOutline" class="settings-card compact-card">
+            <Card title="RAG 知识库" :icon="Library" class="settings-card compact-card">
                 <n-space vertical size="large">
                     <div class="setting-row">
                         <div>
@@ -364,7 +364,7 @@ onMounted(loadCurrentUser);
                 </n-space>
             </Card>
 
-            <Card title="导航" :icon="NavigationOutline" class="settings-card">
+            <Card title="导航" :icon="Navigation" class="settings-card">
                 <n-space vertical size="large">
                     <div class="setting-row">
                         <div>
@@ -376,7 +376,7 @@ onMounted(loadCurrentUser);
                 </n-space>
             </Card>
 
-            <Card title="连接信息" :icon="CloudOutline" class="settings-card">
+            <Card title="连接信息" :icon="Cloud" class="settings-card">
                 <n-space vertical size="large">
                     <div class="setting-row">
                         <div>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 import { NButton, NCard, NIcon, NTooltip } from 'naive-ui';
-import { CloseOutline, Github, StarOutline } from '@/components/icons/lucide.ts';
+import { X, Github, Star } from 'lucide-vue-next';
 import { useStarPrompt } from '@/composables/useStarPrompt.ts';
 import { GITHUB_STAR_PROMPT_STORAGE_KEY } from '@/utils/constants.ts';
 
@@ -103,7 +103,7 @@ onUnmounted(() => {
                                     @click="handleDismiss"
                                 >
                                     <template #icon>
-                                        <n-icon :component="CloseOutline" />
+                                        <n-icon :component="X" />
                                     </template>
                                 </n-button>
                             </template>
@@ -123,7 +123,7 @@ onUnmounted(() => {
                             @click="handleOpen"
                         >
                             <template #icon>
-                                <n-icon :component="StarOutline" />
+                                <n-icon :component="Star" />
                             </template>
                             去 GitHub 点 Star
                         </n-button>

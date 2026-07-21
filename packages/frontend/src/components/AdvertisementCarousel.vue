@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { NButton, NIcon } from 'naive-ui';
-import { ChevronBack, ChevronForward } from '@/components/icons/lucide.ts';
+import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
 import type { Advertisement } from '@/api/advertisement.ts';
 
 const props = defineProps<{
@@ -127,7 +127,7 @@ onBeforeUnmount(stopTimer);
                     aria-label="上一张广告"
                     @click="showRelative(-1)"
                 >
-                    <template #icon><n-icon :component="ChevronBack" /></template>
+                    <template #icon><n-icon :component="ChevronLeft" /></template>
                 </n-button>
                 <n-button
                     circle
@@ -136,7 +136,7 @@ onBeforeUnmount(stopTimer);
                     aria-label="下一张广告"
                     @click="showRelative(1)"
                 >
-                    <template #icon><n-icon :component="ChevronForward" /></template>
+                    <template #icon><n-icon :component="ChevronRight" /></template>
                 </n-button>
 
                 <div class="carousel-indicators" aria-label="广告位置">

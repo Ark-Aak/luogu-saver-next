@@ -2,7 +2,7 @@ import { watch, onUnmounted, nextTick, type Ref } from 'vue';
 import type { ViewMode } from '@/composables/useViewMode';
 import type { Bookmark } from '@/composables/useBookmarks';
 
-// Star icon matching lucide StarOutline for consistency with TOC collect buttons
+// Star icon matching Lucide's Star component for consistency with TOC collect buttons
 const STAR_OUTLINE_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>

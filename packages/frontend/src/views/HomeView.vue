@@ -2,13 +2,7 @@
 import { inject, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { NButton, NEmpty, NIcon, NInput, NStatistic } from 'naive-ui';
-import {
-    ArrowForward,
-    Clipboard,
-    Megaphone,
-    Newspaper,
-    Search
-} from '@/components/icons/lucide.ts';
+import { ArrowRight, Clipboard, Megaphone, Newspaper, Search } from 'lucide-vue-next';
 import { getArticleCount } from '@/api/article.ts';
 import { getPasteCount } from '@/api/paste.ts';
 import { getCurrentAnnouncement, type Announcement } from '@/api/announcement.ts';
@@ -139,7 +133,7 @@ function handleSearch() {
                         @click="handleSearch"
                     >
                         <template #icon>
-                            <n-icon :component="ArrowForward" />
+                            <n-icon :component="ArrowRight" />
                         </template>
                     </n-button>
                 </template>

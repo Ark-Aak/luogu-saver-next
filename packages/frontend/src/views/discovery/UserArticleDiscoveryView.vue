@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { NAlert, NButton, NInputNumber, NSpace, NSwitch, useMessage } from 'naive-ui';
-import { CloudDownloadOutline } from '@/components/icons/lucide.ts';
+import { CloudDownload } from 'lucide-vue-next';
 import Card from '@/components/Card.vue';
 import CardTitle from '@/components/CardTitle.vue';
 import { startUserArticleDiscovery } from '@/api/discovery.ts';
@@ -36,11 +36,11 @@ async function handleStart() {
 
 <template>
     <div class="user-article-discovery-page">
-        <CardTitle title="用户文章爬取" :icon="CloudDownloadOutline">
+        <CardTitle title="用户文章爬取" :icon="CloudDownload">
             输入洛谷 UID，批量发现并保存该用户公开文章。
         </CardTitle>
 
-        <Card title="启动爬取" :icon="CloudDownloadOutline" class="discovery-card">
+        <Card title="启动爬取" :icon="CloudDownload" class="discovery-card">
             <n-space vertical size="large">
                 <n-alert type="warning" title="抓取说明">
                     启动该任务会爬取指定用户的所有文章进行保存。<br />

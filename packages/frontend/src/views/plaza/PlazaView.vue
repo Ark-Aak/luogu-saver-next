@@ -2,13 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { NSpin, NDivider, NButton, NIcon, NEmpty, NTag } from 'naive-ui';
-import {
-    NewspaperOutline,
-    ArrowForwardOutline,
-    SparklesOutline,
-    GlobeOutline,
-    FireAlt
-} from '@/components/icons/lucide.ts';
+import { Newspaper, ArrowRight, Sparkles, Globe2, Flame } from 'lucide-vue-next';
 
 import { getRecommendations } from '@/api/recommendation';
 import type { PlazaArticle } from '@/types/article';
@@ -100,16 +94,14 @@ const goToDetail = (id: string) => {
 
 <template>
     <div class="plaza-page">
-        <CardTitle title="文章广场" :icon="GlobeOutline" class="feed-header">
-            ARTICLE PLAZA!
-        </CardTitle>
+        <CardTitle title="文章广场" :icon="Globe2" class="feed-header"> ARTICLE PLAZA! </CardTitle>
 
         <div class="feed-shell">
             <div class="article-list">
                 <div v-for="article in articles" :key="article.id" class="article-item">
                     <Card
                         :title="article.title"
-                        :icon="NewspaperOutline"
+                        :icon="Newspaper"
                         class="clickable-card"
                         @click="goToDetail(article.id)"
                     >
@@ -121,7 +113,7 @@ const goToDetail = (id: string) => {
                                 size="small"
                             >
                                 <template #icon>
-                                    <n-icon :component="FireAlt" />
+                                    <n-icon :component="Flame" />
                                 </template>
                                 热门
                             </n-tag>
@@ -132,7 +124,7 @@ const goToDetail = (id: string) => {
                                 size="small"
                             >
                                 <template #icon>
-                                    <n-icon :component="SparklesOutline" />
+                                    <n-icon :component="Sparkles" />
                                 </template>
                                 猜你想看
                             </n-tag>
@@ -170,7 +162,7 @@ const goToDetail = (id: string) => {
                                         >
                                             阅读全文
                                             <n-icon
-                                                :component="ArrowForwardOutline"
+                                                :component="ArrowRight"
                                                 style="margin-left: 4px"
                                             />
                                         </n-button>

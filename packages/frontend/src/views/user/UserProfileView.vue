@@ -13,13 +13,7 @@ import {
     useDialog,
     useMessage
 } from 'naive-ui';
-import {
-    SyncOutline,
-    TrophyOutline,
-    ReaderOutline,
-    PersonCircleOutline,
-    ShareSocialOutline
-} from '@/components/icons/lucide.ts';
+import { RefreshCw, Trophy, BookOpenText, CircleUserRound, Share2 } from 'lucide-vue-next';
 
 import { getUserProfile, refreshUserProfile } from '@/api/user';
 import type { UserProfile } from '@/types/user';
@@ -260,7 +254,7 @@ onUnmounted(() => {
                     <Card
                         class="profile-card profile-card--intro"
                         title="个人介绍"
-                        :icon="ReaderOutline"
+                        :icon="BookOpenText"
                     >
                         <MarkdownViewer
                             v-if="profile.renderedIntroduction"
@@ -275,7 +269,7 @@ onUnmounted(() => {
                     <Card
                         class="profile-card profile-card--identity"
                         title="用户主页"
-                        :icon="PersonCircleOutline"
+                        :icon="CircleUserRound"
                     >
                         <template #header-extra>
                             <n-button
@@ -286,7 +280,7 @@ onUnmounted(() => {
                                 target="_blank"
                             >
                                 <template #icon>
-                                    <n-icon><ShareSocialOutline /></n-icon>
+                                    <n-icon><Share2 /></n-icon>
                                 </template>
                                 原站
                             </n-button>
@@ -351,7 +345,7 @@ onUnmounted(() => {
                                 @click="handleManualRefresh"
                             >
                                 <template #icon>
-                                    <n-icon><SyncOutline /></n-icon>
+                                    <n-icon><RefreshCw /></n-icon>
                                 </template>
                                 刷新
                             </n-button>
@@ -361,11 +355,7 @@ onUnmounted(() => {
                         </div>
                     </Card>
 
-                    <Card
-                        class="profile-card profile-card--prizes"
-                        title="获奖信息"
-                        :icon="TrophyOutline"
-                    >
+                    <Card class="profile-card profile-card--prizes" title="获奖信息" :icon="Trophy">
                         <n-empty
                             v-if="orderedPrizes.length === 0"
                             :description="
@@ -429,7 +419,7 @@ onUnmounted(() => {
                 @click="triggerRefresh"
             >
                 <template #icon>
-                    <n-icon><SyncOutline /></n-icon>
+                    <n-icon><RefreshCw /></n-icon>
                 </template>
             </n-button>
         </div>

@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { NAlert, NButton, NCheckbox, NInput, NProgress, NSpace, NTag, useMessage } from 'naive-ui';
-import { ChatbubbleEllipsesOutline, NewspaperOutline } from '@/components/icons/lucide.ts';
+import { MessageCircleMore, Newspaper } from 'lucide-vue-next';
 import CardTitle from '@/components/CardTitle.vue';
 import Card from '@/components/Card.vue';
 import MarkdownViewer from '@/components/MarkdownViewer.vue';
@@ -224,7 +224,7 @@ function getProgressDetail(taskName: string, data?: any) {
 
 <template>
     <div class="rag-page">
-        <CardTitle title="RAG 问答" :icon="ChatbubbleEllipsesOutline" class="rag-header">
+        <CardTitle title="RAG 问答" :icon="MessageCircleMore" class="rag-header">
             RETRIEVAL AUGMENTED QA
         </CardTitle>
 
@@ -299,12 +299,7 @@ function getProgressDetail(taskName: string, data?: any) {
             <MarkdownViewer :content="answerMarkdown" :loading="loading" :pre-rendered="false" />
         </Card>
 
-        <Card
-            v-if="documents.length"
-            title="引用文章"
-            :icon="NewspaperOutline"
-            class="sources-card"
-        >
+        <Card v-if="documents.length" title="引用文章" :icon="Newspaper" class="sources-card">
             <div class="sources-grid">
                 <div
                     v-for="doc in documents"

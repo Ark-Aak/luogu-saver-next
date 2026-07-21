@@ -13,13 +13,7 @@ import {
     NTag,
     useMessage
 } from 'naive-ui';
-import {
-    AddOutline,
-    ArrowDownOutline,
-    ArrowUpOutline,
-    SaveOutline,
-    TrashOutline
-} from '@/components/icons/lucide.ts';
+import { Plus, ArrowDown, ArrowUp, Save, Trash2 } from 'lucide-vue-next';
 import Card from '@/components/Card.vue';
 import HtmlCodeEditor from '@/components/HtmlCodeEditor.vue';
 import {
@@ -539,7 +533,7 @@ onMounted(async () => {
                             :disabled="advertisementDrafts.length >= 10"
                             @click="addAdvertisement"
                         >
-                            <template #icon><n-icon :component="AddOutline" /></template>
+                            <template #icon><n-icon :component="Plus" /></template>
                             新增广告
                         </n-button>
                     </div>
@@ -574,9 +568,7 @@ onMounted(async () => {
                                     title="上移"
                                     @click="moveAdvertisement(index, -1)"
                                 >
-                                    <template #icon
-                                        ><n-icon :component="ArrowUpOutline"
-                                    /></template>
+                                    <template #icon><n-icon :component="ArrowUp" /></template>
                                 </n-button>
                                 <n-button
                                     circle
@@ -586,9 +578,7 @@ onMounted(async () => {
                                     title="下移"
                                     @click="moveAdvertisement(index, 1)"
                                 >
-                                    <template #icon
-                                        ><n-icon :component="ArrowDownOutline"
-                                    /></template>
+                                    <template #icon><n-icon :component="ArrowDown" /></template>
                                 </n-button>
                                 <n-button
                                     circle
@@ -599,7 +589,7 @@ onMounted(async () => {
                                     title="删除"
                                     @click="removeAdvertisement(index)"
                                 >
-                                    <template #icon><n-icon :component="TrashOutline" /></template>
+                                    <template #icon><n-icon :component="Trash2" /></template>
                                 </n-button>
                             </n-space>
                         </div>
@@ -644,7 +634,7 @@ onMounted(async () => {
                             :loading="savingAdvertisements"
                             @click="handleAdvertisementsSave"
                         >
-                            <template #icon><n-icon :component="SaveOutline" /></template>
+                            <template #icon><n-icon :component="Save" /></template>
                             保存广告配置
                         </n-button>
                     </n-space>
