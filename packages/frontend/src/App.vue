@@ -1003,11 +1003,18 @@ setInterval(() => {
     backdrop-filter: blur(16px);
 }
 
+.footer-grid {
+    /* Preserve the former paragraph spacing after moving each row into its own grid item. */
+    row-gap: 1em;
+    padding-block: 1em;
+}
+
 .footer-element {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     min-width: 0;
+    margin: 0;
 }
 .footer-element.right-aligned {
     justify-content: flex-end;
