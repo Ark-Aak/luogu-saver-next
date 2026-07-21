@@ -82,10 +82,6 @@
                                     <n-grid class="footer-grid" cols="1 s:2" responsive="screen">
                                         <n-gi>
                                             <p class="footer-element">
-                                                <Copyright :size="14" />
-                                                <span> 2025-2026 洛谷保存站 </span>
-                                            </p>
-                                            <p class="footer-element">
                                                 <a
                                                     href="https://github.com/laikit-dev/luogu-saver"
                                                     class="footer-link"
@@ -98,22 +94,6 @@
                                                     <span> 帮助文档 </span>
                                                 </a>
                                                 <a
-                                                    href="https://help.luogu.me/docs/update"
-                                                    class="footer-link"
-                                                >
-                                                    <History :size="14" />
-                                                    <span> 更新日志 </span>
-                                                </a>
-                                            </p>
-                                            <p class="footer-element">
-                                                <Clock3 :size="14" />
-                                                <span>
-                                                    本网站已运行
-                                                    {{ timeSinceFound }} 秒
-                                                </span>
-                                            </p>
-                                            <p class="footer-element">
-                                                <a
                                                     href="https://github.com/laikit-dev/luogu-saver/graphs/contributors"
                                                     class="footer-link"
                                                 >
@@ -123,17 +103,6 @@
                                             </p>
                                         </n-gi>
                                         <n-gi>
-                                            <p class="footer-element right-aligned">
-                                                <Code2 :size="14" />
-                                                <span>
-                                                    开发者：Federico2903 & Murasame & quanac-lcx &
-                                                    <a
-                                                        href="https://github.com/laikit-dev/luogu-saver/graphs/contributors"
-                                                        target="_blank"
-                                                        >其他贡献者</a
-                                                    >
-                                                </span>
-                                            </p>
                                             <p class="footer-element right-aligned">
                                                 <a
                                                     href="https://qm.qq.com/q/QVM9YFEb26"
@@ -146,6 +115,35 @@
                                                     >
                                                 </a>
                                             </p>
+                                        </n-gi>
+                                        <n-gi>
+                                            <p class="footer-element">
+                                                <Clock3 :size="14" />
+                                                <span>
+                                                    本网站已运行
+                                                    {{ timeSinceFound }} 秒
+                                                </span>
+                                            </p>
+                                        </n-gi>
+                                        <n-gi>
+                                            <p class="footer-element right-aligned">
+                                                <a
+                                                    href="https://www.rainyun.com/federico_?s=saver"
+                                                    target="_blank"
+                                                    class="footer-link"
+                                                >
+                                                    <Server :size="14" />
+                                                    <span>本站由雨云提供支持</span>
+                                                </a>
+                                            </p>
+                                        </n-gi>
+                                        <n-gi class="footer-copyright">
+                                            <p class="footer-element">
+                                                <Copyright :size="14" />
+                                                <span> 2025-2026 洛谷保存站 </span>
+                                            </p>
+                                        </n-gi>
+                                        <n-gi class="footer-legal">
                                             <p class="footer-element right-aligned">
                                                 <router-link to="/privacy" class="footer-link">
                                                     <ShieldUser :size="14" />
@@ -159,16 +157,6 @@
                                                     <Trash2 :size="14" />
                                                     <span>数据移除政策</span>
                                                 </router-link>
-                                            </p>
-                                            <p class="footer-element right-aligned">
-                                                <a
-                                                    href="https://www.rainyun.com/federico_?s=saver"
-                                                    target="_blank"
-                                                    class="footer-link"
-                                                >
-                                                    <Server :size="14" />
-                                                    <span>本站由雨云提供支持</span>
-                                                </a>
                                             </p>
                                         </n-gi>
                                     </n-grid>
@@ -212,12 +200,10 @@ import {
     CircleAlert,
     Clock3,
     CloudDownload,
-    Code2,
     Copyright,
     Globe2,
     Github,
     Hammer,
-    History,
     House,
     LayoutGrid,
     Menu,
@@ -1174,6 +1160,14 @@ setInterval(() => {
 }
 
 @media (max-width: 639px) {
+    .footer-legal {
+        order: 5;
+    }
+
+    .footer-copyright {
+        order: 6;
+    }
+
     .footer-element,
     .footer-element.right-aligned {
         justify-content: center;
