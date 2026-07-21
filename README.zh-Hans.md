@@ -1,18 +1,18 @@
 <div align="center">
-    <h1>Luogu Saver Next (LGS-NG)</h1>
+    <h1>Luogu Saver (LGS)</h1>
     <p>一个用于保存来自 www.luogu.com.cn 的用户生成内容 (UGC) 的 Web 应用程序。</p>
     <p>
         <img src="https://img.shields.io/badge/node-v22.18.0-brightgreen" alt="Node 版本"/>
-        <img src="https://img.shields.io/github/last-commit/quanac-lcx/luogu-saver-next" alt="最后提交"/>
-        <img src="https://img.shields.io/github/actions/workflow/status/quanac-lcx/luogu-saver-next/deploy.yml" alt="构建状态">
-        <img src="https://img.shields.io/github/license/quanac-lcx/luogu-saver-next" alt="许可证"/>
+        <img src="https://img.shields.io/github/last-commit/laikit-dev/luogu-saver" alt="最后提交"/>
+        <img src="https://img.shields.io/github/actions/workflow/status/laikit-dev/luogu-saver/deploy.yml" alt="构建状态">
+        <img src="https://img.shields.io/github/license/laikit-dev/luogu-saver" alt="许可证"/>
     </p>
-    <p>简体中文 | <a href="README.md">English</a></p>
+    <p><a href="README.md">English</a> | 简体中文</p>
 </div>
 
 ## 项目描述
 
-**Luogu Saver Next (LGS-NG)** 是一个 Web 应用程序，旨在帮助用户保存和管理来自 [洛谷](https://www.luogu.com.cn/)（一个流行的中文算法竞赛平台）的用户生成内容。该工具允许用户存档文章、剪贴板内容和其他类型的内容，确保有价值的信息得以保存并易于访问。
+**Luogu Saver (LGS)** 是一个 Web 应用程序，旨在帮助用户保存和管理来自 [洛谷](https://www.luogu.com.cn/)（一个流行的中文算法竞赛平台）的用户生成内容。该工具允许用户存档文章、剪贴板内容和其他类型的内容，确保有价值的信息得以保存并易于访问。
 
 ## 功能特性
 
@@ -58,8 +58,8 @@ docker compose up -d
 ### 1. 克隆仓库
 
 ```bash
-git clone https://github.com/quanac-lcx/luogu-saver-next.git
-cd luogu-saver-next
+git clone https://github.com/laikit-dev/luogu-saver.git
+cd luogu-saver
 ```
 
 ### 2. 安装依赖
@@ -84,8 +84,8 @@ npm run build
 
 ```bash
 # 可选：内联设置环境变量
-# VITE_API_URL=https://api.example.com npm run build -w @luogu-saver-next/frontend
-npm run build -w @luogu-saver-next/frontend
+# VITE_API_URL=https://api.example.com npm run build -w @luogu-saver/frontend
+npm run build -w @luogu-saver/frontend
 ```
 
 _编译后的静态文件将位于 `packages/frontend/dist` 目录中。_
@@ -93,7 +93,7 @@ _编译后的静态文件将位于 `packages/frontend/dist` 目录中。_
 **仅构建后端：**
 
 ```bash
-npm run build -w @luogu-saver-next/backend
+npm run build -w @luogu-saver/backend
 ```
 
 _编译后的后端文件将位于 `packages/backend/dist` 目录中。_
@@ -174,7 +174,7 @@ judgement:
 备份并停止旧 `luogu-judgement-saver` 的定时任务，再导入未纳入 Git 的 `data/judgements.db`。时区偏移必须填写旧服务器的本地时区：
 
 ```bash
-npm run import:judgement -w @luogu-saver-next/backend -- \
+npm run import:judgement -w @luogu-saver/backend -- \
   --db /secure/path/judgements.db \
   --source-time-zone +08:00
 ```
@@ -189,7 +189,7 @@ npm run import:judgement -w @luogu-saver-next/backend -- \
 
 ## 贡献
 
-欢迎贡献！要为 Luogu Saver Next 做出贡献：
+欢迎贡献！要为 Luogu Saver 做出贡献：
 
 1. **Fork** GitHub 上的仓库。
 2. **创建** 一个新的分支用于你的功能或错误修复。

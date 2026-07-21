@@ -2,7 +2,7 @@
 
 ## 1. Scope
 
-This specification defines Markdown rendering behavior provided by `@luogu-saver-next/markdown-renderer` and consumed by the backend through `packages/backend/src/lib/markdown.ts`.
+This specification defines Markdown rendering behavior provided by `@luogu-saver/markdown-renderer` and consumed by the backend through `packages/backend/src/lib/markdown.ts`.
 
 ## 2. Admonition Directive Containers
 

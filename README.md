@@ -1,18 +1,18 @@
 <div align="center">
-    <h1>Luogu Saver Next (LGS-NG)</h1>
+    <h1>Luogu Saver (LGS)</h1>
     <p>A web application for saving user-generated content (UGC) from www.luogu.com.cn.</p>
     <p>
         <img src="https://img.shields.io/badge/node-v22.18.0-brightgreen" alt="Node Version"/>
-        <img src="https://img.shields.io/github/last-commit/quanac-lcx/luogu-saver-next" alt="Last Commit"/>
-        <img src="https://img.shields.io/github/actions/workflow/status/quanac-lcx/luogu-saver-next/deploy.yml" alt="Build Status">
-        <img src="https://img.shields.io/github/license/quanac-lcx/luogu-saver-next" alt="License"/>
+        <img src="https://img.shields.io/github/last-commit/laikit-dev/luogu-saver" alt="Last Commit"/>
+        <img src="https://img.shields.io/github/actions/workflow/status/laikit-dev/luogu-saver/deploy.yml" alt="Build Status">
+        <img src="https://img.shields.io/github/license/laikit-dev/luogu-saver" alt="License"/>
     </p>
-    <p><a href="README.cn.md">简体中文</a> | English</p>
+    <p>English | <a href="README.zh-Hans.md">简体中文</a></p>
 </div>
 
 ## Description
 
-**Luogu Saver Next (LGS-NG)** is a web application designed to help users save and manage user-generated content from [Luogu](https://www.luogu.com.cn/), a popular Chinese competitive programming platform. This tool allows users to archive articles, pastes, and other content types, ensuring that valuable information is preserved and remains easily accessible.
+**Luogu Saver (LGS)** is a web application designed to help users save and manage user-generated content from [Luogu](https://www.luogu.com.cn/), a popular Chinese competitive programming platform. This tool allows users to archive articles, pastes, and other content types, ensuring that valuable information is preserved and remains easily accessible.
 
 ## Features
 
@@ -58,8 +58,8 @@ docker compose up -d
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/quanac-lcx/luogu-saver-next.git
-cd luogu-saver-next
+git clone https://github.com/laikit-dev/luogu-saver.git
+cd luogu-saver
 ```
 
 ### 2. Install Dependencies
@@ -84,8 +84,8 @@ Or build them individually using npm workspaces:
 
 ```bash
 # Optional: Set environment variables inline
-# VITE_API_URL=[https://api.example.com](https://api.example.com) npm run build -w @luogu-saver-next/frontend
-npm run build -w @luogu-saver-next/frontend
+# VITE_API_URL=https://api.example.com npm run build -w @luogu-saver/frontend
+npm run build -w @luogu-saver/frontend
 ```
 
 _The compiled static files will be located in `packages/frontend/dist`._
@@ -93,7 +93,7 @@ _The compiled static files will be located in `packages/frontend/dist`._
 **Backend Only:**
 
 ```bash
-npm run build -w @luogu-saver-next/backend
+npm run build -w @luogu-saver/backend
 ```
 
 _The compiled backend files will be located in `packages/backend/dist`._
@@ -181,8 +181,8 @@ judgement:
 Back up and stop the legacy `luogu-judgement-saver` scheduler, then import its untracked `data/judgements.db`. The offset must be the old server's local time zone:
 
 ```bash
-npm run build -w @luogu-saver-next/backend
-npm run import:judgement -w @luogu-saver-next/backend -- \
+npm run build -w @luogu-saver/backend
+npm run import:judgement -w @luogu-saver/backend -- \
   --db /secure/path/judgements.db \
   --source-time-zone +08:00
 ```
@@ -206,7 +206,7 @@ Public read-only endpoints behind the `/api` reverse proxy are:
 
 ## Contributing
 
-Contributions are welcome! To contribute to Luogu Saver Next:
+Contributions are welcome! To contribute to Luogu Saver:
 
 1. **Fork** the repository on GitHub.
 2. **Create** a new branch for your feature or bug fix.

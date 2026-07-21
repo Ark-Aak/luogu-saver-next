@@ -27,11 +27,11 @@ The view SHALL render the following sections, in this order. Section copy is in 
 
 ### 3.1 Header
 
-A page title and a one-line subtitle identifying the project as Luogu Saver Next (LGS-NG).
+A page title and a one-line subtitle identifying the project as Luogu Saver (LGS).
 
 ### 3.2 Project Introduction (项目简介)
 
-A prose description: LGS-NG is a web application for archiving user-generated content (articles, pastes, and related content) from Luogu, so that valuable content remains accessible even if the original is deleted.
+A prose description: LGS is a web application for archiving user-generated content (articles, pastes, and related content) from Luogu, so that valuable content remains accessible even if the original is deleted.
 
 ### 3.3 Core Features (核心功能)
 

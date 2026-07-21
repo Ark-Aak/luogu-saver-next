@@ -78,14 +78,14 @@ onMounted(() => {
 
 <template>
     <div class="about-view">
-        <CardTitle title="关于 Luogu Saver Next" :icon="Globe2">
-            一个用于归档洛谷用户生成内容的开源 Web 应用 · LGS-NG
+        <CardTitle title="关于 Luogu Saver" :icon="Globe2">
+            一个用于归档洛谷用户生成内容的开源 Web 应用 · LGS
         </CardTitle>
 
         <Card :icon="LayoutGrid" title="项目简介" class="about-card">
             <p class="about-paragraph">
-                Luogu Saver Next（简称
-                LGS-NG）是一个面向洛谷的内容归档应用。它将洛谷上的文章、剪贴板等用户生成内容抓取并长期保存，使有价值的内容在原始页面被删除或失效后，依然可以被检索与阅读。
+                Luogu Saver（简称
+                LGS）是一个面向洛谷的内容归档应用。它将洛谷上的文章、剪贴板等用户生成内容抓取并长期保存，使有价值的内容在原始页面被删除或失效后，依然可以被检索与阅读。
             </p>
         </Card>
 

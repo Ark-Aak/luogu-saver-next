@@ -34,13 +34,13 @@ jobs:
             - name: Install & Build Backend
               run: |
                   npm ci
-                  npm run build -w @luogu-saver-next/markdown-renderer
-                  npm run build -w @luogu-saver-next/backend
+                  npm run build -w @luogu-saver/markdown-renderer
+                  npm run build -w @luogu-saver/backend
 
             - name: Package Markdown Renderer
               run: |
-                  npm pack -w @luogu-saver-next/markdown-renderer --pack-destination packages/backend
-                  mv packages/backend/luogu-saver-next-markdown-renderer-*.tgz packages/backend/markdown-renderer.tgz
+                  npm pack -w @luogu-saver/markdown-renderer --pack-destination packages/backend
+                  mv packages/backend/luogu-saver-markdown-renderer-*.tgz packages/backend/markdown-renderer.tgz
 
             - name: Deploy Backend
               uses: appleboy/scp-action@master
@@ -117,7 +117,7 @@ jobs:
               run: npm ci
 
             - name: Build Frontend
-              run: npm run build -w @luogu-saver-next/frontend
+              run: npm run build -w @luogu-saver/frontend
               env:
                   VITE_API_URL: ${{ secrets.BACKEND_API_URL }}
                   VITE_CDN_URL: ${{ secrets.OSS_DOMAIN }}/luogu-saver/

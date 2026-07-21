@@ -1,7 +1,7 @@
 {
-    "name": "@luogu-saver-next/markdown-renderer",
+    "name": "@luogu-saver/markdown-renderer",
     "version": "1.0.0",
-    "description": "Markdown renderer shared by luogu-saver-next packages.",
+    "description": "Markdown renderer shared by Luogu Saver packages.",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "repository": "https://github.com/laikit-dev/luogu-saver",

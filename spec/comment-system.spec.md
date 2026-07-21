@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-The comment system fetches the comments shown beneath an article on Luogu and displays them, read-only, beneath the corresponding article on LGS-NG. The original interactive features (posting, replying, voting) are NOT reproduced; LGS-NG only mirrors existing comments for archival and display.
+The comment system fetches the comments shown beneath an article on Luogu and displays them, read-only, beneath the corresponding article on LGS. The original interactive features (posting, replying, voting) are NOT reproduced; LGS only mirrors existing comments for archival and display.
 
 Comments are fetched lazily on article access and re-fetched when stale (TTL-based), mirroring the profile system. Comment content is plain text.
 

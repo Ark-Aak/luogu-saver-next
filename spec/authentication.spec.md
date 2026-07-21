@@ -56,7 +56,7 @@ Authentication code SHALL NOT insert, update, or delete rows in the `user` table
 
 Table name: `registered_user`
 
-This table stores users that can log in to Luogu Saver Next.
+This table stores users that can log in to Luogu Saver.
 
 | Column         | Type         | Constraints      | Description                |
 | -------------- | ------------ | ---------------- | -------------------------- |

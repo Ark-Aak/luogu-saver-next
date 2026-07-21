@@ -1,6 +1,6 @@
 # Agents Guidelines
 
-You are participating in the development of **luogu-saver-next**.
+You are participating in the development of **luogu-saver**.
 During the development process, you must strictly adhere to the rules in this document.
 
 ---

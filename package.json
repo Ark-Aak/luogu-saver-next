@@ -1,5 +1,5 @@
 {
-    "name": "luogu-saver-next",
+    "name": "luogu-saver",
     "version": "1.0.0",
     "private": true,
     "license": "AGPL-3.0-or-later",
@@ -7,8 +7,8 @@
         "packages/*"
     ],
     "scripts": {
-        "dev": "concurrently -n \"FRONT,BACK\" -c \"green,blue\" \"npm run dev -w @luogu-saver-next/frontend\" \"npm run dev -w @luogu-saver-next/backend\"",
-        "build": "npm run build -w @luogu-saver-next/markdown-renderer && npm run build --workspaces --if-present",
+        "dev": "concurrently -n \"FRONT,BACK\" -c \"green,blue\" \"npm run dev -w @luogu-saver/frontend\" \"npm run dev -w @luogu-saver/backend\"",
+        "build": "npm run build -w @luogu-saver/markdown-renderer && npm run build --workspaces --if-present",
         "lint:prettier": "prettier --check .",
         "lint:eslint": "eslint .",
         "format:eslint": "eslint . --fix",
