@@ -89,10 +89,7 @@
                                                     <Github :size="14" />
                                                     <span> GitHub </span>
                                                 </a>
-                                                <a
-                                                    href="https://laikit.dev/docs/home"
-                                                    class="footer-link"
-                                                >
+                                                <a href="https://help.luogu.me" class="footer-link">
                                                     <BookOpen :size="14" />
                                                     <span> 帮助文档 </span>
                                                 </a>
