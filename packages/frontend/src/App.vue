@@ -441,7 +441,7 @@ const applyUserOverrides = (base: UiThemeVars, stored: StoredUiThemeVars | null)
 };
 
 const themePresetStorage = useLocalStorage<UiThemePresetName>(THEME_PRESET_STORAGE_KEY, 'default');
-const themeStorage = useLocalStorage(THEME_STORAGE_KEY, null);
+const themeStorage = useLocalStorage<StoredUiThemeVars | null>(THEME_STORAGE_KEY, null);
 const themeModeStorage = useLocalStorage<UiThemeMode>(THEME_MODE_STORAGE_KEY, 'auto');
 
 if (themeStorage.value && Object.keys(themeStorage.value).length > 20) {
