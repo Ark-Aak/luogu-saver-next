@@ -280,7 +280,6 @@ const handleRestore = () => {
                                             <n-skeleton text style="width: 80px" />
                                         </div>
                                     </div>
-                                    <div class="info-item"></div>
                                 </div>
                             </Card>
                         </template>
@@ -317,7 +316,6 @@ const handleRestore = () => {
                                         <span class="label">作者</span>
                                         <UserLink :user="paste.author" show-avatar />
                                     </div>
-                                    <div class="info-item"></div>
                                 </div>
 
                                 <n-divider style="margin: 12px 0" />
@@ -541,7 +539,7 @@ const handleRestore = () => {
 
 .info-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: 12px;
 }
 
@@ -614,12 +612,6 @@ const handleRestore = () => {
     .focus-sidebar-right {
         position: static;
         max-height: none;
-    }
-}
-
-@media (max-width: 640px) {
-    .info-grid {
-        grid-template-columns: minmax(0, 1fr);
     }
 }
 
